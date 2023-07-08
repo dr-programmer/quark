@@ -1,0 +1,15 @@
+include {stdio.h; stdlib.h;}
+
+functions {
+	main[int](){
+		int i = 5;
+	}
+	add[int](int a, int b) {
+		give / return a+b;
+	}
+	swap[void](int $a, int $b) {
+		int temp = %a;
+		%a = %b;
+		%b = temp;
+	}
+}
