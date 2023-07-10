@@ -4,6 +4,9 @@
 typedef enum {
     TOKEN_EOF = 0,
     TOKEN_ADD,
+    TOKEN_SUBTRACT,
+    TOKEN_MULTIPLY,
+    TOKEN_DIVIDE,
     TOKEN_IDENT,
     TOKEN_EQUAL,
     TOKEN_NOTEQUAL,
