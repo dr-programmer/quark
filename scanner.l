@@ -9,6 +9,9 @@ LETTERS [a-zA-Z]
 (" "|\n|\t)
 give        {return TOKEN_GIVE;}
 \+          {return TOKEN_ADD;}
+\-          {return TOKEN_SUBTRACT;}
+\*          {return TOKEN_MULTIPLY;}
+\/          {return TOKEN_DIVIDE;}
 \[          {return TOKEN_SQBROPEN;}
 \]          {return TOKEN_SQBRCLOSE;}
 \(          {return TOKEN_BROPEN;}
