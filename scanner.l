@@ -18,6 +18,7 @@ give        {return TOKEN_GIVE;}
 \)          {return TOKEN_BRCLOSE;}
 \{          {return TOKEN_CRBROPEN;}
 \}          {return TOKEN_CRBRCLOSE;}
+\^          {return TOKEN_ALLOCATE;}
 \".*\"      {literalClean(); return TOKEN_LITERAL;}
 {LETTERS}+  {return TOKEN_IDENT;}
 {DIGITS}+\.{DIGITS}+    {return TOKEN_FLOAT;}
@@ -26,6 +27,7 @@ give        {return TOKEN_GIVE;}
 ,           {return TOKEN_COMMA;}
 ==          {return TOKEN_EQUAL;}
 !=          {return TOKEN_NOTEQUAL;}
+!           {return TOKEN_NOT;}
 =           {return TOKEN_ASSIGN;}
 .           {return TOKEN_ERROR;}
 %%

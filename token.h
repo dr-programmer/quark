@@ -10,6 +10,7 @@ typedef enum {
     TOKEN_IDENT,
     TOKEN_EQUAL,
     TOKEN_NOTEQUAL,
+    TOKEN_NOT,
     TOKEN_ASSIGN,
     TOKEN_SQBROPEN,
     TOKEN_SQBRCLOSE,
@@ -23,6 +24,7 @@ typedef enum {
     TOKEN_LITERAL,
     TOKEN_END,
     TOKEN_COMMA,
+    TOKEN_ALLOCATE,
     TOKEN_ERROR
 } Token;
 
