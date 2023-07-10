@@ -2,14 +2,17 @@ include {stdio.h; stdlib.h;}
 
 functions {
 	main[int](){
-		int i = 5;
+		i[int] = 5;
+		a[float] = 6.6;
+		str[char]^10 = "Hello, World!";
+		give 0;
 	}
-	add[int](int a, int b) {
-		give / return a+b;
+	add[int](a[int], b[int]) {
+		give a+b;
 	}
-	swap[void](int $a, int $b) {
-		int temp = %a;
-		%a = %b;
-		%b = temp;
+	swap[void]($a[int], $b[int]) {
+		temp[int] = $a;
+		$a = $b;
+		$b = temp;
 	}
 }

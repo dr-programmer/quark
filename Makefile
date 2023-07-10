@@ -1,8 +1,8 @@
 scanner.out: scanner.c main.o
 	gcc scanner.c main.o -o scanner.out
 
-scanner.c: scanner.flex token.h
-	flex -o scanner.c scanner.flex
+scanner.c: scanner.l token.h
+	flex -o scanner.c scanner.l
 
 main.o: main.c token.h
 	gcc -c main.c -o main.o
