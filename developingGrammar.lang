@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#functions {
+testing[int]() {
 	main[int](){
 		i[int] = 5;
 		a[float] = 6.6;
@@ -19,4 +19,9 @@
 		$a = $b;
 		$b = temp;
 	}
+}
+
+main[int]() {
+	finish[int] = testing();
+	give finish;
 }
