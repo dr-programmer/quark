@@ -1,16 +1,20 @@
-include {stdio.h; stdlib.h;}
+#include <stdio.h>
+#include <stdlib.h>
 
-functions {
+#functions {
 	main[int](){
 		i[int] = 5;
 		a[float] = 6.6;
 		str[char]^10 = "Hello, World!";
+		b[float] = 5 / 3;
+		c[int] = 6 - 3;
+		z[int] = 6 * 7;
 		give 0;
 	}
 	add[int](a[int], b[int]) {
 		give a+b;
 	}
-	swap[void]($a[int], $b[int]) {
+	swap[void](a[int]^!, b[int]^!) {
 		temp[int] = $a;
 		$a = $b;
 		$b = temp;
