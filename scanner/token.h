@@ -3,6 +3,7 @@
 
 typedef enum {
     TOKEN_EOF = 0,
+    TOKEN_INCLUDE,
     TOKEN_ADD,
     TOKEN_SUBTRACT,
     TOKEN_MULTIPLY,
@@ -21,11 +22,11 @@ typedef enum {
     TOKEN_INT,
     TOKEN_FLOAT,
     TOKEN_GIVE,
-    TOKEN_LITERAL,
+    TOKEN_STRING,
     TOKEN_END,
     TOKEN_COMMA,
     TOKEN_ALLOCATE,
     TOKEN_ERROR
-} Token;
+} TokenT;
 
 #endif

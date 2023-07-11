@@ -1,13 +1,17 @@
 %{
 #include "token.h"
 
-void literalClean();
+void stringClean();
+
+int line = 0;
 %}
 DIGITS [0-9]
 LETTERS [a-zA-Z]
 %%
-(" "|\n|\t)
+(" "|\t)
+(\n)        {line++;}
 give        {return TOKEN_GIVE;}
+include     {return TOKEN_INCLUDE;}
 \+          {return TOKEN_ADD;}
 \-          {return TOKEN_SUBTRACT;}
 \*          {return TOKEN_MULTIPLY;}
@@ -19,7 +23,7 @@ give        {return TOKEN_GIVE;}
 \{          {return TOKEN_CRBROPEN;}
 \}          {return TOKEN_CRBRCLOSE;}
 \^          {return TOKEN_ALLOCATE;}
-\".*\"      {literalClean(); return TOKEN_LITERAL;}
+\".*\"      {stringClean(); return TOKEN_STRING;}
 {LETTERS}+  {return TOKEN_IDENT;}
 {DIGITS}+\.{DIGITS}+    {return TOKEN_FLOAT;}
 {DIGITS}+   {return TOKEN_INT;}
@@ -32,7 +36,7 @@ give        {return TOKEN_GIVE;}
 .           {return TOKEN_ERROR;}
 %%
 int yywrap() {return 1;}
-void literalClean() {
+void stringClean() {
     yytext++;
     for(int i = 0; yytext[i] != '\0'; i++) {
         if(yytext[i] == '"') {

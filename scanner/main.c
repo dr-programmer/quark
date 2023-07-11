@@ -5,6 +5,13 @@
 extern FILE *yyin;
 extern int yylex();
 extern char *yytext;
+extern const int line;
+
+typedef struct {
+    TokenT tokenType;
+    char *literal;
+    int line;
+} Token;
 
 int main(int argc, char **argv)
 {
@@ -17,9 +24,12 @@ int main(int argc, char **argv)
         exit(0);
     }
     while(1) {
-        Token token = yylex();
-        if(token == TOKEN_EOF)break;
-        printf("Token: %d, text: %s \n", token, yytext);
+        TokenT tokenT = yylex();
+        if(tokenT == TOKEN_EOF)break;
+        Token token = {.tokenType = tokenT, .literal = yytext, .line = line};
+        if(token.tokenType == TOKEN_ERROR)printf("Error on line %d with token |%s|. \n", \
+                                                    token.line, token.literal);
+        else printf("Token Type: %d, text: %s \n", tokenT, yytext);
     }
 
     return 0;
