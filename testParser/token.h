@@ -54,8 +54,8 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    TOKEN_INT = 258,               /* TOKEN_INT  */
-    TOKEN_FLOAT = 259,             /* TOKEN_FLOAT  */
+    TOKEN_NUMBER = 258,            /* TOKEN_NUMBER  */
+    TOKEN_IDENT = 259,             /* TOKEN_IDENT  */
     TOKEN_PLUS = 260,              /* TOKEN_PLUS  */
     TOKEN_MINUS = 261,             /* TOKEN_MINUS  */
     TOKEN_MUL = 262,               /* TOKEN_MUL  */
