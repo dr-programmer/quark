@@ -76,3 +76,27 @@ struct expr *expr_create_string_literal(const char *string) {
     e->string_literal = string;
     return e;
 }
+
+struct type *type_create(type_t kind, 
+                            struct type *subtype, 
+                            struct param_list *params, 
+                            int number_of_subtypes)
+{
+    struct type *t = (struct type *)malloc(sizeof(struct type));
+    t->kind = kind;
+    t->subtype = subtype;
+    t->params = params;
+    t->number_of_subtypes = number_of_subtypes;
+    return t;
+}
+
+struct param_list *param_list_create(char *name, 
+                                    struct type *type, 
+                                    struct param_list *next)
+{
+    struct param_list *p = (struct param_list *)malloc(sizeof(struct param_list));
+    p->name = name;
+    p->type = type;
+    p->next = next;
+    return p;
+}

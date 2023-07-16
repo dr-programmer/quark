@@ -15,7 +15,8 @@ LETTERS [a-zA-Z]
 \-          {return TOKEN_MINUS;}
 \*          {return TOKEN_MUL;}
 \/          {return TOKEN_DIV;}
-({DIGITS}+\.{DIGITS}+|{DIGITS}+)    {return TOKEN_NUMBER;}
+{DIGITS}+\.{DIGITS}+   {return TOKEN_FLOATING_POINT_LITERAL;}
+{DIGITS}+   {return TOKEN_INTEGER_LITERAL;}
 {LETTERS}+  {return TOKEN_IDENT;}
 \(          {return TOKEN_LPAREN;}
 \)          {return TOKEN_RPAREN;}

@@ -6,8 +6,8 @@ testing[int]() {
 		i[int] = 5;
 		a[float] = 6.6;
 		str[char]^10 = "Hello, World!";
-		dynamic arr[int]^3 = {1, 2, 3};
-		arr^5; ??this is a comment: reallocating more space
+		arr[int]^? = {1, 2, 3}; 
+		??this is a comment: ^~~dynamic array
 		b[float] = 5 / 3;
 		c[int] = 6 - 3;
 		z[int] = 6 * 7;

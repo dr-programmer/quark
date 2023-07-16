@@ -26,7 +26,7 @@ typedef enum {
     STMT_IF_ELSE,
     STMT_FOR,
     STMT_PRINT,
-    STMT_RETURN,
+    STMT_GIVE,
     STMT_BLOCK
 } stmt_t;
 
@@ -45,6 +45,7 @@ typedef enum {
     EXPR_NOT,
     EXPR_CALL,
     EXPR_SUBSCRIPT,
+    EXPR_ARG,
 
     EXPR_ADD,
     EXPR_SUB,
@@ -70,6 +71,30 @@ typedef enum {
     EXPR_STRING_LITERAL
 } expr_t;
 
+struct type {
+    type_t kind;
+    struct type *subtype;
+    struct param_list *params;
+    int number_of_subtypes;
+};
+
+struct param_list {
+    char *name;
+    struct type *type;
+    struct param_list *next;
+};
+
+typedef enum {
+    TYPE_VOID,
+    TYPE_BOOLEAN,
+    TYPE_CHARACTER,
+    TYPE_INTEGER,
+    TYPE_FLOATING_POINT,
+    TYPE_STRING,
+    TYPE_ARRAY,
+    TYPE_FUNCTION
+} type_t;
+
 struct decl *decl_create(char *name, 
                             struct type *type, 
                             struct expr *value, 
@@ -92,5 +117,14 @@ struct expr *expr_create_boolean_literal(int i);
 struct expr *expr_create_char_literal(int i);
 struct expr *expr_create_foating_point_literal(float f);
 struct expr *expr_create_string_literal(const char *string);
+
+struct type *type_create(type_t kind, 
+                            struct type *subtype, 
+                            struct param_list *params, 
+                            int number_of_subtypes);
+
+struct param_list *param_list_create(char *name, 
+                                    struct type *type, 
+                                    struct param_list *next);
 
 #endif
