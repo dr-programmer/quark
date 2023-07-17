@@ -1,10 +1,12 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include "structures.h"
 #include "colors.h"
 
 extern int yylex();
 extern char *yytext;
+extern int line;
 
 void yyerror(char *s);
 
@@ -23,9 +25,9 @@ struct decl *parser_result;
 
 %type <decl> program decl_list decl
 %type <stmt> stmt_list stmt
-%type <expt> expr expr_list
+%type <expr> expr expr_list
 %type <type> type
-%type <params> parameters parameter
+%type <params> parameters parameter list_of_parameters
 
 %type <name> name string_literal
 %type <integer> allocation_size
@@ -34,6 +36,8 @@ struct decl *parser_result;
 
 %token TOKEN_NOT
 %token TOKEN_UNKNOWN
+
+%token TOKEN_GIVE
 
 %token TOKEN_CHAR
 %token TOKEN_INT
@@ -92,11 +96,12 @@ decl    : name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_SEMI
                 struct type *temp = type_create(TYPE_ARRAY, $3, 0, $6);
                 $$ = decl_create($1, temp, 0, 0, 0); 
             }
-        | name TOKEN_LSQBR TOKEN_CHAR TOKEN_RSQBR TOKEN_ALLOCATE 
+        | name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE 
             allocation_size TOKEN_ASSIGN string_literal TOKEN_SEMI
             {
-                struct type *temp = type_create(TYPE_ARRAY, TOKEN_CHAR, 0, $6);
-                $$ = decl_create($1, temp, $8, 0, 0); 
+                struct type *temp = type_create(TYPE_ARRAY, $3, 0, $6);
+                struct expr *e = expr_create_string_literal($8);
+                $$ = decl_create($1, temp, e, 0, 0); 
             }
         | name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size 
             TOKEN_ASSIGN TOKEN_LCRBR expr_list TOKEN_RCRBR TOKEN_SEMI
@@ -117,6 +122,23 @@ decl_list
         |                   { $$ = 0; }
         ;
 
+stmt    :
+        ;
+
+stmt_list
+        :
+        ;
+
+expr    :
+        ;
+
+expr_list
+        :
+        ;
+
+name    : TOKEN_IDENT   { $$ = yytext; }
+        ;
+
 string_literal
         : TOKEN_STRING_LITERAL { $$ = yytext; }
         ;
@@ -132,8 +154,14 @@ parameter
         ;
 
 parameters
-        : parameter parameters  { $$ = $1; $1->next = $2; }
-        |                       { $$ = 0; }
+        : parameter list_of_parameters 
+            { $$ = $1; $1->next = $2; }
+        |   { $$ = 0; }
+        ;
+
+list_of_parameters
+        : TOKEN_COMMA parameters    { $$ = $2; }
+        |                           { $$ = 0; }
         ;
 
 type    : TOKEN_INT     { $$ = type_create(TYPE_INTEGER, 0, 0, 0); }

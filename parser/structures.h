@@ -1,25 +1,6 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 
-struct decl {
-    char *name;
-    struct type *type;
-    struct expr *value;
-    struct stmt *code;
-    struct decl *next;
-};
-
-struct stmt {
-    stmt_t kind;
-    struct decl *decl;
-    struct expr *init_expr;
-    struct expr *expr;
-    struct expr *next_expr;
-    struct stmt *body;
-    struct stmt *else_body;
-    struct stmt *next;
-};
-
 typedef enum {
     STMT_DECL,
     STMT_EXPR,
@@ -29,17 +10,6 @@ typedef enum {
     STMT_GIVE,
     STMT_BLOCK
 } stmt_t;
-
-struct expr {
-    expr_t kind;
-    struct expr *left;
-    struct expr *right;
-
-    const char *name;
-    int integer_value;
-    float floating_point_value;
-    const char *string_literal;
-};
 
 typedef enum {
     EXPR_NOT,
@@ -71,6 +41,47 @@ typedef enum {
     EXPR_STRING_LITERAL
 } expr_t;
 
+typedef enum {
+    TYPE_VOID,
+    TYPE_BOOLEAN,
+    TYPE_CHARACTER,
+    TYPE_INTEGER,
+    TYPE_FLOATING_POINT,
+    TYPE_STRING,
+    TYPE_ARRAY,
+    TYPE_FUNCTION
+} type_t;
+
+struct decl {
+    char *name;
+    struct type *type;
+    struct expr *value;
+    struct stmt *code;
+    struct decl *next;
+};
+
+struct stmt {
+    stmt_t kind;
+    struct decl *decl;
+    struct expr *init_expr;
+    struct expr *expr;
+    struct expr *next_expr;
+    struct stmt *body;
+    struct stmt *else_body;
+    struct stmt *next;
+};
+
+struct expr {
+    expr_t kind;
+    struct expr *left;
+    struct expr *right;
+
+    const char *name;
+    int integer_value;
+    float floating_point_value;
+    const char *string_literal;
+};
+
 struct type {
     type_t kind;
     struct type *subtype;
@@ -83,17 +94,6 @@ struct param_list {
     struct type *type;
     struct param_list *next;
 };
-
-typedef enum {
-    TYPE_VOID,
-    TYPE_BOOLEAN,
-    TYPE_CHARACTER,
-    TYPE_INTEGER,
-    TYPE_FLOATING_POINT,
-    TYPE_STRING,
-    TYPE_ARRAY,
-    TYPE_FUNCTION
-} type_t;
 
 struct decl *decl_create(char *name, 
                             struct type *type, 

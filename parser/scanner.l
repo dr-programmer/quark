@@ -11,15 +11,44 @@ LETTERS [a-zA-Z]
 
 (" "|\t)
 "\n"        {line++;}
+\^          {return TOKEN_ALLOCATE;}
+\+{2}       {return TOKEN_INCREMENT;}
+-{2}        {return TOKEN_DECREMENT;}
+\+=         {return TOKEN_ADD_WITH;}
+-=          {return TOKEN_SUB_WITH;}
+\*=         {return TOKEN_MUL_WITH;}
+\/=         {return TOKEN_DIV_WITH;}
 \+          {return TOKEN_PLUS;}
 \-          {return TOKEN_MINUS;}
 \*          {return TOKEN_MUL;}
 \/          {return TOKEN_DIV;}
+!=          {return TOKEN_NOT_EQUAL;}
+!           {return TOKEN_NOT;}
+\?          {return TOKEN_UNKNOWN;}
+==          {return TOKEN_EQUAL;}
+=           {return TOKEN_ASSIGN;}
+>=          {return TOKEN_GREATER_EQUAL;}
+>           {return TOKEN_GREATER;}
+"<"=          {return TOKEN_LESS_EQUAL;}
+"<"           {return TOKEN_LESS;}
+give        {return TOKEN_GIVE;}
+char        {return TOKEN_CHAR;}
+int         {return TOKEN_INT;}
+float       {return TOKEN_FLOAT;}
+bool        {return TOKEN_BOOL;}
+void        {return TOKEN_VOID;}
 {DIGITS}+\.{DIGITS}+   {return TOKEN_FLOATING_POINT_LITERAL;}
 {DIGITS}+   {return TOKEN_INTEGER_LITERAL;}
 {LETTERS}+  {return TOKEN_IDENT;}
+\".*\"      {return TOKEN_STRING_LITERAL;}
 \(          {return TOKEN_LPAREN;}
 \)          {return TOKEN_RPAREN;}
+\{          {return TOKEN_LCRBR;}
+\}          {return TOKEN_RCRBR;}
+\[          {return TOKEN_LSQBR;}
+\]          {return TOKEN_RSQBR;}
+,           {return TOKEN_COMMA;}
+:           {return TOKEN_COLON;}
 ;           {return TOKEN_SEMI;}
 .           {return TOKEN_ERROR;}
 

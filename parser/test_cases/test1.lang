@@ -1,0 +1,6 @@
+hello[char];
+str[int]^10;
+dstr[float]^?;
+function[void](a[char], b[int]){
+
+}
