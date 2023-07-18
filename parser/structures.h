@@ -115,7 +115,7 @@ struct expr *expr_create_name(const char *name);
 struct expr *expr_create_integer_literal(int i);
 struct expr *expr_create_boolean_literal(int i);
 struct expr *expr_create_char_literal(int i);
-struct expr *expr_create_foating_point_literal(float f);
+struct expr *expr_create_floating_point_literal(float f);
 struct expr *expr_create_string_literal(const char *string);
 
 struct type *type_create(type_t kind, 

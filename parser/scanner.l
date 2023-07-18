@@ -29,9 +29,14 @@ LETTERS [a-zA-Z]
 =           {return TOKEN_ASSIGN;}
 >=          {return TOKEN_GREATER_EQUAL;}
 >           {return TOKEN_GREATER;}
-"<"=          {return TOKEN_LESS_EQUAL;}
-"<"           {return TOKEN_LESS;}
+"<"=        {return TOKEN_LESS_EQUAL;}
+"<"         {return TOKEN_LESS;}
 give        {return TOKEN_GIVE;}
+if          {return TOKEN_IF;}
+else        {return TOKEN_ELSE;}
+while       {return TOKEN_WHILE;}
+for         {return TOKEN_FOR;}
+do          {return TOKEN_DO;}
 char        {return TOKEN_CHAR;}
 int         {return TOKEN_INT;}
 float       {return TOKEN_FLOAT;}

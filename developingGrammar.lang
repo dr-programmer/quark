@@ -8,6 +8,7 @@ testing[int]() {
 		str[char]^10 = "Hello, World!";
 		arr[int]^? = {1, 2, 3}; 
 		??this is a comment: ^~~dynamic array
+		arr = <5>; ?? changing the size of the d-array
 		b[float] = 5 / 3;
 		c[int] = 6 - 3;
 		z[int] = 6 * 7;

@@ -66,7 +66,7 @@ struct expr *expr_create_char_literal(int i) {
     e->integer_value = i;
     return e;
 }
-struct expr *expr_create_foating_point_literal(float f) {
+struct expr *expr_create_floating_point_literal(float f) {
     struct expr *e = expr_create(EXPR_FLOATING_POINT_LITERAL, NULL, NULL);
     e->floating_point_value = f;
     return e;

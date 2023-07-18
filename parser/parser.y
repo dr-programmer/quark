@@ -25,7 +25,7 @@ struct decl *parser_result;
 
 %type <decl> program decl_list decl
 %type <stmt> stmt_list stmt
-%type <expr> expr expr_list
+%type <expr> expr expr_list next_expr term
 %type <type> type
 %type <params> parameters parameter list_of_parameters
 
@@ -38,6 +38,11 @@ struct decl *parser_result;
 %token TOKEN_UNKNOWN
 
 %token TOKEN_GIVE
+%token TOKEN_IF
+%token TOKEN_ELSE
+%token TOKEN_WHILE
+%token TOKEN_FOR
+%token TOKEN_DO
 
 %token TOKEN_CHAR
 %token TOKEN_INT
@@ -99,7 +104,7 @@ decl    : name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_SEMI
         | name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE 
             allocation_size TOKEN_ASSIGN string_literal TOKEN_SEMI
             {
-                struct type *temp = type_create(TYPE_ARRAY, $3, 0, $6);
+                struct type *temp = type_create(TYPE_STRING, $3, 0, $6);
                 struct expr *e = expr_create_string_literal($8);
                 $$ = decl_create($1, temp, e, 0, 0); 
             }
@@ -122,18 +127,52 @@ decl_list
         |                   { $$ = 0; }
         ;
 
-stmt    :
+stmt    : TOKEN_IF TOKEN_LPAREN expr TOKEN_RPAREN stmt
+                { $$ = stmt_create(STMT_IF_ELSE, 0, 0, $3, 0, $5, 0, 0); }
+        | TOKEN_IF TOKEN_LPAREN expr TOKEN_RPAREN stmt TOKEN_ELSE stmt
+                { $$ = stmt_create(STMT_IF_ELSE, 0, 0, $3, 0, $5, $7, 0); }
+        | TOKEN_FOR TOKEN_LPAREN expr_list TOKEN_SEMI expr TOKEN_SEMI 
+                expr_list TOKEN_RPAREN stmt
+                { $$ = stmt_create(STMT_FOR, 0, $3, $5, $7, $9, 0, 0); }
+        | TOKEN_LCRBR stmt_list TOKEN_RCRBR
+                { $$ = $2; }
+        | decl  { $$ = stmt_create(STMT_DECL, $1, 0, 0, 0, 0, 0, 0); }
+        | expr TOKEN_SEMI
+                { $$ = stmt_create(STMT_EXPR, 0, 0, $1, 0, 0, 0, 0); }
+        | TOKEN_GIVE expr TOKEN_SEMI
+                { $$ = stmt_create(STMT_GIVE, 0, 0, $2, 0, 0, 0, 0); }
         ;
 
 stmt_list
-        :
+        : stmt stmt_list        { $$ = $1; $1->next = $2; }
+        |                       { $$ = 0; }
         ;
 
-expr    :
+term    : name                  { $$ = expr_create_name($1); }
+        | TOKEN_INTEGER_LITERAL { $$ = expr_create_integer_literal(atoi(yytext)); }
+        | TOKEN_FLOATING_POINT_LITERAL
+                                { $$ = expr_create_floating_point_literal(atof(yytext)); }
+        | TOKEN_NOT term        { $$ = expr_create(EXPR_NOT, $2, 0); }
+        | TOKEN_LPAREN expr TOKEN_RPAREN
+                                { $$ = $2; }
+        ;
+
+expr    : expr TOKEN_EQUAL term { $$ = expr_create(EXPR_EQUAL, $1, $3); }
+        | name TOKEN_ASSIGN term
+                                { $$ = expr_create(EXPR_ASSIGN, expr_create_name($1), $3); }
+        | name TOKEN_LPAREN expr_list TOKEN_RPAREN
+                                { $$ = expr_create(EXPR_CALL, expr_create_name($1), $3); }
+        | term                  { $$ = $1; }
         ;
 
 expr_list
-        :
+        : expr next_expr        { $$ = expr_create(EXPR_ARG, $1, $2); }
+        |                       { $$ = 0; }
+        ;
+
+next_expr
+        : TOKEN_COMMA expr_list { $$ = $2; }
+        |                       { $$ = 0; }
         ;
 
 name    : TOKEN_IDENT   { $$ = yytext; }

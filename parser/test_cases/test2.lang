@@ -1,0 +1,9 @@
+function[void]() {
+    if(a == b) {
+        a = !a;
+        if(!a)give b;
+        a = b;
+        give a;
+    }
+    function(a, b);
+}
