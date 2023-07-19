@@ -22,8 +22,11 @@ LETTERS [a-zA-Z]
 \-          {return TOKEN_MINUS;}
 \*          {return TOKEN_MUL;}
 \/          {return TOKEN_DIV;}
+\%          {return TOKEN_MODULUS;}
 !=          {return TOKEN_NOT_EQUAL;}
 !           {return TOKEN_NOT;}
+\&\&        {return TOKEN_AND;}
+\|\|        {return TOKEN_OR;} 
 \?          {return TOKEN_UNKNOWN;}
 ==          {return TOKEN_EQUAL;}
 =           {return TOKEN_ASSIGN;}

@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "structures.h"
 #include "colors.h"
 
@@ -26,6 +27,7 @@ struct decl *parser_result;
 %type <decl> program decl_list decl
 %type <stmt> stmt_list stmt
 %type <expr> expr expr_list next_expr term
+%type <expr> assignment_algebra algebra logical_algebra comparison_algebra
 %type <type> type
 %type <params> parameters parameter list_of_parameters
 
@@ -34,6 +36,8 @@ struct decl *parser_result;
 
 %token TOKEN_ALLOCATE
 
+%token TOKEN_AND
+%token TOKEN_OR
 %token TOKEN_NOT
 %token TOKEN_UNKNOWN
 
@@ -59,6 +63,7 @@ struct decl *parser_result;
 %token TOKEN_MINUS
 %token TOKEN_MUL
 %token TOKEN_DIV
+%token TOKEN_MODULUS
 
 %token TOKEN_ASSIGN
 %token TOKEN_EQUAL
@@ -135,7 +140,7 @@ stmt    : TOKEN_IF TOKEN_LPAREN expr TOKEN_RPAREN stmt
                 expr_list TOKEN_RPAREN stmt
                 { $$ = stmt_create(STMT_FOR, 0, $3, $5, $7, $9, 0, 0); }
         | TOKEN_LCRBR stmt_list TOKEN_RCRBR
-                { $$ = $2; }
+                { $$ = stmt_create(STMT_BLOCK, 0, 0, 0, 0, $2, 0, 0); }
         | decl  { $$ = stmt_create(STMT_DECL, $1, 0, 0, 0, 0, 0, 0); }
         | expr TOKEN_SEMI
                 { $$ = stmt_create(STMT_EXPR, 0, 0, $1, 0, 0, 0, 0); }
@@ -152,16 +157,59 @@ term    : name                  { $$ = expr_create_name($1); }
         | TOKEN_INTEGER_LITERAL { $$ = expr_create_integer_literal(atoi(yytext)); }
         | TOKEN_FLOATING_POINT_LITERAL
                                 { $$ = expr_create_floating_point_literal(atof(yytext)); }
+        | string_literal        { $$ = expr_create_string_literal($1); }
+        | TOKEN_MINUS term
+                { $$ = expr_create(EXPR_MUL, expr_create_integer_literal(-1), $2); }
         | TOKEN_NOT term        { $$ = expr_create(EXPR_NOT, $2, 0); }
         | TOKEN_LPAREN expr TOKEN_RPAREN
                                 { $$ = $2; }
         ;
 
-expr    : expr TOKEN_EQUAL term { $$ = expr_create(EXPR_EQUAL, $1, $3); }
-        | name TOKEN_ASSIGN term
+assignment_algebra
+        : name TOKEN_ASSIGN term
                                 { $$ = expr_create(EXPR_ASSIGN, expr_create_name($1), $3); }
-        | name TOKEN_LPAREN expr_list TOKEN_RPAREN
+        | name TOKEN_ADD_WITH term
+                                { $$ = expr_create(EXPR_ADD_WITH, expr_create_name($1), $3); }
+        | name TOKEN_SUB_WITH term
+                                { $$ = expr_create(EXPR_SUB_WITH, expr_create_name($1), $3); }
+        | name TOKEN_MUL_WITH term
+                                { $$ = expr_create(EXPR_MUL_WITH, expr_create_name($1), $3); }
+        | name TOKEN_DIV_WITH term
+                                { $$ = expr_create(EXPR_DIV_WITH, expr_create_name($1), $3); }
+        | name TOKEN_INCREMENT  { $$ = expr_create(EXPR_INCREMENT, expr_create_name($1), 0); }
+        | name TOKEN_DECREMENT  { $$ = expr_create(EXPR_DECREMENT, expr_create_name($1), 0); }
+        | TOKEN_INCREMENT name  { $$ = expr_create(EXPR_INCREMENT, 0, expr_create_name($2)); }
+        | TOKEN_DECREMENT name  { $$ = expr_create(EXPR_DECREMENT, 0, expr_create_name($2)); }
+        ;
+
+algebra : expr TOKEN_PLUS term  { $$ = expr_create(EXPR_ADD, $1, $3); }
+        | expr TOKEN_MINUS term { $$ = expr_create(EXPR_SUB, $1, $3); }
+        | expr TOKEN_MUL term   { $$ = expr_create(EXPR_MUL, $1, $3); }
+        | expr TOKEN_DIV term   { $$ = expr_create(EXPR_DIV, $1, $3); }
+        | expr TOKEN_MODULUS term
+                                { $$ = expr_create(EXPR_MODULUS, $1, $3); }
+        ;
+
+comparison_algebra
+        : expr TOKEN_EQUAL term         { $$ = expr_create(EXPR_EQUAL, $1, $3); }
+        | expr TOKEN_NOT_EQUAL term     { $$ = expr_create(EXPR_NOT_EQUAL, $1, $3); }
+        | expr TOKEN_LESS term          { $$ = expr_create(EXPR_LESS, $1, $3); }
+        | expr TOKEN_GREATER term       { $$ = expr_create(EXPR_GREATER, $1, $3); }
+        | expr TOKEN_LESS_EQUAL term    { $$ = expr_create(EXPR_LESS_EQUAL, $1, $3); }
+        | expr TOKEN_GREATER_EQUAL term { $$ = expr_create(EXPR_GREATER_EQUAL, $1, $3); }
+        ;
+
+logical_algebra
+        : expr TOKEN_AND term   { $$ = expr_create(EXPR_AND, $1, $3); }
+        | expr TOKEN_OR term    { $$ = expr_create(EXPR_OR, $1, $3); }
+        ;
+
+expr    : name TOKEN_LPAREN expr_list TOKEN_RPAREN
                                 { $$ = expr_create(EXPR_CALL, expr_create_name($1), $3); }
+        | assignment_algebra    { $$ = $1; }
+        | algebra               { $$ = $1; }
+        | comparison_algebra    { $$ = $1; }
+        | logical_algebra       { $$ = $1; }
         | term                  { $$ = $1; }
         ;
 
@@ -175,11 +223,19 @@ next_expr
         |                       { $$ = 0; }
         ;
 
-name    : TOKEN_IDENT   { $$ = yytext; }
+name    : TOKEN_IDENT   {
+                                char *temp = (char *)malloc(strlen(yytext)*sizeof(char));
+                                strcpy(temp, yytext);
+                                $$ = temp; 
+                        }
         ;
 
 string_literal
-        : TOKEN_STRING_LITERAL { $$ = yytext; }
+        : TOKEN_STRING_LITERAL  { 
+                                char *temp = (char *)malloc(strlen(yytext)*sizeof(char));
+                                strcpy(temp, yytext);
+                                $$ = temp; 
+                                }
         ;
 
 allocation_size

@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "structures.h"
 #include "error.h"
 #include "colors.h"
 
 extern FILE *yyin;
 extern int yyparse();
+extern struct decl *parser_result;
 
 int main(int argc, char **argv)
 {
@@ -15,6 +17,7 @@ int main(int argc, char **argv)
     }
     if(yyparse() == 0) {
         printf("Parse "GRN"successful"RESET"! \n");
+        decl_print(parser_result);
     }
     else {
         printf("Parse "RED"failed"RESET". \n");

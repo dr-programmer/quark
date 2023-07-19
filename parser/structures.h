@@ -12,6 +12,8 @@ typedef enum {
 } stmt_t;
 
 typedef enum {
+    EXPR_AND,
+    EXPR_OR,
     EXPR_NOT,
     EXPR_CALL,
     EXPR_SUBSCRIPT,
@@ -21,6 +23,7 @@ typedef enum {
     EXPR_SUB,
     EXPR_MUL,
     EXPR_DIV,
+    EXPR_MODULUS,
     EXPR_ASSIGN,
     EXPR_EQUAL,
     EXPR_NOT_EQUAL,
@@ -126,5 +129,11 @@ struct type *type_create(type_t kind,
 struct param_list *param_list_create(char *name, 
                                     struct type *type, 
                                     struct param_list *next);
+
+void decl_print(struct decl *d);
+void stmt_print(struct stmt *s);
+void expr_print(struct expr *e);
+void type_print(struct type *t);
+void param_list_print(struct param_list *p);
 
 #endif

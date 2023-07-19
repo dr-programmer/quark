@@ -13,7 +13,7 @@ scanner.o: scanner.c
 scanner.c: scanner.l token.h
 	flex -o scanner.c scanner.l
 
-main.o: main.c error.h colors.h
+main.o: main.c error.h colors.h structures.h
 	gcc -c main.c -o main.o
 
 clean:
