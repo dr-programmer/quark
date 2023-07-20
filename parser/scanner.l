@@ -7,11 +7,14 @@ int line = 1;
 DIGITS [0-9]
 LETTERS [a-zA-Z]
 
+%x multiline_comment
+
 %%
 
 (" "|\t)
 "\n"        {line++;}
 \^          {return TOKEN_ALLOCATE;}
+\-\>        {return TOKEN_SUBSCRIPT;}
 \+{2}       {return TOKEN_INCREMENT;}
 -{2}        {return TOKEN_DECREMENT;}
 \+=         {return TOKEN_ADD_WITH;}
@@ -26,7 +29,12 @@ LETTERS [a-zA-Z]
 !=          {return TOKEN_NOT_EQUAL;}
 !           {return TOKEN_NOT;}
 \&\&        {return TOKEN_AND;}
-\|\|        {return TOKEN_OR;} 
+\|\|        {return TOKEN_OR;}
+\<\?        {BEGIN(multiline_comment);}
+<multiline_comment>[^\?]*
+<multiline_comment>\?+[^\?\>]*
+<multiline_comment>\?\>     {BEGIN(INITIAL);}
+\?\?.*"\n"
 \?          {return TOKEN_UNKNOWN;}
 ==          {return TOKEN_EQUAL;}
 =           {return TOKEN_ASSIGN;}

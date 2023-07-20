@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     }
     if(yyparse() == 0) {
         printf("Parse "GRN"successful"RESET"! \n");
-        decl_print(parser_result);
+        decl_print(parser_result, 0);
     }
     else {
         printf("Parse "RED"failed"RESET". \n");

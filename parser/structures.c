@@ -101,8 +101,10 @@ struct param_list *param_list_create(char *name,
     return p;
 }
 
-void decl_print(struct decl *d) {
+void decl_print(struct decl *d, int number_of_tabs) {
     if(d == NULL) return;
+
+    print_tabs(number_of_tabs);
 
     printf("%s", d->name);
     type_print(d->type);
@@ -115,31 +117,34 @@ void decl_print(struct decl *d) {
     }
     else if(d->code != NULL){
         printf(" { \n");
-        stmt_print(d->code);
+        stmt_print(d->code, number_of_tabs+1);
         printf("}");
     }
     else printf(";");
     printf("\n");
 
-    decl_print(d->next);
+    decl_print(d->next, number_of_tabs);
 }
-void stmt_print(struct stmt *s) {
+void stmt_print(struct stmt *s, int number_of_tabs) {
     if(s == NULL)return;
 
     switch(s->kind) {
-        case STMT_DECL: decl_print(s->decl); break;
-        case STMT_EXPR: expr_print(s->expr); printf(";\n"); break;
+        case STMT_DECL: decl_print(s->decl, number_of_tabs); break;
+        case STMT_EXPR: print_tabs(number_of_tabs); expr_print(s->expr); printf(";\n"); break;
         case STMT_IF_ELSE:
+            print_tabs(number_of_tabs);
             printf("if(");
             expr_print(s->expr);
             printf(") ");
-            stmt_print(s->body);
+            stmt_print(s->body, number_of_tabs);
             if(s->else_body != NULL) {
+                print_tabs(number_of_tabs);
                 printf("else ");
-                stmt_print(s->else_body);
+                stmt_print(s->else_body, number_of_tabs);
             }
             break;
         case STMT_FOR:
+            print_tabs(number_of_tabs);
             printf("for(");
             expr_print(s->init_expr);
             printf("; ");
@@ -147,21 +152,23 @@ void stmt_print(struct stmt *s) {
             printf("; ");
             expr_print(s->next_expr);
             printf(") ");
-            stmt_print(s->body);
+            stmt_print(s->body, number_of_tabs);
             break;
         case STMT_GIVE:
+            print_tabs(number_of_tabs);
             printf("give ");
             expr_print(s->expr);
             printf(";\n");
             break;
         case STMT_BLOCK:
             printf("{\n");
-            stmt_print(s->body);
-            printf("}");
+            stmt_print(s->body, number_of_tabs+1);
+            print_tabs(number_of_tabs);
+            printf("}\n");
             break;
     }
 
-    stmt_print(s->next);
+    stmt_print(s->next, number_of_tabs);
 }
 void expr_print(struct expr *e) {
     if(e == NULL)return;
@@ -176,6 +183,8 @@ void expr_print(struct expr *e) {
         case EXPR_OR: printf("("); expr_print(e->left); printf(" || "); 
                             expr_print(e->right); printf(")"); break;
         case EXPR_NOT: printf("!"); expr_print(e->left); break;
+        case EXPR_SUBSCRIPT: expr_print(e->left); printf("->"); printf("(");
+                                expr_print(e->right); printf(")"); break;
         case EXPR_CALL: expr_print(e->left); printf("("); expr_print(e->right); 
                                 printf(")"); break;
         case EXPR_ARG: expr_print(e->left); 
@@ -187,9 +196,12 @@ void expr_print(struct expr *e) {
                                 expr_print(e->right); printf(")"); break;
         case EXPR_SUB: printf("("); expr_print(e->left); printf(" - "); 
                                 expr_print(e->right); printf(")"); break;
-        case EXPR_MUL: expr_print(e->left); printf(" * "); expr_print(e->right); break;
-        case EXPR_DIV: expr_print(e->left); printf(" / "); expr_print(e->right); break;
-        case EXPR_MODULUS: expr_print(e->left); printf(" %% "); expr_print(e->right); break;
+        case EXPR_MUL: printf("("); expr_print(e->left); printf(" * "); 
+                            expr_print(e->right); printf(")"); break;
+        case EXPR_DIV: printf("("); expr_print(e->left); printf(" / "); 
+                            expr_print(e->right); printf(")"); break;
+        case EXPR_MODULUS: printf("("); expr_print(e->left); printf(" %% "); 
+                            expr_print(e->right); printf(")"); break;
         case EXPR_ASSIGN: expr_print(e->left); printf(" = "); expr_print(e->right); break;
         case EXPR_EQUAL: expr_print(e->left); printf(" == "); expr_print(e->right); break;
         case EXPR_NOT_EQUAL: expr_print(e->left); printf(" != "); expr_print(e->right); break;
@@ -249,4 +261,10 @@ void param_list_print(struct param_list *p) {
     type_print(p->type);
     if(p->next != NULL)printf(", ");
     param_list_print(p->next);
+}
+
+void print_tabs(int number_of_tabs) {
+    for(unsigned char i = 0; i < number_of_tabs; i++) {
+        printf("    ");
+    }
 }

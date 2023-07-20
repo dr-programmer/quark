@@ -130,10 +130,12 @@ struct param_list *param_list_create(char *name,
                                     struct type *type, 
                                     struct param_list *next);
 
-void decl_print(struct decl *d);
-void stmt_print(struct stmt *s);
+void decl_print(struct decl *d, int number_of_tabs);
+void stmt_print(struct stmt *s, int number_of_tabs);
 void expr_print(struct expr *e);
 void type_print(struct type *t);
 void param_list_print(struct param_list *p);
+
+void print_tabs(int number_of_tabs);
 
 #endif
