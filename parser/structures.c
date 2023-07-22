@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "structures.h"
-
+// Constructing the AST
 struct decl *decl_create(char *name, 
                             struct type *type, 
                             struct expr *value, 
@@ -267,4 +267,34 @@ void print_tabs(int number_of_tabs) {
     for(unsigned char i = 0; i < number_of_tabs; i++) {
         printf("    ");
     }
+}
+// Semantic analysis
+struct symbol *symbol(symbol_t kind, 
+                        struct type *type, 
+                        char *name)
+{
+    struct symbol *s = (struct symbol *)malloc(sizeof(struct symbol));
+    s->kind = kind;
+    s->type = type;
+    s->name = name;
+    return s;
+}
+
+void scope_enter() {
+
+}
+void scope_exit() {
+
+}
+int scope_level() {
+
+}
+void scope_bind(struct symbol *symbol) {
+
+}
+struct symbol *scope_lookup(const char *name) {
+
+}
+struct symbol *scope_lookup_current(const char *name) {
+
 }

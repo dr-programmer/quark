@@ -1,6 +1,6 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
-
+// Constructing the AST
 typedef enum {
     STMT_DECL,
     STMT_EXPR,
@@ -137,5 +137,29 @@ void type_print(struct type *t);
 void param_list_print(struct param_list *p);
 
 void print_tabs(int number_of_tabs);
+// Semantic analysis
+typedef enum {
+    SYMBOL_LOCAL,
+    SYMBOL_PARAM,
+    SYMBOL_GLOBAL
+} symbol_t;
+
+struct symbol {
+    symbol_t kind;
+    struct type *type;
+    char *name;
+    int which;
+};
+
+struct symbol *symbol(symbol_t kind, 
+                        struct type *type, 
+                        char *name);
+
+void scope_enter();
+void scope_exit();
+int scope_level();
+void scope_bind(struct symbol *symbol);
+struct symbol *scope_lookup(const char *name);
+struct symbol *scope_lookup_current(const char *name);
 
 #endif

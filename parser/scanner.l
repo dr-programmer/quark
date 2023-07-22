@@ -53,10 +53,13 @@ int         {return TOKEN_INT;}
 float       {return TOKEN_FLOAT;}
 bool        {return TOKEN_BOOL;}
 void        {return TOKEN_VOID;}
+true        {return TOKEN_TRUE;}
+false       {return TOKEN_FALSE;}
 {DIGITS}+\.{DIGITS}+   {return TOKEN_FLOATING_POINT_LITERAL;}
 {DIGITS}+   {return TOKEN_INTEGER_LITERAL;}
-{LETTERS}+  {return TOKEN_IDENT;}
+({LETTERS}|_)({LETTERS}|{DIGITS}|_)*  {return TOKEN_IDENT;}
 \".*\"      {return TOKEN_STRING_LITERAL;}
+\'.\'       {return TOKEN_CHAR_LITERAL;}
 \(          {return TOKEN_LPAREN;}
 \)          {return TOKEN_RPAREN;}
 \{          {return TOKEN_LCRBR;}

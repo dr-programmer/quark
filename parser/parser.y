@@ -32,7 +32,7 @@ struct decl *parser_result;
 %type <params> parameters parameter list_of_parameters
 
 %type <name> name string_literal
-%type <integer> allocation_size
+%type <integer> allocation_size boolean_literal char_literal
 
 %token TOKEN_ALLOCATE
 %token TOKEN_SUBSCRIPT
@@ -54,6 +54,10 @@ struct decl *parser_result;
 %token TOKEN_FLOAT
 %token TOKEN_BOOL
 %token TOKEN_VOID
+
+%token TOKEN_TRUE
+%token TOKEN_FALSE
+%token TOKEN_CHAR_LITERAL
 
 %token TOKEN_INTEGER_LITERAL
 %token TOKEN_FLOATING_POINT_LITERAL
@@ -194,6 +198,8 @@ factor  : name                  { $$ = expr_create_name($1); }
         | TOKEN_FLOATING_POINT_LITERAL
                                 { $$ = expr_create_floating_point_literal(atof(yytext)); }
         | string_literal        { $$ = expr_create_string_literal($1); }
+        | boolean_literal       { $$ = expr_create_boolean_literal($1); }
+        | char_literal          { $$ = expr_create_char_literal($1); }
         | TOKEN_MINUS factor
                 { $$ = expr_create(EXPR_MUL, expr_create_integer_literal(-1), $2); }
         | TOKEN_NOT factor      { $$ = expr_create(EXPR_NOT, $2, 0); }
@@ -245,6 +251,19 @@ string_literal
                                 char *temp = (char *)malloc(strlen(yytext)*sizeof(char));
                                 strcpy(temp, yytext);
                                 $$ = temp; 
+                                }
+        ;
+
+boolean_literal
+        : TOKEN_TRUE            { $$ = 1; }
+        | TOKEN_FALSE           { $$ = 0; }
+        ;
+
+char_literal
+        : TOKEN_CHAR_LITERAL    {
+                                char *temp = (char *)malloc(sizeof(char));
+                                *temp = yytext[1];
+                                $$ = *temp;
                                 }
         ;
 

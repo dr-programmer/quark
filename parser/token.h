@@ -71,38 +71,41 @@ extern int yydebug;
     TOKEN_FLOAT = 272,             /* TOKEN_FLOAT  */
     TOKEN_BOOL = 273,              /* TOKEN_BOOL  */
     TOKEN_VOID = 274,              /* TOKEN_VOID  */
-    TOKEN_INTEGER_LITERAL = 275,   /* TOKEN_INTEGER_LITERAL  */
-    TOKEN_FLOATING_POINT_LITERAL = 276, /* TOKEN_FLOATING_POINT_LITERAL  */
-    TOKEN_IDENT = 277,             /* TOKEN_IDENT  */
-    TOKEN_STRING_LITERAL = 278,    /* TOKEN_STRING_LITERAL  */
-    TOKEN_PLUS = 279,              /* TOKEN_PLUS  */
-    TOKEN_MINUS = 280,             /* TOKEN_MINUS  */
-    TOKEN_MUL = 281,               /* TOKEN_MUL  */
-    TOKEN_DIV = 282,               /* TOKEN_DIV  */
-    TOKEN_MODULUS = 283,           /* TOKEN_MODULUS  */
-    TOKEN_ASSIGN = 284,            /* TOKEN_ASSIGN  */
-    TOKEN_EQUAL = 285,             /* TOKEN_EQUAL  */
-    TOKEN_NOT_EQUAL = 286,         /* TOKEN_NOT_EQUAL  */
-    TOKEN_GREATER = 287,           /* TOKEN_GREATER  */
-    TOKEN_GREATER_EQUAL = 288,     /* TOKEN_GREATER_EQUAL  */
-    TOKEN_LESS = 289,              /* TOKEN_LESS  */
-    TOKEN_LESS_EQUAL = 290,        /* TOKEN_LESS_EQUAL  */
-    TOKEN_INCREMENT = 291,         /* TOKEN_INCREMENT  */
-    TOKEN_DECREMENT = 292,         /* TOKEN_DECREMENT  */
-    TOKEN_ADD_WITH = 293,          /* TOKEN_ADD_WITH  */
-    TOKEN_SUB_WITH = 294,          /* TOKEN_SUB_WITH  */
-    TOKEN_MUL_WITH = 295,          /* TOKEN_MUL_WITH  */
-    TOKEN_DIV_WITH = 296,          /* TOKEN_DIV_WITH  */
-    TOKEN_LPAREN = 297,            /* TOKEN_LPAREN  */
-    TOKEN_RPAREN = 298,            /* TOKEN_RPAREN  */
-    TOKEN_LCRBR = 299,             /* TOKEN_LCRBR  */
-    TOKEN_RCRBR = 300,             /* TOKEN_RCRBR  */
-    TOKEN_LSQBR = 301,             /* TOKEN_LSQBR  */
-    TOKEN_RSQBR = 302,             /* TOKEN_RSQBR  */
-    TOKEN_COMMA = 303,             /* TOKEN_COMMA  */
-    TOKEN_COLON = 304,             /* TOKEN_COLON  */
-    TOKEN_SEMI = 305,              /* TOKEN_SEMI  */
-    TOKEN_ERROR = 306              /* TOKEN_ERROR  */
+    TOKEN_TRUE = 275,              /* TOKEN_TRUE  */
+    TOKEN_FALSE = 276,             /* TOKEN_FALSE  */
+    TOKEN_CHAR_LITERAL = 277,      /* TOKEN_CHAR_LITERAL  */
+    TOKEN_INTEGER_LITERAL = 278,   /* TOKEN_INTEGER_LITERAL  */
+    TOKEN_FLOATING_POINT_LITERAL = 279, /* TOKEN_FLOATING_POINT_LITERAL  */
+    TOKEN_IDENT = 280,             /* TOKEN_IDENT  */
+    TOKEN_STRING_LITERAL = 281,    /* TOKEN_STRING_LITERAL  */
+    TOKEN_PLUS = 282,              /* TOKEN_PLUS  */
+    TOKEN_MINUS = 283,             /* TOKEN_MINUS  */
+    TOKEN_MUL = 284,               /* TOKEN_MUL  */
+    TOKEN_DIV = 285,               /* TOKEN_DIV  */
+    TOKEN_MODULUS = 286,           /* TOKEN_MODULUS  */
+    TOKEN_ASSIGN = 287,            /* TOKEN_ASSIGN  */
+    TOKEN_EQUAL = 288,             /* TOKEN_EQUAL  */
+    TOKEN_NOT_EQUAL = 289,         /* TOKEN_NOT_EQUAL  */
+    TOKEN_GREATER = 290,           /* TOKEN_GREATER  */
+    TOKEN_GREATER_EQUAL = 291,     /* TOKEN_GREATER_EQUAL  */
+    TOKEN_LESS = 292,              /* TOKEN_LESS  */
+    TOKEN_LESS_EQUAL = 293,        /* TOKEN_LESS_EQUAL  */
+    TOKEN_INCREMENT = 294,         /* TOKEN_INCREMENT  */
+    TOKEN_DECREMENT = 295,         /* TOKEN_DECREMENT  */
+    TOKEN_ADD_WITH = 296,          /* TOKEN_ADD_WITH  */
+    TOKEN_SUB_WITH = 297,          /* TOKEN_SUB_WITH  */
+    TOKEN_MUL_WITH = 298,          /* TOKEN_MUL_WITH  */
+    TOKEN_DIV_WITH = 299,          /* TOKEN_DIV_WITH  */
+    TOKEN_LPAREN = 300,            /* TOKEN_LPAREN  */
+    TOKEN_RPAREN = 301,            /* TOKEN_RPAREN  */
+    TOKEN_LCRBR = 302,             /* TOKEN_LCRBR  */
+    TOKEN_RCRBR = 303,             /* TOKEN_RCRBR  */
+    TOKEN_LSQBR = 304,             /* TOKEN_LSQBR  */
+    TOKEN_RSQBR = 305,             /* TOKEN_RSQBR  */
+    TOKEN_COMMA = 306,             /* TOKEN_COMMA  */
+    TOKEN_COLON = 307,             /* TOKEN_COLON  */
+    TOKEN_SEMI = 308,              /* TOKEN_SEMI  */
+    TOKEN_ERROR = 309              /* TOKEN_ERROR  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -121,7 +124,7 @@ union YYSTYPE
     char *name;
     int integer;
 
-#line 125 "token.h"
+#line 128 "token.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
