@@ -61,6 +61,8 @@ struct decl {
     struct expr *value;
     struct stmt *code;
     struct decl *next;
+
+    struct symbol *symbol;
 };
 
 struct stmt {
@@ -83,6 +85,8 @@ struct expr {
     int integer_value;
     float floating_point_value;
     const char *string_literal;
+
+    struct symbol *symbol;
 };
 
 struct type {
@@ -96,6 +100,8 @@ struct param_list {
     char *name;
     struct type *type;
     struct param_list *next;
+
+    struct symbol *symbol;
 };
 
 struct decl *decl_create(char *name, 
@@ -151,7 +157,7 @@ struct symbol {
     int which;
 };
 
-struct symbol *symbol(symbol_t kind, 
+struct symbol *symbol_create(symbol_t kind, 
                         struct type *type, 
                         char *name);
 

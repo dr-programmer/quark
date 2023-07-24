@@ -269,7 +269,7 @@ void print_tabs(int number_of_tabs) {
     }
 }
 // Semantic analysis
-struct symbol *symbol(symbol_t kind, 
+struct symbol *symbol_create(symbol_t kind, 
                         struct type *type, 
                         char *name)
 {
