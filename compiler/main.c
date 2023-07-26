@@ -3,10 +3,12 @@
 #include "structures.h"
 #include "error.h"
 #include "colors.h"
+#include "scope.h"
 
 extern FILE *yyin;
 extern int yyparse();
 extern struct decl *parser_result;
+extern Stack symbol_table;
 
 int main(int argc, char **argv)
 {
@@ -18,6 +20,8 @@ int main(int argc, char **argv)
     if(yyparse() == 0) {
         printf("Parse "GRN"successful"RESET"! \n");
         decl_print(parser_result, 0);
+
+        symbol_table = initStack();
     }
     else {
         printf("Parse "RED"failed"RESET". \n");

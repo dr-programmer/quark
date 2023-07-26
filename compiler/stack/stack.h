@@ -7,6 +7,8 @@ typedef struct {
     LinkedList list;
 } Stack;
 
+Stack initStack();
+
 void pushStack(Stack *stack, HashTable value);
 HashTable popStack(Stack *stack);
 int lenStack(Stack *stack);

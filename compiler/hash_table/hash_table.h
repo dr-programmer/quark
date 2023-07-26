@@ -11,8 +11,6 @@ typedef struct {
 
 HashTable hash_table_init(unsigned long capacity);
 
-static void hash_table_resize(HashTable *hashTable, unsigned long newSize);
-
 unsigned long hash_function(HashTable *hashTable, const char *name);
 
 void hash_table_insert(HashTable *hashTable, struct symbol *symbol);

@@ -13,4 +13,4 @@ stack.o: stack.c stack.h
 	gcc -c stack.c -o stack.o
 
 clean:
-	rm -f *.out *.o
+	rm -f *.out *.o *.a
