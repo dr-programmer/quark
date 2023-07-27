@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "structures.h"
+#include "colors.h"
 // Constructing the AST
 struct decl *decl_create(char *name, 
                             struct type *type, 
@@ -118,6 +119,7 @@ void decl_print(struct decl *d, int number_of_tabs) {
     else if(d->code != NULL){
         printf(" { \n");
         stmt_print(d->code, number_of_tabs+1);
+        print_tabs(number_of_tabs);
         printf("}");
     }
     else printf(";");
@@ -268,14 +270,69 @@ void print_tabs(int number_of_tabs) {
         printf("    ");
     }
 }
+
 // Semantic analysis
-struct symbol *symbol_create(symbol_t kind, 
-                        struct type *type, 
-                        char *name)
-{
-    struct symbol *s = (struct symbol *)malloc(sizeof(struct symbol));
-    s->kind = kind;
-    s->type = type;
-    s->name = name;
-    return s;
+
+static void print_error(const char *error, const char *name) {
+    fprintf(stderr, RED "Error" RESET \
+        MAG" |%s|"RESET"->"YEL"|%s|"RESET" \n", error, name);
+}
+
+void decl_resolve(struct decl *d) {
+    if(d == NULL)return;
+
+    symbol_t kind = scope_level() > 1 ? SYMBOL_LOCAL : SYMBOL_GLOBAL;
+
+    d->symbol = symbol_create(kind, d->type, d->name);
+
+    expr_resolve(d->value);
+    if(scope_lookup_current(d->name)) print_error("variable already exists", d->name);
+    else scope_bind(d->symbol);
+
+    if(d->code) {
+        scope_enter();
+        param_list_resolve(d->type->params);
+        stmt_resolve(d->code);
+        scope_exit();
+    }
+
+    decl_resolve(d->next);
+}
+void stmt_resolve(struct stmt *s) {
+    if(s == NULL)return;
+
+    switch(s->kind) {
+        case STMT_DECL: decl_resolve(s->decl); break;
+        case STMT_EXPR: expr_resolve(s->expr); break;
+        case STMT_IF_ELSE: expr_resolve(s->expr); stmt_resolve(s->body);
+                                stmt_resolve(s->else_body); break;
+        case STMT_FOR: expr_resolve(s->init_expr); expr_resolve(s->expr);
+                            expr_resolve(s->next_expr); stmt_resolve(s->body); break;
+        case STMT_GIVE: expr_resolve(s->expr); break;
+        case STMT_BLOCK: scope_enter(); stmt_resolve(s->body); scope_exit(); break;
+    }
+
+    stmt_resolve(s->next);
+}
+void expr_resolve(struct expr *e) {
+    if(e == NULL)return;
+
+    if(e->kind == EXPR_NAME) {
+        e->symbol = scope_lookup(e->name);
+        if(e->symbol == NULL) print_error("no declaration found", e->name);
+    }
+    else {
+        expr_resolve(e->left);
+        expr_resolve(e->right);
+    }
+}
+void param_list_resolve(struct param_list *p) {
+    if(p == NULL)return;
+
+    p->symbol = symbol_create(SYMBOL_PARAM, p->type, p->name);
+    if(scope_lookup_current(p->name)) print_error("parameter already exists"
+                                            " in function", p->name);
+    else scope_bind(p->symbol);
+
+    param_list_resolve(p->next);
 }

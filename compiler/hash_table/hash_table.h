@@ -1,7 +1,7 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
-#include "../structures.h"
+#include "../symbol/symbol.h"
 
 typedef struct {
     struct symbol **symbols;

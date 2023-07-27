@@ -22,6 +22,9 @@ int main(int argc, char **argv)
         decl_print(parser_result, 0);
 
         symbol_table = initStack();
+        scope_enter();
+        decl_resolve(parser_result);
+        scope_exit();
     }
     else {
         printf("Parse "RED"failed"RESET". \n");

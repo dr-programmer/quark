@@ -1,0 +1,13 @@
+c[int] = 5;
+function[int](a[int], b[int], b[int]) {
+    main[int]() {
+        z = 3;
+        give a + b;
+    }
+}
+main[void]() {
+    a[int] = 3;
+    b[int] = 6;
+    a[int] = 1;
+    give function(a, b);
+}

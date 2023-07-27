@@ -1,5 +1,5 @@
-compiler: parser.o structures.o scanner.o main.o scope.o
-	gcc -o compiler parser.o structures.o scanner.o main.o scope.o -Lstack -lstack
+compiler: parser.o structures.o scanner.o main.o scope.o stack_do symbol_make
+	gcc -o compiler parser.o structures.o scanner.o main.o scope.o symbol/symbol.o -Lstack -lstack
 
 parser.o: parser.c
 	gcc -c parser.c -o parser.o
@@ -28,5 +28,11 @@ stack_do:
 stack_wipe:
 	cd stack; make clean; cd ..
 
-clean:
+symbol_make:
+	cd symbol; make; cd ..
+
+symbol_wipe:
+	cd symbol; make clean; cd ..
+
+clean: symbol_wipe stack_wipe
 	rm -f *.out *.o scanner.c parser.c token.h *.dot *.output compiler

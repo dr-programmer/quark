@@ -143,22 +143,15 @@ void type_print(struct type *t);
 void param_list_print(struct param_list *p);
 
 void print_tabs(int number_of_tabs);
+
 // Semantic analysis
-typedef enum {
-    SYMBOL_LOCAL,
-    SYMBOL_PARAM,
-    SYMBOL_GLOBAL
-} symbol_t;
 
-struct symbol {
-    symbol_t kind;
-    struct type *type;
-    char *name;
-    int which;
-};
+#include "symbol/symbol.h"
+#include "scope.h"
 
-struct symbol *symbol_create(symbol_t kind, 
-                        struct type *type, 
-                        char *name);
+void decl_resolve(struct decl *d);
+void stmt_resolve(struct stmt *s);
+void expr_resolve(struct expr *e);
+void param_list_resolve(struct param_list *p);
 
 #endif
