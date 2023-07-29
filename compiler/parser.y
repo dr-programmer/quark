@@ -114,7 +114,7 @@ decl    : name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_SEMI
         | name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE 
             allocation_size TOKEN_ASSIGN string_literal TOKEN_SEMI
             {
-                struct type *temp = type_create(TYPE_STRING, $3, 0, $6);
+                struct type *temp = type_create(TYPE_ARRAY, $3, 0, $6);
                 struct expr *e = expr_create_string_literal($8);
                 $$ = decl_create($1, temp, e, 0, 0); 
             }

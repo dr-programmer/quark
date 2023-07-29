@@ -1,4 +1,6 @@
-c[int] = 5;
+c[int] = 5.3;
+k[char]^? = "hi";
+string[char]^?;
 function[int](a[int], b[int], b[int]) {
     main[int]() {
         z = 3;
@@ -9,5 +11,6 @@ main[void]() {
     a[int] = 3;
     b[int] = 6;
     a[int] = 1;
+    a = a + 5.5;
     give function(a, b);
 }

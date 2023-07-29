@@ -154,4 +154,16 @@ void stmt_resolve(struct stmt *s);
 void expr_resolve(struct expr *e);
 void param_list_resolve(struct param_list *p);
 
+unsigned short type_equals(struct type *a, struct type *b);
+struct type *type_copy(struct type *t);
+struct param_list *param_list_copy(struct param_list *p);
+void type_delete(struct type *t);
+void param_list_delete(struct param_list *p);
+
+extern unsigned int error_count;
+
+void decl_typecheck(struct decl *d);
+void stmt_typecheck(struct stmt *t);
+struct type *expr_typecheck(struct expr *e);
+
 #endif

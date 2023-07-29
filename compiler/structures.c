@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "structures.h"
 #include "colors.h"
 // Constructing the AST
@@ -278,6 +279,10 @@ static void print_error(const char *error, const char *name) {
         MAG" |%s|"RESET"->"YEL"|%s|"RESET" \n", error, name);
 }
 
+static void print_type_error() {
+    
+}
+
 void decl_resolve(struct decl *d) {
     if(d == NULL)return;
 
@@ -335,4 +340,186 @@ void param_list_resolve(struct param_list *p) {
     else scope_bind(p->symbol);
 
     param_list_resolve(p->next);
+}
+
+unsigned short type_equals(struct type *a, struct type *b) {
+    if(a->kind == b->kind) {
+        if(a->kind == TYPE_ARRAY || a->kind == TYPE_FUNCTION) {
+            return type_equals(a->subtype, b->subtype);
+        }
+        else return 1;
+    }
+    else return 0;
+}
+struct type *type_copy(struct type *t) {
+    if(t == NULL) return NULL;
+
+    struct type *result = type_create(t->kind, NULL, NULL, t->number_of_subtypes);
+    result->subtype = type_copy(t->subtype);
+    result->params = param_list_copy(t->params);
+
+    return result;
+}
+struct param_list *param_list_copy(struct param_list *p) {
+    if(p == NULL) return NULL;
+
+    struct param_list *result = param_list_create(NULL, type_copy(p->type), 
+                                                    param_list_copy(p->next));
+    result->name = (char *)calloc(strlen(p->name), sizeof(char));
+    strcpy(result->name, p->name);
+
+    return result;
+}
+void type_delete(struct type *t) {
+    if(t == NULL)return;
+
+    type_delete(t->subtype);
+    param_list_delete(t->params);
+
+    free(t);
+}
+void param_list_delete(struct param_list *p) {
+    if(p == NULL)return;
+
+    free(p->name);
+    type_delete(p->type);
+    param_list_delete(p->next);
+
+    free(p);
+}
+
+unsigned int error_count;
+
+void decl_typecheck(struct decl *d) {
+    if(d == NULL)return;
+
+    if(d->value) {
+        struct type *t = expr_typecheck(d->value);
+        if(!type_equals(t, d->symbol->type)) {
+            printf(RED"Error ");
+            printf(MAG"|cannot assign "BLU);
+            type_print(t);
+            printf(MAG" to "BLU);
+            type_print(d->symbol->type);
+            printf(MAG"|"RESET);
+            printf("->"YEL"|%s", d->name);
+            type_print(d->type);
+            printf(" = ");
+            expr_print(d->value);
+            printf(";| \n"RESET);
+            error_count++;
+        }
+        type_delete(t);
+    }
+    if(d->code) stmt_typecheck(d->code);
+
+    decl_typecheck(d->next);
+}
+void stmt_typecheck(struct stmt *s) {
+    if(s == NULL)return;
+
+    struct type *t;
+    switch(s->kind) {
+        case STMT_DECL:
+            decl_typecheck(s->decl);
+            break;
+        case STMT_EXPR:
+            t = expr_typecheck(s->expr);
+            type_delete(t);
+            break;
+    }
+
+    stmt_typecheck(s->next);
+}
+struct type *expr_typecheck(struct expr *e) {
+    if(e == NULL) return NULL;
+
+    struct type *left = expr_typecheck(e->left);
+    struct type *right = expr_typecheck(e->right);
+
+    struct type *result;
+
+    switch(e->kind) {
+        case EXPR_INTEGER_LITERAL: result = type_create(TYPE_INTEGER, 0, 0, 0); break;
+        case EXPR_FLOATING_POINT_LITERAL: result = type_create(TYPE_FLOATING_POINT, 0, 0, 0); 
+                                                break;
+        case EXPR_STRING_LITERAL: struct type *temp = type_create(TYPE_CHARACTER, 0, 0, 0);
+                                    result = type_create(TYPE_ARRAY, temp, 0, 0); break;
+        case EXPR_NAME: result = type_copy(e->symbol->type); break;
+        case EXPR_ASSIGN:
+            if(!type_equals(left, right)) {
+                printf(RED"Error |cannot assign expression|!1! \n"RESET);
+                error_count++;
+            }
+            if(left->kind == TYPE_FUNCTION || left->kind == TYPE_VOID
+                || left->kind == TYPE_ARRAY)
+            {
+                printf(RED"Error |cannot assign expression|!2! \n"RESET);
+                error_count++;
+            }
+            result = type_copy(left);
+            break;
+        case EXPR_ADD:
+            if(!type_equals(left, right)) {
+                printf(RED"Error |cannot add expression|!1! \n"RESET);
+                error_count++;
+            }
+            if(left->kind == TYPE_FUNCTION || left->kind == TYPE_VOID) {
+                printf(RED"Error |cannot add expression|!2! \n"RESET);
+                error_count++;
+            }
+            result = type_copy(left);
+            break;
+        case EXPR_SUB:
+            if(!type_equals(left, right)) {
+                printf(RED"Error |cannot subtract expression|!1! \n"RESET);
+                error_count++;
+            }
+            if(left->kind == TYPE_FUNCTION || left->kind == TYPE_VOID) {
+                printf(RED"Error |cannot subtract expression|!2! \n"RESET);
+                error_count++;
+            }
+            result = type_copy(left);
+            break;
+        case EXPR_MUL:
+            if(!type_equals(left, right)) {
+                printf(RED"Error |cannot multiply expression|!1! \n"RESET);
+                error_count++;
+            }
+            if(left->kind == TYPE_FUNCTION || left->kind == TYPE_VOID) {
+                printf(RED"Error |cannot multiply expression|!2! \n"RESET);
+                error_count++;
+            }
+            result = type_copy(left);
+            break;
+        case EXPR_DIV:
+            if(!type_equals(left, right)) {
+                printf(RED"Error |cannot divide expression|!1! \n"RESET);
+                error_count++;
+            }
+            if(left->kind == TYPE_FUNCTION || left->kind == TYPE_VOID) {
+                printf(RED"Error |cannot divide expression|!2! \n"RESET);
+                error_count++;
+            }
+            result = type_copy(left);
+            break;
+        case EXPR_MODULUS:
+            if(!type_equals(left, right)) {
+                printf(RED"Error |cannot modulus expression|!1! \n"RESET);
+                error_count++;
+            }
+            if(left->kind == TYPE_FUNCTION || left->kind == TYPE_VOID) {
+                printf(RED"Error |cannot modulus expression|!2! \n"RESET);
+                error_count++;
+            }
+            result = type_copy(left);
+            break;
+        
+        default: printf("Strange epxression \n"); break;
+    }
+
+    type_delete(left);
+    type_delete(right);
+
+    return result;
 }

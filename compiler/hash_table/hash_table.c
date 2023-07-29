@@ -6,7 +6,7 @@
 
 HashTable hash_table_init(unsigned long capacity) {
     HashTable h = {.symbols = NULL, .size = 0, .capacity = capacity};
-    h.symbols = (struct symbol **)malloc(h.capacity * sizeof(struct symbol *));
+    h.symbols = (struct symbol **)calloc(h.capacity, sizeof(struct symbol *));
     return h;
 }
 

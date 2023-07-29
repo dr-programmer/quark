@@ -74,6 +74,7 @@ HashTable popfront(LinkedList *list) {
     list->size--;
 
     HashTable result = elementtodelete->value;
+    hash_table_free(&elementtodelete->value);
     free(elementtodelete);
 
     return result;

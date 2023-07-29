@@ -1,0 +1,6 @@
+b[int];
+main[void]() {
+    a[float] = b;
+    b = 6.6;
+    c[char] = 3;
+}

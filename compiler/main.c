@@ -25,6 +25,7 @@ int main(int argc, char **argv)
         scope_enter();
         decl_resolve(parser_result);
         scope_exit();
+        decl_typecheck(parser_result);
     }
     else {
         printf("Parse "RED"failed"RESET". \n");

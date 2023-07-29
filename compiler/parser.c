@@ -1298,7 +1298,7 @@ yyreduce:
   case 6: /* decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_ASSIGN string_literal TOKEN_SEMI  */
 #line 116 "parser.y"
             {
-                struct type *temp = type_create(TYPE_STRING, (yyvsp[-6].type), 0, (yyvsp[-3].integer));
+                struct type *temp = type_create(TYPE_ARRAY, (yyvsp[-6].type), 0, (yyvsp[-3].integer));
                 struct expr *e = expr_create_string_literal((yyvsp[-1].name));
                 (yyval.decl) = decl_create((yyvsp[-8].name), temp, e, 0, 0); 
             }
