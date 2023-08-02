@@ -45,13 +45,13 @@ typedef enum {
 } expr_t;
 
 typedef enum {
-    TYPE_VOID,
-    TYPE_BOOLEAN,
     TYPE_CHARACTER,
     TYPE_INTEGER,
+    TYPE_BOOLEAN,
     TYPE_FLOATING_POINT,
     TYPE_STRING,
     TYPE_ARRAY,
+    TYPE_VOID,
     TYPE_FUNCTION
 } type_t;
 
@@ -155,6 +155,7 @@ void expr_resolve(struct expr *e);
 void param_list_resolve(struct param_list *p);
 
 unsigned short type_equals(struct type *a, struct type *b);
+unsigned short param_list_equals(struct param_list *a, struct param_list *b);
 struct type *type_copy(struct type *t);
 struct param_list *param_list_copy(struct param_list *p);
 void type_delete(struct type *t);

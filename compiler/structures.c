@@ -324,7 +324,11 @@ void expr_resolve(struct expr *e) {
 
     if(e->kind == EXPR_NAME) {
         e->symbol = scope_lookup(e->name);
-        if(e->symbol == NULL) print_error("no declaration found", e->name);
+        if(e->symbol == NULL) {
+            print_error("no declaration found", e->name);
+            struct type *temp = type_create(TYPE_INTEGER, 0, 0, 0);
+            e->symbol = symbol_create(SYMBOL_LOCAL, temp, NULL);
+        }
     }
     else {
         expr_resolve(e->left);
@@ -344,10 +348,21 @@ void param_list_resolve(struct param_list *p) {
 
 unsigned short type_equals(struct type *a, struct type *b) {
     if(a->kind == b->kind) {
-        if(a->kind == TYPE_ARRAY || a->kind == TYPE_FUNCTION) {
+        if(a->kind == TYPE_ARRAY) {
             return type_equals(a->subtype, b->subtype);
         }
+        else if(a->kind == TYPE_FUNCTION) {
+            return type_equals(a->subtype, b->subtype) && param_list_equals(a->params, b->params);
+        }
         else return 1;
+    }
+    else return 0;
+}
+unsigned short param_list_equals(struct param_list *a, struct param_list *b) {
+    if(a == NULL && b == NULL)return 1;
+    if(a == NULL || b == NULL)return 0;
+    if(type_equals(a->type, b->type)) {
+        return 1 && param_list_equals(a->next, b->next);
     }
     else return 0;
 }
@@ -395,7 +410,7 @@ void decl_typecheck(struct decl *d) {
 
     if(d->value) {
         struct type *t = expr_typecheck(d->value);
-        if(!type_equals(t, d->symbol->type)) {
+        if(d->symbol->type->kind >= TYPE_VOID || d->symbol->type->kind < t->kind) {
             printf(RED"Error ");
             printf(MAG"|cannot assign "BLU);
             type_print(t);
@@ -446,73 +461,71 @@ struct type *expr_typecheck(struct expr *e) {
         case EXPR_STRING_LITERAL: struct type *temp = type_create(TYPE_CHARACTER, 0, 0, 0);
                                     result = type_create(TYPE_ARRAY, temp, 0, 0); break;
         case EXPR_NAME: result = type_copy(e->symbol->type); break;
+        case EXPR_ADD_WITH ... EXPR_DIV_WITH:
         case EXPR_ASSIGN:
-            if(!type_equals(left, right)) {
-                printf(RED"Error |cannot assign expression|!1! \n"RESET);
-                error_count++;
-            }
-            if(left->kind == TYPE_FUNCTION || left->kind == TYPE_VOID
-                || left->kind == TYPE_ARRAY)
-            {
-                printf(RED"Error |cannot assign expression|!2! \n"RESET);
+            if(left->kind >= TYPE_VOID || left->kind < right->kind) {
+                printf(RED"Error "MAG"|cannot assign expression| \n"RESET);
                 error_count++;
             }
             result = type_copy(left);
             break;
-        case EXPR_ADD:
-            if(!type_equals(left, right)) {
-                printf(RED"Error |cannot add expression|!1! \n"RESET);
+        case EXPR_ADD ... EXPR_DIV:
+            if(left->kind >= TYPE_VOID || right->kind >= TYPE_VOID) {
+                printf(RED"Error "MAG"|cannot add expression| \n"RESET);
                 error_count++;
             }
-            if(left->kind == TYPE_FUNCTION || left->kind == TYPE_VOID) {
-                printf(RED"Error |cannot add expression|!2! \n"RESET);
-                error_count++;
-            }
-            result = type_copy(left);
-            break;
-        case EXPR_SUB:
-            if(!type_equals(left, right)) {
-                printf(RED"Error |cannot subtract expression|!1! \n"RESET);
-                error_count++;
-            }
-            if(left->kind == TYPE_FUNCTION || left->kind == TYPE_VOID) {
-                printf(RED"Error |cannot subtract expression|!2! \n"RESET);
-                error_count++;
-            }
-            result = type_copy(left);
-            break;
-        case EXPR_MUL:
-            if(!type_equals(left, right)) {
-                printf(RED"Error |cannot multiply expression|!1! \n"RESET);
-                error_count++;
-            }
-            if(left->kind == TYPE_FUNCTION || left->kind == TYPE_VOID) {
-                printf(RED"Error |cannot multiply expression|!2! \n"RESET);
-                error_count++;
-            }
-            result = type_copy(left);
-            break;
-        case EXPR_DIV:
-            if(!type_equals(left, right)) {
-                printf(RED"Error |cannot divide expression|!1! \n"RESET);
-                error_count++;
-            }
-            if(left->kind == TYPE_FUNCTION || left->kind == TYPE_VOID) {
-                printf(RED"Error |cannot divide expression|!2! \n"RESET);
-                error_count++;
-            }
-            result = type_copy(left);
+            result = left->kind > right->kind ? type_copy(left) : type_copy(right);
             break;
         case EXPR_MODULUS:
-            if(!type_equals(left, right)) {
-                printf(RED"Error |cannot modulus expression|!1! \n"RESET);
+            if(!(left->kind == right->kind && left->kind == TYPE_INTEGER)) {
+                printf(RED"Error "MAG"|cannot use binary %%| \n"RESET);
                 error_count++;
             }
-            if(left->kind == TYPE_FUNCTION || left->kind == TYPE_VOID) {
-                printf(RED"Error |cannot modulus expression|!2! \n"RESET);
+            result = type_create(TYPE_INTEGER, 0, 0, 0);
+            break;
+        case EXPR_AND ... EXPR_NOT:
+        case EXPR_EQUAL ... EXPR_LESS_EQUAL:
+            if(right == NULL) {
+                if(left->kind == TYPE_VOID) {
+                    printf(RED"Error "MAG"|cannot compare or logic-test| \n"RESET);
+                    error_count++;
+                }
+            }
+            else if(left->kind == TYPE_VOID || right->kind == TYPE_VOID) {
+                printf(RED"Error "MAG"|cannot compare or logic-test| \n"RESET);
                 error_count++;
             }
-            result = type_copy(left);
+            result = type_create(TYPE_BOOLEAN, 0, 0, 0);
+            break;
+        case EXPR_INCREMENT ... EXPR_DECREMENT:
+            temp = left == NULL ? right : left;
+            if(temp->kind > TYPE_FLOATING_POINT) {
+                printf(RED"Error "MAG"|cannot incr/decr| \n"RESET);
+                error_count++;
+            }
+            result = type_copy(temp);
+            break;
+        case EXPR_SUBSCRIPT:
+            if(left->kind == TYPE_ARRAY) {
+                if(right->kind != TYPE_INTEGER) {
+                    printf(RED"Error "MAG"|array index not an integer| \n"RESET);
+                    error_count++;
+                }
+                result = type_copy(left->subtype);
+            }
+            else {
+                printf(RED"Error "MAG"|attempt to subscript a noniterable| \n"RESET);
+                error_count++;
+                result = type_copy(left);
+            }
+            break;
+        case EXPR_CALL:
+            if(left->kind != TYPE_FUNCTION) {
+                printf(RED"Error "MAG"|attempt to call a nonfunction| \n"RESET);
+                error_count++;
+                result = type_copy(left);
+            }
+            else result = type_copy(left->subtype);
             break;
         
         default: printf("Strange epxression \n"); break;
