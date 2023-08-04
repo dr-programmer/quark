@@ -36,6 +36,7 @@ struct decl *parser_result;
 
 %token TOKEN_ALLOCATE
 %token TOKEN_SUBSCRIPT
+%token TOKEN_UP
 
 %token TOKEN_AND
 %token TOKEN_OR
@@ -151,6 +152,8 @@ stmt    : TOKEN_IF TOKEN_LPAREN expr TOKEN_RPAREN stmt
                 { $$ = stmt_create(STMT_EXPR, 0, 0, $1, 0, 0, 0, 0); }
         | TOKEN_GIVE expr TOKEN_SEMI
                 { $$ = stmt_create(STMT_GIVE, 0, 0, $2, 0, 0, 0, 0); }
+        | TOKEN_GIVE TOKEN_UP TOKEN_SEMI
+                { $$ = stmt_create(STMT_GIVE, 0, 0, 0, 0, 0, 0, 0); }
         ;
 
 stmt_list

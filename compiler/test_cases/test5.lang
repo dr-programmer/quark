@@ -10,6 +10,9 @@ main[void]() {
     for(i = 0, b = 1; i < 10; i++) {
         bfunction(true, false);
     }
+    if(function(true, false)) {
+        give up;
+    }
     a[float] = b;
     asd[bool] = true;
     c[char] = asd;

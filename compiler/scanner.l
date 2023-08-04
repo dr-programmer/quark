@@ -43,6 +43,7 @@ LETTERS [a-zA-Z]
 "<"=        {return TOKEN_LESS_EQUAL;}
 "<"         {return TOKEN_LESS;}
 give        {return TOKEN_GIVE;}
+up          {return TOKEN_UP;}
 if          {return TOKEN_IF;}
 else        {return TOKEN_ELSE;}
 while       {return TOKEN_WHILE;}

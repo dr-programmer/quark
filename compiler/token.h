@@ -56,56 +56,57 @@ extern int yydebug;
     YYUNDEF = 257,                 /* "invalid token"  */
     TOKEN_ALLOCATE = 258,          /* TOKEN_ALLOCATE  */
     TOKEN_SUBSCRIPT = 259,         /* TOKEN_SUBSCRIPT  */
-    TOKEN_AND = 260,               /* TOKEN_AND  */
-    TOKEN_OR = 261,                /* TOKEN_OR  */
-    TOKEN_NOT = 262,               /* TOKEN_NOT  */
-    TOKEN_UNKNOWN = 263,           /* TOKEN_UNKNOWN  */
-    TOKEN_GIVE = 264,              /* TOKEN_GIVE  */
-    TOKEN_IF = 265,                /* TOKEN_IF  */
-    TOKEN_ELSE = 266,              /* TOKEN_ELSE  */
-    TOKEN_WHILE = 267,             /* TOKEN_WHILE  */
-    TOKEN_FOR = 268,               /* TOKEN_FOR  */
-    TOKEN_DO = 269,                /* TOKEN_DO  */
-    TOKEN_CHAR = 270,              /* TOKEN_CHAR  */
-    TOKEN_INT = 271,               /* TOKEN_INT  */
-    TOKEN_FLOAT = 272,             /* TOKEN_FLOAT  */
-    TOKEN_BOOL = 273,              /* TOKEN_BOOL  */
-    TOKEN_VOID = 274,              /* TOKEN_VOID  */
-    TOKEN_TRUE = 275,              /* TOKEN_TRUE  */
-    TOKEN_FALSE = 276,             /* TOKEN_FALSE  */
-    TOKEN_CHAR_LITERAL = 277,      /* TOKEN_CHAR_LITERAL  */
-    TOKEN_INTEGER_LITERAL = 278,   /* TOKEN_INTEGER_LITERAL  */
-    TOKEN_FLOATING_POINT_LITERAL = 279, /* TOKEN_FLOATING_POINT_LITERAL  */
-    TOKEN_IDENT = 280,             /* TOKEN_IDENT  */
-    TOKEN_STRING_LITERAL = 281,    /* TOKEN_STRING_LITERAL  */
-    TOKEN_PLUS = 282,              /* TOKEN_PLUS  */
-    TOKEN_MINUS = 283,             /* TOKEN_MINUS  */
-    TOKEN_MUL = 284,               /* TOKEN_MUL  */
-    TOKEN_DIV = 285,               /* TOKEN_DIV  */
-    TOKEN_MODULUS = 286,           /* TOKEN_MODULUS  */
-    TOKEN_ASSIGN = 287,            /* TOKEN_ASSIGN  */
-    TOKEN_EQUAL = 288,             /* TOKEN_EQUAL  */
-    TOKEN_NOT_EQUAL = 289,         /* TOKEN_NOT_EQUAL  */
-    TOKEN_GREATER = 290,           /* TOKEN_GREATER  */
-    TOKEN_GREATER_EQUAL = 291,     /* TOKEN_GREATER_EQUAL  */
-    TOKEN_LESS = 292,              /* TOKEN_LESS  */
-    TOKEN_LESS_EQUAL = 293,        /* TOKEN_LESS_EQUAL  */
-    TOKEN_INCREMENT = 294,         /* TOKEN_INCREMENT  */
-    TOKEN_DECREMENT = 295,         /* TOKEN_DECREMENT  */
-    TOKEN_ADD_WITH = 296,          /* TOKEN_ADD_WITH  */
-    TOKEN_SUB_WITH = 297,          /* TOKEN_SUB_WITH  */
-    TOKEN_MUL_WITH = 298,          /* TOKEN_MUL_WITH  */
-    TOKEN_DIV_WITH = 299,          /* TOKEN_DIV_WITH  */
-    TOKEN_LPAREN = 300,            /* TOKEN_LPAREN  */
-    TOKEN_RPAREN = 301,            /* TOKEN_RPAREN  */
-    TOKEN_LCRBR = 302,             /* TOKEN_LCRBR  */
-    TOKEN_RCRBR = 303,             /* TOKEN_RCRBR  */
-    TOKEN_LSQBR = 304,             /* TOKEN_LSQBR  */
-    TOKEN_RSQBR = 305,             /* TOKEN_RSQBR  */
-    TOKEN_COMMA = 306,             /* TOKEN_COMMA  */
-    TOKEN_COLON = 307,             /* TOKEN_COLON  */
-    TOKEN_SEMI = 308,              /* TOKEN_SEMI  */
-    TOKEN_ERROR = 309              /* TOKEN_ERROR  */
+    TOKEN_UP = 260,                /* TOKEN_UP  */
+    TOKEN_AND = 261,               /* TOKEN_AND  */
+    TOKEN_OR = 262,                /* TOKEN_OR  */
+    TOKEN_NOT = 263,               /* TOKEN_NOT  */
+    TOKEN_UNKNOWN = 264,           /* TOKEN_UNKNOWN  */
+    TOKEN_GIVE = 265,              /* TOKEN_GIVE  */
+    TOKEN_IF = 266,                /* TOKEN_IF  */
+    TOKEN_ELSE = 267,              /* TOKEN_ELSE  */
+    TOKEN_WHILE = 268,             /* TOKEN_WHILE  */
+    TOKEN_FOR = 269,               /* TOKEN_FOR  */
+    TOKEN_DO = 270,                /* TOKEN_DO  */
+    TOKEN_CHAR = 271,              /* TOKEN_CHAR  */
+    TOKEN_INT = 272,               /* TOKEN_INT  */
+    TOKEN_FLOAT = 273,             /* TOKEN_FLOAT  */
+    TOKEN_BOOL = 274,              /* TOKEN_BOOL  */
+    TOKEN_VOID = 275,              /* TOKEN_VOID  */
+    TOKEN_TRUE = 276,              /* TOKEN_TRUE  */
+    TOKEN_FALSE = 277,             /* TOKEN_FALSE  */
+    TOKEN_CHAR_LITERAL = 278,      /* TOKEN_CHAR_LITERAL  */
+    TOKEN_INTEGER_LITERAL = 279,   /* TOKEN_INTEGER_LITERAL  */
+    TOKEN_FLOATING_POINT_LITERAL = 280, /* TOKEN_FLOATING_POINT_LITERAL  */
+    TOKEN_IDENT = 281,             /* TOKEN_IDENT  */
+    TOKEN_STRING_LITERAL = 282,    /* TOKEN_STRING_LITERAL  */
+    TOKEN_PLUS = 283,              /* TOKEN_PLUS  */
+    TOKEN_MINUS = 284,             /* TOKEN_MINUS  */
+    TOKEN_MUL = 285,               /* TOKEN_MUL  */
+    TOKEN_DIV = 286,               /* TOKEN_DIV  */
+    TOKEN_MODULUS = 287,           /* TOKEN_MODULUS  */
+    TOKEN_ASSIGN = 288,            /* TOKEN_ASSIGN  */
+    TOKEN_EQUAL = 289,             /* TOKEN_EQUAL  */
+    TOKEN_NOT_EQUAL = 290,         /* TOKEN_NOT_EQUAL  */
+    TOKEN_GREATER = 291,           /* TOKEN_GREATER  */
+    TOKEN_GREATER_EQUAL = 292,     /* TOKEN_GREATER_EQUAL  */
+    TOKEN_LESS = 293,              /* TOKEN_LESS  */
+    TOKEN_LESS_EQUAL = 294,        /* TOKEN_LESS_EQUAL  */
+    TOKEN_INCREMENT = 295,         /* TOKEN_INCREMENT  */
+    TOKEN_DECREMENT = 296,         /* TOKEN_DECREMENT  */
+    TOKEN_ADD_WITH = 297,          /* TOKEN_ADD_WITH  */
+    TOKEN_SUB_WITH = 298,          /* TOKEN_SUB_WITH  */
+    TOKEN_MUL_WITH = 299,          /* TOKEN_MUL_WITH  */
+    TOKEN_DIV_WITH = 300,          /* TOKEN_DIV_WITH  */
+    TOKEN_LPAREN = 301,            /* TOKEN_LPAREN  */
+    TOKEN_RPAREN = 302,            /* TOKEN_RPAREN  */
+    TOKEN_LCRBR = 303,             /* TOKEN_LCRBR  */
+    TOKEN_RCRBR = 304,             /* TOKEN_RCRBR  */
+    TOKEN_LSQBR = 305,             /* TOKEN_LSQBR  */
+    TOKEN_RSQBR = 306,             /* TOKEN_RSQBR  */
+    TOKEN_COMMA = 307,             /* TOKEN_COMMA  */
+    TOKEN_COLON = 308,             /* TOKEN_COLON  */
+    TOKEN_SEMI = 309,              /* TOKEN_SEMI  */
+    TOKEN_ERROR = 310              /* TOKEN_ERROR  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -124,7 +125,7 @@ union YYSTYPE
     char *name;
     int integer;
 
-#line 128 "token.h"
+#line 129 "token.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

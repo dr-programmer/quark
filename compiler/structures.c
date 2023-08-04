@@ -506,6 +506,7 @@ void stmt_typecheck(struct stmt *s, struct type *current_function_type) {
             stmt_typecheck(s->body, current_function_type);
             break;
         case STMT_GIVE:
+            if(s->expr == NULL)break;
             t = expr_typecheck(s->expr);
             if(!assignment_typecheck(current_function_type, t)) {
                 print_error_formated(RED"Error "
