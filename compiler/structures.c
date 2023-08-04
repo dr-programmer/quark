@@ -124,9 +124,9 @@ void decl_print(struct decl *d, int number_of_tabs) {
         printf("}");
     }
     else printf(";");
-    printf("\n");
+    if(number_of_tabs > -1)printf("\n");
 
-    decl_print(d->next, number_of_tabs);
+    if(number_of_tabs > -1)decl_print(d->next, number_of_tabs);
 }
 void stmt_print(struct stmt *s, int number_of_tabs) {
     if(s == NULL)return;
@@ -161,7 +161,8 @@ void stmt_print(struct stmt *s, int number_of_tabs) {
             print_tabs(number_of_tabs);
             printf("give ");
             expr_print(s->expr);
-            printf(";\n");
+            if(number_of_tabs == -1)printf(";");
+            else printf(";\n");
             break;
         case STMT_BLOCK:
             printf("{\n");
@@ -171,7 +172,7 @@ void stmt_print(struct stmt *s, int number_of_tabs) {
             break;
     }
 
-    stmt_print(s->next, number_of_tabs);
+    if(number_of_tabs > -1)stmt_print(s->next, number_of_tabs);
 }
 void expr_print(struct expr *e) {
     if(e == NULL)return;
@@ -236,12 +237,6 @@ void type_print(struct type *t) {
         case TYPE_INTEGER: printf("[int]"); break;
         case TYPE_FLOATING_POINT: printf("[float]"); break;
         case TYPE_STRING:
-            type_print(t->subtype);
-            switch(t->number_of_subtypes) {
-                case 0: printf("^?"); break;
-                default: printf("^%d", t->number_of_subtypes); break;
-            }
-            break;
         case TYPE_ARRAY:
             type_print(t->subtype);
             switch(t->number_of_subtypes) {
@@ -274,13 +269,59 @@ void print_tabs(int number_of_tabs) {
 
 // Semantic analysis
 
+#include <stdarg.h>
+
+unsigned int error_count;
+
 static void print_error(const char *error, const char *name) {
+    error_count++;
     fprintf(stderr, RED "Error" RESET \
         MAG" |%s|"RESET"->"YEL"|%s|"RESET" \n", error, name);
 }
 
-static void print_error_formated() {
-    
+static void print_error_formated(char *str, ...) {
+    va_list argument;
+    struct decl *d;
+    struct stmt *s;
+    struct expr *e;
+    struct type *t;
+    struct param_list *p;
+    error_count++;
+    va_start(argument, str);
+    for(unsigned int i = 0; str[i] != '\0'; i++) {
+        switch(str[i]) {
+            case '%':
+                switch(str[++i]) {
+                    case 'D':
+                        d = va_arg(argument, struct decl *);
+                        decl_print(d, -1);
+                        break;
+                    case 'S':
+                        s = va_arg(argument, struct stmt *);
+                        stmt_print(s, -1);
+                        break;
+                    case 'E':
+                        e = va_arg(argument, struct expr *);
+                        expr_print(e);
+                        break;
+                    case 'T':
+                        t = va_arg(argument, struct type *);
+                        type_print(t);
+                        break;
+                    case 'P':
+                        p = va_arg(argument, struct param_list *);
+                        param_list_print(p);
+                        break;
+                    case '%':
+                        putchar(str[i]);
+                        break;
+                    default: i--; break;
+                }
+                break;
+            default: putchar(str[i]); break;
+        }
+    }
+    va_end(argument);
 }
 
 void decl_resolve(struct decl *d) {
@@ -404,8 +445,6 @@ void param_list_delete(struct param_list *p) {
     free(p);
 }
 
-unsigned int error_count;
-
 void decl_typecheck(struct decl *d) {
     if(d == NULL)return;
 
@@ -418,13 +457,9 @@ void decl_typecheck(struct decl *d) {
             printf(MAG" to "BLU);
             type_print(d->symbol->type);
             printf(MAG"|"RESET);
-            printf("->"YEL"|%s", d->name);
-            type_print(d->type);
-            printf(" = ");
-            if(d->symbol->type->kind == TYPE_ARRAY)printf("{");
-            expr_print(d->value);
-            if(d->symbol->type->kind == TYPE_ARRAY)printf("}");
-            printf(";| \n"RESET);
+            printf("->"YEL"|");
+            decl_print(d, -1);
+            printf("| \n"RESET);
             error_count++;
         }
         type_delete(t);
@@ -452,8 +487,10 @@ void stmt_typecheck(struct stmt *s, struct type *current_function_type) {
         case STMT_IF_ELSE:
             t = expr_typecheck(s->expr);
             if(t->kind == TYPE_VOID) {
-                printf(RED"Error "MAG"|if-statement is void| \n"RESET);
-                error_count++;
+                print_error_formated(RED"Error "
+                    MAG"|type "BLU"%T"MAG" in if-statement|"RESET"->"
+                    YEL"|%S|\n"RESET, 
+                    t, s);
             }
             type_delete(t);
             stmt_typecheck(s->body, current_function_type);
@@ -471,8 +508,12 @@ void stmt_typecheck(struct stmt *s, struct type *current_function_type) {
         case STMT_GIVE:
             t = expr_typecheck(s->expr);
             if(!assignment_typecheck(current_function_type, t)) {
-                printf(RED"Error "MAG"|cannot give type to function| \n"RESET);
-                error_count++;
+                print_error_formated(RED"Error "
+                    MAG"|cannot give type "BLU"%T "
+                    MAG"to function of type "BLU"%T"
+                    MAG"|"RESET"->"
+                    YEL"|%S|\n"RESET, 
+                    t, current_function_type, s);
             }
             type_delete(t);
             break;
@@ -501,22 +542,36 @@ struct type *expr_typecheck(struct expr *e) {
         case EXPR_ADD_WITH ... EXPR_DIV_WITH:
         case EXPR_ASSIGN:
             if(!assignment_typecheck(left, right)) {
-                printf(RED"Error "MAG"|cannot assign expression| \n"RESET);
-                error_count++;
+                print_error_formated(RED"Error "
+                    MAG"|cannot assign "BLU"%T "
+                    MAG"to "BLU"%T"
+                    MAG"|"RESET"->"
+                    YEL"|%E;|\n"RESET, 
+                    right, left, e);
             }
             result = type_copy(left);
             break;
         case EXPR_ADD ... EXPR_DIV:
             if(left->kind >= TYPE_VOID || right->kind >= TYPE_VOID) {
-                printf(RED"Error "MAG"|cannot add expression| \n"RESET);
-                error_count++;
+                print_error_formated(RED"Error "
+                    MAG"|cannot apply binary operator "
+                    "between "BLU"%T "
+                    MAG"and "BLU"%T"
+                    MAG"|"RESET"->"
+                    YEL"|%E;|\n"RESET, 
+                    right, left, e);
             }
             result = left->kind > right->kind ? type_copy(left) : type_copy(right);
             break;
         case EXPR_MODULUS:
             if(!(left->kind == right->kind && left->kind == TYPE_INTEGER)) {
-                printf(RED"Error "MAG"|cannot use binary %%| \n"RESET);
-                error_count++;
+                print_error_formated(RED"Error "
+                    MAG"|cannot apply binary operator "BLU"("CYN"%%"BLU") "
+                    MAG"between "BLU"%T "
+                    MAG"and "BLU"%T"
+                    MAG"|"RESET"->"
+                    YEL"|%E;|\n"RESET, 
+                    right, left, e);
             }
             result = type_create(TYPE_INTEGER, 0, 0, 0);
             break;
@@ -524,52 +579,75 @@ struct type *expr_typecheck(struct expr *e) {
         case EXPR_EQUAL ... EXPR_LESS_EQUAL:
             if(right == NULL) {
                 if(left->kind == TYPE_VOID) {
-                    printf(RED"Error "MAG"|cannot compare or logic-test| \n"RESET);
-                    error_count++;
+                    print_error_formated(RED"Error "
+                        MAG"|cannot negate "
+                        BLU"%T"MAG"|"RESET"->"
+                        YEL"|%E;|\n"RESET, 
+                        left, e);
                 }
             }
             else if(left->kind == TYPE_VOID || right->kind == TYPE_VOID) {
-                printf(RED"Error "MAG"|cannot compare or logic-test| \n"RESET);
-                error_count++;
+                print_error_formated(RED"Error "
+                    MAG"|cannot compare or logic-test "
+                    BLU"%T"MAG" and "BLU"%T"MAG"|"RESET"->"
+                    YEL"|%E;|\n"RESET, 
+                    left, right, e);
             }
             result = type_create(TYPE_BOOLEAN, 0, 0, 0);
             break;
         case EXPR_INCREMENT ... EXPR_DECREMENT:
             temp = left == NULL ? right : left;
             if(temp->kind > TYPE_FLOATING_POINT) {
-                printf(RED"Error "MAG"|cannot incr/decr| \n"RESET);
-                error_count++;
+                print_error_formated(RED"Error "
+                    MAG"|cannot incr/decr "
+                    BLU"%T"MAG"|"RESET"->"
+                    YEL"|%E;|\n"RESET, 
+                    temp, e);
             }
             result = type_copy(temp);
             break;
         case EXPR_SUBSCRIPT:
             if(left->kind == TYPE_ARRAY) {
                 if(right->kind != TYPE_INTEGER) {
-                    printf(RED"Error "MAG"|array index not an integer| \n"RESET);
-                    error_count++;
+                    print_error_formated(RED"Error "
+                        MAG"|array index not an integer|"RESET"->"
+                        YEL"|%E;|\n"RESET, e);
                 }
                 result = type_copy(left->subtype);
             }
             else {
-                printf(RED"Error "MAG"|attempt to subscript a noniterable| \n"RESET);
-                error_count++;
+                print_error_formated(RED"Error "
+                    MAG"|attempt to subscript a noniterable "
+                    BLU"%T"MAG"|"RESET"->"
+                    YEL"|%E;|\n"RESET, left, e);
                 result = type_copy(left);
             }
             break;
         case EXPR_CALL:
             if(left->kind != TYPE_FUNCTION) {
-                printf(RED"Error "MAG"|attempt to call a nonfunction| \n"RESET);
-                error_count++;
+                print_error_formated(RED"Error "
+                    MAG"|attempt to call a nonfunction "
+                    BLU"%T"MAG"|"RESET"->"
+                    YEL"|%E;|\n"RESET, left, e);
                 result = type_copy(left);
             }
             else result = type_copy(left->subtype);
             if(!param_list_typecheck(left->params, e->right)) {
-                printf(RED"Error "MAG"|inappropriate arguments to function| \n"RESET);
-                error_count++;
+                print_error_formated(RED"Error "
+                    MAG"|inappropriate arguments to function-<<"
+                    BLU"%T"MAG">> call|"RESET"->"
+                    YEL"|%E;|\n"RESET, left, e);
             }
             break;
         case EXPR_ARG:
-            if(!right) result = type_create(TYPE_ARRAY, type_copy(left), NULL, 0);
+            if(!right) {
+                if(left->kind == TYPE_ARRAY) {
+                    result = left->subtype->kind == TYPE_CHARACTER
+                    ? type_create(TYPE_ARRAY, type_copy(left->subtype), NULL, 0)
+                    : type_create(TYPE_ARRAY, type_copy(left), NULL, 0);
+                }
+                else result = type_create(TYPE_ARRAY, type_copy(left), NULL, 0);
+            }
             else result = left->kind > right->kind 
                 ? type_create(TYPE_ARRAY, type_copy(left->subtype), NULL, 0) 
                 : type_create(TYPE_ARRAY, type_copy(right->subtype), NULL, 0);
