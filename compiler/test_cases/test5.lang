@@ -1,7 +1,16 @@
 b[int];
+function[int](a[int], b[int]) {
+    give a + b;
+}
+bfunction[void](a[bool], b[bool]) {
+    give a && b;
+}
 main[void]() {
+    i[int];
+    for(i = 0, b = 1; i < 10; i++) {
+        bfunction(true, false);
+    }
     a[float] = b;
-    b = 6.6;
     asd[bool] = true;
     c[char] = asd;
     check[float] = asd;
@@ -9,4 +18,7 @@ main[void]() {
     str[char]^? = "Hello, World!";
     str->(b + 1 / 3.3);
     test[int] = 5 % 3;
+    function(a, b);
+    bfunction(true, false);
+    array[int]^? = {1, 2, 3.3};
 }

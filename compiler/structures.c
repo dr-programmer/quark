@@ -279,7 +279,7 @@ static void print_error(const char *error, const char *name) {
         MAG" |%s|"RESET"->"YEL"|%s|"RESET" \n", error, name);
 }
 
-static void print_type_error() {
+static void print_error_formated() {
     
 }
 
@@ -352,7 +352,8 @@ unsigned short type_equals(struct type *a, struct type *b) {
             return type_equals(a->subtype, b->subtype);
         }
         else if(a->kind == TYPE_FUNCTION) {
-            return type_equals(a->subtype, b->subtype) && param_list_equals(a->params, b->params);
+            return type_equals(a->subtype, b->subtype) 
+                && param_list_equals(a->params, b->params);
         }
         else return 1;
     }
@@ -362,7 +363,7 @@ unsigned short param_list_equals(struct param_list *a, struct param_list *b) {
     if(a == NULL && b == NULL)return 1;
     if(a == NULL || b == NULL)return 0;
     if(type_equals(a->type, b->type)) {
-        return 1 && param_list_equals(a->next, b->next);
+        return param_list_equals(a->next, b->next);
     }
     else return 0;
 }
@@ -410,7 +411,7 @@ void decl_typecheck(struct decl *d) {
 
     if(d->value) {
         struct type *t = expr_typecheck(d->value);
-        if(d->symbol->type->kind >= TYPE_VOID || d->symbol->type->kind < t->kind) {
+        if(!assignment_typecheck(d->symbol->type, t)) {
             printf(RED"Error ");
             printf(MAG"|cannot assign "BLU);
             type_print(t);
@@ -420,17 +421,23 @@ void decl_typecheck(struct decl *d) {
             printf("->"YEL"|%s", d->name);
             type_print(d->type);
             printf(" = ");
+            if(d->symbol->type->kind == TYPE_ARRAY)printf("{");
             expr_print(d->value);
+            if(d->symbol->type->kind == TYPE_ARRAY)printf("}");
             printf(";| \n"RESET);
             error_count++;
         }
         type_delete(t);
     }
-    if(d->code) stmt_typecheck(d->code);
+    if(d->code) {
+        struct type *current_function_type = type_copy(d->symbol->type->subtype);
+        stmt_typecheck(d->code, current_function_type);
+        type_delete(current_function_type);
+    }
 
     decl_typecheck(d->next);
 }
-void stmt_typecheck(struct stmt *s) {
+void stmt_typecheck(struct stmt *s, struct type *current_function_type) {
     if(s == NULL)return;
 
     struct type *t;
@@ -442,9 +449,39 @@ void stmt_typecheck(struct stmt *s) {
             t = expr_typecheck(s->expr);
             type_delete(t);
             break;
+        case STMT_IF_ELSE:
+            t = expr_typecheck(s->expr);
+            if(t->kind == TYPE_VOID) {
+                printf(RED"Error "MAG"|if-statement is void| \n"RESET);
+                error_count++;
+            }
+            type_delete(t);
+            stmt_typecheck(s->body, current_function_type);
+            stmt_typecheck(s->else_body, current_function_type);
+            break;
+        case STMT_FOR:
+            t = expr_typecheck(s->init_expr);
+            type_delete(t);
+            t = expr_typecheck(s->expr);
+            type_delete(t);
+            t = expr_typecheck(s->next_expr);
+            type_delete(t);
+            stmt_typecheck(s->body, current_function_type);
+            break;
+        case STMT_GIVE:
+            t = expr_typecheck(s->expr);
+            if(!assignment_typecheck(current_function_type, t)) {
+                printf(RED"Error "MAG"|cannot give type to function| \n"RESET);
+                error_count++;
+            }
+            type_delete(t);
+            break;
+        case STMT_BLOCK:
+            stmt_typecheck(s->body, current_function_type);
+            break;
     }
 
-    stmt_typecheck(s->next);
+    stmt_typecheck(s->next, current_function_type);
 }
 struct type *expr_typecheck(struct expr *e) {
     if(e == NULL) return NULL;
@@ -463,7 +500,7 @@ struct type *expr_typecheck(struct expr *e) {
         case EXPR_NAME: result = type_copy(e->symbol->type); break;
         case EXPR_ADD_WITH ... EXPR_DIV_WITH:
         case EXPR_ASSIGN:
-            if(left->kind >= TYPE_VOID || left->kind < right->kind) {
+            if(!assignment_typecheck(left, right)) {
                 printf(RED"Error "MAG"|cannot assign expression| \n"RESET);
                 error_count++;
             }
@@ -526,13 +563,50 @@ struct type *expr_typecheck(struct expr *e) {
                 result = type_copy(left);
             }
             else result = type_copy(left->subtype);
+            if(!param_list_typecheck(left->params, e->right)) {
+                printf(RED"Error "MAG"|inappropriate arguments to function| \n"RESET);
+                error_count++;
+            }
             break;
-        
-        default: printf("Strange epxression \n"); break;
+        case EXPR_ARG:
+            if(!right) result = type_create(TYPE_ARRAY, type_copy(left), NULL, 0);
+            else result = left->kind > right->kind 
+                ? type_create(TYPE_ARRAY, type_copy(left->subtype), NULL, 0) 
+                : type_create(TYPE_ARRAY, type_copy(right->subtype), NULL, 0);
+            break;
     }
 
     type_delete(left);
     type_delete(right);
 
     return result;
+}
+unsigned short param_list_typecheck(struct param_list *p, 
+                                        struct expr *e)
+{
+    if(p == NULL && e == NULL)return 1;
+    if(p == NULL || e == NULL)return 0;
+    struct type *check = expr_typecheck(e->left);
+    if(assignment_typecheck(p->type, check)) {
+        type_delete(check);
+        return param_list_typecheck(p->next, e->right);
+    }
+    else {
+        type_delete(check);
+        return 0;
+    }
+}
+unsigned short assignment_typecheck(struct type *left, struct type *right) {
+    if(left->kind == TYPE_BOOLEAN || left->kind == TYPE_CHARACTER) {
+        if(right->kind < TYPE_FLOATING_POINT) {
+            return 1;
+        }
+    }
+    else if(left->kind < TYPE_VOID && left->kind >= right->kind) {
+        return 1;
+    }
+    else if(left->kind == TYPE_ARRAY && right->kind == TYPE_ARRAY) {
+        return assignment_typecheck(left->subtype, right->subtype);
+    }
+    return 0;
 }
