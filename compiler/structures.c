@@ -553,14 +553,25 @@ struct type *expr_typecheck(struct expr *e) {
             result = type_copy(left);
             break;
         case EXPR_ADD ... EXPR_DIV:
-            if(left->kind >= TYPE_VOID || right->kind >= TYPE_VOID) {
+            if(e->kind == EXPR_ADD) {
+                if(left->kind > TYPE_ARRAY || right->kind > TYPE_ARRAY) {
+                    print_error_formated(RED"Error "
+                        MAG"|cannot apply binary operator "
+                        "between "BLU"%T "
+                        MAG"and "BLU"%T"
+                        MAG"|"RESET"->"
+                        YEL"|%E;|\n"RESET, 
+                        left, right, e);
+                }
+            }
+            else if(left->kind >= TYPE_VOID || right->kind >= TYPE_VOID) {
                 print_error_formated(RED"Error "
                     MAG"|cannot apply binary operator "
                     "between "BLU"%T "
                     MAG"and "BLU"%T"
                     MAG"|"RESET"->"
                     YEL"|%E;|\n"RESET, 
-                    right, left, e);
+                    left, right, e);
             }
             result = left->kind > right->kind ? type_copy(left) : type_copy(right);
             break;
@@ -657,6 +668,8 @@ struct type *expr_typecheck(struct expr *e) {
 
     type_delete(left);
     type_delete(right);
+
+    e->type = type_copy(result);
 
     return result;
 }

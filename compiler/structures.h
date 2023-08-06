@@ -87,6 +87,7 @@ struct expr {
     const char *string_literal;
 
     struct symbol *symbol;
+    struct type *type;
 };
 
 struct type {

@@ -26,6 +26,9 @@ int main(int argc, char **argv)
         decl_resolve(parser_result);
         scope_exit();
         decl_typecheck(parser_result);
+        if(!error_count) {
+            
+        }
         printf("Program compiled with %d error/s \n", error_count);
     }
     else {
