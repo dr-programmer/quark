@@ -175,4 +175,15 @@ unsigned short param_list_typecheck(struct param_list *p,
 unsigned short assignment_typecheck(struct type *left, 
                                         struct type *right);
 
+// Generating IR / Assembly instructions
+
+unsigned short scratch_alloc();
+void scratch_free(int r);
+const char *scratch_name(int r);
+
+unsigned int label_create();
+const char *label_name(unsigned int label);
+
+const char *symbol_codegen(struct symbol *s);
+
 #endif

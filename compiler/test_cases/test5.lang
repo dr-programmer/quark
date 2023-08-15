@@ -1,6 +1,11 @@
 b[int];
 function[int](a[int], b[int]) {
-    give a + b;
+    add[int](a[int], b[int]) {
+        give a + b;
+    }
+    main[int]() {
+        give add(a, b);
+    }
 }
 bfunction[void](a[bool], b[bool]) {
     give a && b;
@@ -13,6 +18,8 @@ main[void]() {
     if(function(true, false)) {
         give up;
     }
+    testing[int]^10;
+    testing;
     a[float] = b;
     asd[bool] = true;
     c[char] = asd;

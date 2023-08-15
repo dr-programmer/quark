@@ -324,6 +324,22 @@ static void print_error_formated(char *str, ...) {
     va_end(argument);
 }
 
+unsigned int offset;
+
+static void apply_offset(struct symbol *symbol, struct type *type, int number) {
+    switch(type->kind) {
+        case TYPE_INTEGER: symbol->which = offset += 8 * number; break;
+        case TYPE_BOOLEAN: symbol->which = offset += 1 * number; break;
+        case TYPE_CHARACTER: symbol->which = offset += 1 * number; break;
+        case TYPE_FLOATING_POINT: symbol->which = offset += 8 * number; break;
+        case TYPE_ARRAY:
+            if(symbol->type->number_of_subtypes != 0) {
+                apply_offset(symbol, symbol->type->subtype, symbol->type->number_of_subtypes);
+            }
+            break;
+    }
+}
+
 void decl_resolve(struct decl *d) {
     if(d == NULL)return;
 
@@ -333,7 +349,13 @@ void decl_resolve(struct decl *d) {
 
     expr_resolve(d->value);
     if(scope_lookup_current(d->name)) print_error("variable already exists", d->name);
-    else scope_bind(d->symbol);
+    else {
+        if(d->symbol->kind == SYMBOL_LOCAL) {
+            apply_offset(d->symbol, d->symbol->type, 1);
+        }
+        else offset = 0;
+        scope_bind(d->symbol);
+    }
 
     if(d->code) {
         scope_enter();
@@ -370,6 +392,8 @@ void expr_resolve(struct expr *e) {
             struct type *temp = type_create(TYPE_INTEGER, 0, 0, 0);
             e->symbol = symbol_create(SYMBOL_LOCAL, temp, NULL);
         }
+        printf("Variable named %s has offset of %d bytes \n", e->name, e->symbol->which);
+        printf("Variable named %s: %s \n", e->name, symbol_codegen(e->symbol));
     }
     else {
         expr_resolve(e->left);
@@ -382,7 +406,10 @@ void param_list_resolve(struct param_list *p) {
     p->symbol = symbol_create(SYMBOL_PARAM, p->type, p->name);
     if(scope_lookup_current(p->name)) print_error("parameter already exists"
                                             " in function", p->name);
-    else scope_bind(p->symbol);
+    else {
+        apply_offset(p->symbol, p->symbol->type, 1);
+        scope_bind(p->symbol);
+    }
 
     param_list_resolve(p->next);
 }
@@ -701,4 +728,92 @@ unsigned short assignment_typecheck(struct type *left, struct type *right) {
         return assignment_typecheck(left->subtype, right->subtype);
     }
     return 0;
+}
+
+// Generating IR / Assembly instructions
+
+#define NUMBER_OF_SCRATCH_REGISTERS 7
+
+unsigned short scratch_registers[NUMBER_OF_SCRATCH_REGISTERS];
+
+unsigned short scratch_alloc() {
+    for(unsigned int i = 0; i < NUMBER_OF_SCRATCH_REGISTERS; i++) {
+        if(scratch_registers[i] == 0) {
+            scratch_registers[i] = 1;
+            return i;
+        }
+    }
+    print_error_formated(RED"Error: "YEL"Codegen "MAG"|out of scratch registers|\n"RESET);
+    return -1;
+}
+void scratch_free(int r) {
+    scratch_registers[r] = 0;
+}
+const char *scratch_name(int r) {
+    char *name = (char *)malloc(5 * sizeof(char));
+    switch(r) {
+        case 0: strcpy(name, "%rbx"); break;
+        case 1: strcpy(name, "%r10"); break;
+        case 2: strcpy(name, "%r11"); break;
+        case 3: strcpy(name, "%r12"); break;
+        case 4: strcpy(name, "%r13"); break;
+        case 5: strcpy(name, "%r14"); break;
+        case 6: strcpy(name, "%r15"); break;
+    }
+
+    return name;
+}
+
+unsigned int label_create() {
+    static unsigned int label;
+    return label++;
+}
+const char *label_name(unsigned int label) {
+    unsigned int size = 2;
+    char *name = (char *)calloc(size, sizeof(char));
+    name[0] = '.'; name[1] = 'L';
+
+    unsigned int i = 1, temp = label;
+    while(temp > 9) {
+        temp /= 10;
+        i *= 10;
+    }
+    while(i) {
+        size++;
+        name = (char *)realloc(name, size * sizeof(char));
+        name[size-1] = '0' + (label / i);
+        label %= i;
+        i /= 10;
+    }
+    return name;
+}
+
+const char *symbol_codegen(struct symbol *s) {
+    char *name = NULL;
+    if(s->kind == SYMBOL_GLOBAL) {
+        name = (char *)calloc(strlen(s->name), sizeof(char));
+        strcpy(name, s->name);
+        return name;
+    }
+    else {
+        name = (char *)calloc(1, sizeof(char));
+        name[0] = '-';
+        unsigned int which = s->which;
+        unsigned int i = 1, temp = which, size = 1;
+        while(temp > 9) {
+            temp /= 10;
+            i *= 10;
+        }
+        while(i) {
+            size++;
+            name = (char *)realloc(name, size * sizeof(char));
+            name[size-1] = '0' + (which / i);
+            which %= i;
+            i /= 10;
+        }
+        size += 7;
+        name = (char *)realloc(name, size * sizeof(char));
+        strcat(name, "(%rbp)");
+        return name;
+    }
 }
