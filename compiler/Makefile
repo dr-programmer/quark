@@ -35,4 +35,4 @@ symbol_wipe:
 	cd symbol; make clean; cd ..
 
 clean: symbol_wipe stack_wipe
-	rm -f *.out *.o scanner.c parser.c token.h *.dot *.output compiler
+	rm -f *.out *.o scanner.c parser.c token.h *.dot *.output compiler *.s

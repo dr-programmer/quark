@@ -88,6 +88,8 @@ struct expr {
 
     struct symbol *symbol;
     struct type *type;
+
+    unsigned short reg;
 };
 
 struct type {
@@ -185,5 +187,10 @@ unsigned int label_create();
 const char *label_name(unsigned int label);
 
 const char *symbol_codegen(struct symbol *s);
+
+void decl_codegen(struct decl *d);
+void stmt_codegen(struct stmt *s);
+void expr_codegen(struct expr *e);
+void expr_arggen(struct expr *e, unsigned int arg);
 
 #endif

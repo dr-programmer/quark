@@ -817,3 +817,148 @@ const char *symbol_codegen(struct symbol *s) {
         return name;
     }
 }
+
+extern FILE *result_file;
+
+void decl_codegen(struct decl *d) {
+    if(d == NULL)return;
+
+    if(d->value) {
+        expr_codegen(d->value);
+    }
+    if(d->code) {
+        stmt_codegen(d->code);
+    }
+
+    decl_codegen(d->next);
+}
+void stmt_codegen(struct stmt *s) {
+    if(s == NULL)return;
+
+    switch(s->kind) {
+        case STMT_EXPR:
+            expr_codegen(s->expr);
+            scratch_free(s->expr->reg);
+            break;
+    }
+
+    stmt_codegen(s->next);
+}
+void expr_codegen(struct expr *e) {
+    if(e == NULL)return;
+
+    switch(e->kind) {
+        case EXPR_NAME:
+            e->reg = scratch_alloc();
+            fprintf(result_file, "MOV %s, %s\n", 
+                        symbol_codegen(e->symbol), 
+                        scratch_name(e->reg));
+            break;
+        case EXPR_ADD:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            if(e->type->kind < TYPE_FLOATING_POINT) {
+                fprintf(result_file, "ADD %s, %s\n", 
+                            scratch_name(e->left->reg), 
+                            scratch_name(e->right->reg));
+            }
+            else {
+
+            }
+            e->reg = e->right->reg;
+            scratch_free(e->left->reg);
+            break;
+        case EXPR_SUB:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            if(e->type->kind < TYPE_FLOATING_POINT) {
+                fprintf(result_file, "SUB %s, %s\n", 
+                            scratch_name(e->left->reg), 
+                            scratch_name(e->right->reg));
+            }
+            else {
+
+            }
+            e->reg = e->right->reg;
+            scratch_free(e->left->reg);
+            break;
+        case EXPR_MUL:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            if(e->type->kind < TYPE_FLOATING_POINT) {
+                fprintf(result_file, "MOV %s, %%rax\n", scratch_name(e->left->reg));
+                fprintf(result_file, "IMUL %s\n", scratch_name(e->right->reg));
+                fprintf(result_file, "MOV %%rax, %s\n", scratch_name(e->right->reg));
+            }
+            else {
+
+            }
+            e->reg = e->right->reg;
+            scratch_free(e->left->reg);
+            break;
+        case EXPR_DIV:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            if(e->type->kind < TYPE_FLOATING_POINT) {
+                fprintf(result_file, "MOV %s, %%rax\nCQO\n", scratch_name(e->left->reg));
+                fprintf(result_file, "IDIV %s\n", scratch_name(e->right->reg));
+                fprintf(result_file, "MOV %%rax, %s\n", scratch_name(e->right->reg));
+            }
+            else {
+
+            }
+            e->reg = e->right->reg;
+            scratch_free(e->left->reg);
+            break;
+        case EXPR_ASSIGN:
+            expr_codegen(e->right);
+            fprintf(result_file, "MOV %s, %s\n",
+                        scratch_name(e->right->reg), 
+                        symbol_codegen(e->left->symbol));
+            e->reg = e->right->reg;
+            break;
+        case EXPR_CALL:
+            expr_arggen(e->right, 0);
+            fprintf(result_file, "PUSHQ %%r10\n");
+            fprintf(result_file, "PUSHQ %%r11\n");
+            fprintf(result_file, "CALL %s\n", e->left->name);
+            e->reg = scratch_alloc();
+            fprintf(result_file, "MOV %%rax, %s\n", scratch_name(e->reg));
+            fprintf(result_file, "POPQ %%r11\n");
+            fprintf(result_file, "POPQ %%r10\n");
+            break;
+    }
+}
+
+static char *argr_name(unsigned int arg) {
+    char *name = (char *)calloc(5, sizeof(char));
+    switch(arg) {
+        case 0: strcpy(name, "%rdi"); break;
+        case 1: strcpy(name, "%rsi"); break;
+        case 2: strcpy(name, "%rdx"); break;
+        case 3: strcpy(name, "%rcx"); break;
+        case 4: strcpy(name, "%r8"); break;
+        case 5: strcpy(name, "%r9"); break;
+        default: free(name); name = NULL; break;
+    }
+    return name;
+}
+
+void expr_arggen(struct expr *e, unsigned int arg) {
+    if(e == NULL)return;
+
+    expr_arggen(e->right, arg+1);
+
+    expr_codegen(e->left);
+    char *name = argr_name(arg);
+    if(name) {
+        fprintf(result_file, "MOV %s, %s\n", 
+                    scratch_name(e->left->reg), 
+                    name);
+        free(name);
+    }
+    else {
+        fprintf(result_file, "PUSHQ %s\n", scratch_name(e->left->reg));
+    }
+    scratch_free(e->left->reg);
+}

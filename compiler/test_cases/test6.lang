@@ -1,0 +1,12 @@
+function[int](a[int], b[int]) {
+    give a + b;
+}
+x[int] = 3;
+y[int] = 6;
+main[void]() {
+    a[int] = 5;
+    b[int] = 6;
+    a + b;
+    a = y / x;
+    b = function(x, y);
+}
