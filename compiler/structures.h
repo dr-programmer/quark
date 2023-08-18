@@ -74,6 +74,8 @@ struct stmt {
     struct stmt *body;
     struct stmt *else_body;
     struct stmt *next;
+
+    unsigned short print;
 };
 
 struct expr {
@@ -189,7 +191,7 @@ const char *label_name(unsigned int label);
 const char *symbol_codegen(struct symbol *s);
 
 void decl_codegen(struct decl *d);
-void stmt_codegen(struct stmt *s);
+void stmt_codegen(struct stmt *s, const char *function_name);
 void expr_codegen(struct expr *e);
 void expr_arggen(struct expr *e, unsigned int arg);
 

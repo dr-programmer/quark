@@ -747,6 +747,7 @@ unsigned short scratch_alloc() {
     return -1;
 }
 void scratch_free(int r) {
+    if(r < 0)return;
     scratch_registers[r] = 0;
 }
 const char *scratch_name(int r) {
@@ -820,34 +821,187 @@ const char *symbol_codegen(struct symbol *s) {
 
 extern FILE *result_file;
 
+static char *argr_name(unsigned int arg) {
+    char *name = (char *)calloc(5, sizeof(char));
+    switch(arg) {
+        case 0: strcpy(name, "%rdi"); break;
+        case 1: strcpy(name, "%rsi"); break;
+        case 2: strcpy(name, "%rdx"); break;
+        case 3: strcpy(name, "%rcx"); break;
+        case 4: strcpy(name, "%r8"); break;
+        case 5: strcpy(name, "%r9"); break;
+        default: free(name); name = NULL; break;
+    }
+    return name;
+}
+unsigned int alignment;
+static void params_push(struct param_list *p, unsigned int arg) {
+    if(p) {
+        alignment++;
+        fprintf(result_file, "PUSHQ %s\n", argr_name(arg));
+        params_push(p->next, arg+1);
+    }
+}
+
+static unsigned int local_var_count(struct stmt *s) {
+    unsigned int result = 0;
+    if(s) {
+        if(s->decl) {
+            result++;
+        }
+        result += local_var_count(s->next);
+    }
+    return result;
+}
+
+static void push_pop_callee_saved_regs(unsigned short action) {
+    if(!action) {
+        fprintf(result_file, "PUSHQ %%rbx\n");
+        fprintf(result_file, "PUSHQ %%r12\n");
+        fprintf(result_file, "PUSHQ %%r13\n");
+        fprintf(result_file, "PUSHQ %%r14\n");
+        fprintf(result_file, "PUSHQ %%r15\n");
+    }
+    else {
+        fprintf(result_file, "POPQ %%r15\n");
+        fprintf(result_file, "POPQ %%r14\n");
+        fprintf(result_file, "POPQ %%r13\n");
+        fprintf(result_file, "POPQ %%r12\n");
+        fprintf(result_file, "POPQ %%rbx\n");
+    }
+}
+
 void decl_codegen(struct decl *d) {
     if(d == NULL)return;
 
-    if(d->value) {
-        expr_codegen(d->value);
-    }
     if(d->code) {
-        stmt_codegen(d->code);
+        alignment = 0;
+        fprintf(result_file, ".text\n");
+        fprintf(result_file, ".global %s\n", d->name);
+        fprintf(result_file, "%s:\n", d->name);
+        fprintf(result_file, "PUSHQ %%rbp\n");
+        fprintf(result_file, "MOVQ %%rsp, %%rbp\n");
+        params_push(d->type->params, 0);
+        unsigned int number_of_vars = local_var_count(d->code);
+        alignment += number_of_vars;
+        while((8 * alignment) % 16 != 0) {
+            number_of_vars++;
+            alignment += number_of_vars;
+        }
+        fprintf(result_file, "SUB $%u, %%rsp\n", number_of_vars * 8);
+        push_pop_callee_saved_regs(0);
+        stmt_codegen(d->code, d->name);
+        fprintf(result_file, ".%s_epilogue:\n", d->name);
+        push_pop_callee_saved_regs(1);
+        fprintf(result_file, "MOVQ %%rbp, %%rsp\n");
+        fprintf(result_file, "POPQ %%rbp\n");
+        fprintf(result_file, "RET\n");
+    }
+    else {
+        if(d->symbol->kind == SYMBOL_GLOBAL) {
+            fprintf(result_file, ".data\n");
+            fprintf(result_file, "%s: .quad ", d->name);
+            if(d->value) {
+                fprintf(result_file, "%d\n", d->value->integer_value);
+            }
+            else {
+                fprintf(result_file, "0\n");
+            }
+        }
+        else {
+            expr_codegen(d->value);
+            if(d->value->reg != -1) {
+                fprintf(result_file, "MOV %s, %s\n", 
+                            scratch_name(d->value->reg), 
+                            symbol_codegen(d->symbol));
+            }
+        }
     }
 
     decl_codegen(d->next);
 }
-void stmt_codegen(struct stmt *s) {
+void stmt_codegen(struct stmt *s, const char *function_name) {
     if(s == NULL)return;
 
     switch(s->kind) {
+        case STMT_DECL:
+            decl_codegen(s->decl);
+            break;
         case STMT_EXPR:
             expr_codegen(s->expr);
             scratch_free(s->expr->reg);
             break;
+        case STMT_IF_ELSE:
+        {
+            int else_label = label_create();
+            int done_label = label_create();
+            expr_codegen(s->expr);
+            fprintf(result_file, "CMP $0, %s\n", scratch_name(s->expr->reg));
+            scratch_free(s->expr->reg);
+            fprintf(result_file, "JE %s\n", label_name(else_label));
+            stmt_codegen(s->body, function_name);
+            fprintf(result_file, "JMP %s\n", label_name(done_label));
+            fprintf(result_file, "%s:\n", label_name(else_label));
+            stmt_codegen(s->else_body, function_name);
+            fprintf(result_file, "%s:\n", label_name(done_label));
+            break;
+        }
+        case STMT_FOR:
+        {
+            int top_label = label_create();
+            int done_label = label_create();
+            expr_codegen(s->init_expr);
+            scratch_free(s->init_expr->reg);
+            fprintf(result_file, "%s:\n", label_name(top_label));
+            expr_codegen(s->expr);
+            if(s->expr->reg != -1) {
+                fprintf(result_file, "CMP $0, %s\n", scratch_name(s->expr->reg));
+                scratch_free(s->expr->reg);
+                fprintf(result_file, "JE %s\n", label_name(done_label));
+            }
+            stmt_codegen(s->body, function_name);
+            expr_codegen(s->next_expr);
+            scratch_free(s->next_expr->reg);
+            fprintf(result_file, "JMP %s\n", label_name(top_label));
+            fprintf(result_file, "%s:\n", label_name(done_label));
+            break;
+        }
+        case STMT_GIVE:
+            expr_codegen(s->expr);
+            fprintf(result_file, "MOV %s, %%rax\n", scratch_name(s->expr->reg));
+            if(s->print) {
+                int string_label = label_create();
+                fprintf(result_file, "MOV %%rax, %%rsi\n");
+                fprintf(result_file, "%s: .string \"%%d\\n\"\n", label_name(string_label));
+                fprintf(result_file, "MOV $%s, %%rdi\n", label_name(string_label));
+                fprintf(result_file, "PUSHQ %%rax\n");
+                fprintf(result_file, "PUSHQ %%rcx\n");
+                fprintf(result_file, "XOR %%rax, %%rax\n");
+                fprintf(result_file, "CALL printf\n");
+                fprintf(result_file, "POPQ %%rcx\n");
+                fprintf(result_file, "POPQ %%rax\n");
+            }
+            fprintf(result_file, "JMP .%s_epilogue\n", function_name);
+            scratch_free(s->expr->reg);
+            break;
+        case STMT_BLOCK:
+            stmt_codegen(s->body, function_name);
+            break;
     }
 
-    stmt_codegen(s->next);
+    stmt_codegen(s->next, function_name);
 }
 void expr_codegen(struct expr *e) {
-    if(e == NULL)return;
+    if(e == NULL) {
+        e->reg = -1;
+        return;
+    }
 
     switch(e->kind) {
+        case EXPR_INTEGER_LITERAL:
+            e->reg = scratch_alloc();
+            fprintf(result_file, "MOV $%d, %s\n", e->integer_value, scratch_name(e->reg));
+            break;
         case EXPR_NAME:
             e->reg = scratch_alloc();
             fprintf(result_file, "MOV %s, %s\n", 
@@ -873,14 +1027,14 @@ void expr_codegen(struct expr *e) {
             expr_codegen(e->right);
             if(e->type->kind < TYPE_FLOATING_POINT) {
                 fprintf(result_file, "SUB %s, %s\n", 
-                            scratch_name(e->left->reg), 
-                            scratch_name(e->right->reg));
+                            scratch_name(e->right->reg), 
+                            scratch_name(e->left->reg));
             }
             else {
 
             }
-            e->reg = e->right->reg;
-            scratch_free(e->left->reg);
+            e->reg = e->left->reg;
+            scratch_free(e->right->reg);
             break;
         case EXPR_MUL:
             expr_codegen(e->left);
@@ -910,6 +1064,52 @@ void expr_codegen(struct expr *e) {
             e->reg = e->right->reg;
             scratch_free(e->left->reg);
             break;
+        case EXPR_EQUAL ... EXPR_LESS_EQUAL:
+            int true_label = label_create();
+            int done_label = label_create();
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            fprintf(result_file, "CMP %s, %s\n", 
+                        scratch_name(e->left->reg), 
+                        scratch_name(e->right->reg));
+            switch(e->kind) {
+                case EXPR_EQUAL:
+                    fprintf(result_file, "JE %s\n", label_name(true_label));
+                    fprintf(result_file, "MOV $0, %s\n", scratch_name(e->right->reg));
+                    fprintf(result_file, "JMP %s\n", label_name(done_label));
+                    break;
+                case EXPR_NOT_EQUAL:
+                    fprintf(result_file, "JNE %s\n", label_name(true_label));
+                    fprintf(result_file, "MOV $0, %s\n", scratch_name(e->right->reg));
+                    fprintf(result_file, "JMP %s\n", label_name(done_label));
+                    break;
+                case EXPR_GREATER:
+                    fprintf(result_file, "JG %s\n", label_name(true_label));
+                    fprintf(result_file, "MOV $0, %s\n", scratch_name(e->right->reg));
+                    fprintf(result_file, "JMP %s\n", label_name(done_label));
+                    break;
+                case EXPR_GREATER_EQUAL:
+                    fprintf(result_file, "JGE %s\n", label_name(true_label));
+                    fprintf(result_file, "MOV $0, %s\n", scratch_name(e->right->reg));
+                    fprintf(result_file, "JMP %s\n", label_name(done_label));
+                    break;
+                case EXPR_LESS:
+                    fprintf(result_file, "JL %s\n", label_name(true_label));
+                    fprintf(result_file, "MOV $0, %s\n", scratch_name(e->right->reg));
+                    fprintf(result_file, "JMP %s\n", label_name(done_label));
+                    break;
+                case EXPR_LESS_EQUAL:
+                    fprintf(result_file, "JLE %s\n", label_name(true_label));
+                    fprintf(result_file, "MOV $0, %s\n", scratch_name(e->right->reg));
+                    fprintf(result_file, "JMP %s\n", label_name(done_label));
+                    break;
+            }
+            fprintf(result_file, "%s:\n", label_name(true_label));
+            fprintf(result_file, "MOV $1, %s\n", scratch_name(e->right->reg));
+            fprintf(result_file, "%s:\n", label_name(done_label));
+            scratch_free(e->left->reg);
+            e->reg = e->right->reg;
+            break;
         case EXPR_ASSIGN:
             expr_codegen(e->right);
             fprintf(result_file, "MOV %s, %s\n",
@@ -923,25 +1123,11 @@ void expr_codegen(struct expr *e) {
             fprintf(result_file, "PUSHQ %%r11\n");
             fprintf(result_file, "CALL %s\n", e->left->name);
             e->reg = scratch_alloc();
-            fprintf(result_file, "MOV %%rax, %s\n", scratch_name(e->reg));
             fprintf(result_file, "POPQ %%r11\n");
             fprintf(result_file, "POPQ %%r10\n");
+            fprintf(result_file, "MOV %%rax, %s\n", scratch_name(e->reg));
             break;
     }
-}
-
-static char *argr_name(unsigned int arg) {
-    char *name = (char *)calloc(5, sizeof(char));
-    switch(arg) {
-        case 0: strcpy(name, "%rdi"); break;
-        case 1: strcpy(name, "%rsi"); break;
-        case 2: strcpy(name, "%rdx"); break;
-        case 3: strcpy(name, "%rcx"); break;
-        case 4: strcpy(name, "%r8"); break;
-        case 5: strcpy(name, "%r9"); break;
-        default: free(name); name = NULL; break;
-    }
-    return name;
 }
 
 void expr_arggen(struct expr *e, unsigned int arg) {

@@ -34,6 +34,9 @@ struct decl *parser_result;
 %type <name> name string_literal
 %type <integer> allocation_size boolean_literal char_literal
 
+%token TOKEN_PRINT_IN
+%token TOKEN_STDIN
+
 %token TOKEN_ALLOCATE
 %token TOKEN_SUBSCRIPT
 %token TOKEN_UP
@@ -154,6 +157,11 @@ stmt    : TOKEN_IF TOKEN_LPAREN expr TOKEN_RPAREN stmt
                 { $$ = stmt_create(STMT_GIVE, 0, 0, $2, 0, 0, 0, 0); }
         | TOKEN_GIVE TOKEN_UP TOKEN_SEMI
                 { $$ = stmt_create(STMT_GIVE, 0, 0, 0, 0, 0, 0, 0); }
+        | TOKEN_GIVE expr TOKEN_PRINT_IN TOKEN_STDIN TOKEN_SEMI
+                { 
+                        $$ = stmt_create(STMT_GIVE, 0, 0, $2, 0, 0, 0, 0); 
+                        $$->print = 1; 
+                }
         ;
 
 stmt_list

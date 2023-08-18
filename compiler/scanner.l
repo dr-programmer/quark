@@ -42,6 +42,8 @@ LETTERS [a-zA-Z]
 >           {return TOKEN_GREATER;}
 "<"=        {return TOKEN_LESS_EQUAL;}
 "<"         {return TOKEN_LESS;}
+=">"        {return TOKEN_PRINT_IN;}
+stdin       {return TOKEN_STDIN;}
 give        {return TOKEN_GIVE;}
 up          {return TOKEN_UP;}
 if          {return TOKEN_IF;}
