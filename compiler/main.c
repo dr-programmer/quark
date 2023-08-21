@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "structures.h"
 #include "error.h"
 #include "colors.h"
 #include "scope.h"
+#include "LLVM/codegen.h"
 
 extern FILE *yyin;
 extern int yyparse();
@@ -11,6 +13,8 @@ extern struct decl *parser_result;
 extern Stack symbol_table;
 
 FILE *result_file;
+
+unsigned short debug;
 
 int main(int argc, char **argv)
 {
@@ -20,13 +24,20 @@ int main(int argc, char **argv)
         exit(ERROR_OPENING_FILE);
     }
     char *name_of_file = "a.s";
-    if(argc > 3) {
-        if(argv[2][0] == '-' && argv[2][1] == 'o') {
-            name_of_file = argv[3];
+    for(unsigned int i = 0; i < argc; i++) {
+        if(!strcmp(argv[i], "--debug")) {
+            debug = 1;
+        }
+        else if(!strcmp(argv[i], "-o")) {
+            name_of_file = argv[i+1];
         }
     }
     printf("Name of result file = "CYN"%s"RESET" \n", name_of_file);
-    result_file = fopen(name_of_file, "w");
+    char *temp_file = (char *)calloc(strlen(name_of_file) + 3, sizeof(char));
+    strcpy(temp_file, name_of_file);
+    if(debug) strcat(temp_file, ".s");
+    else strcat(temp_file, ".ll");
+    result_file = fopen(temp_file, "w");
     if(yyparse() == 0) {
         printf("Parse "GRN"successful"RESET"! \n");
         decl_print(parser_result, 0);
@@ -37,7 +48,12 @@ int main(int argc, char **argv)
         scope_exit();
         decl_typecheck(parser_result);
         if(!error_count) {
-            decl_codegen(parser_result);
+            if(debug) {
+                decl_codegen(parser_result);
+            }
+            else {
+                decl_irgen(parser_result);
+            }
         }
         printf("Program compiled with %d error/s \n", error_count);
     }
@@ -47,6 +63,17 @@ int main(int argc, char **argv)
 
     fclose(result_file);
     fclose(yyin);
+
+    if(debug) {
+        char *temp_string = (char *)calloc(strlen(temp_file) + strlen(name_of_file) + 20, 
+                                sizeof(char));
+        sprintf(temp_string, "gcc %s -o %s -no-pie", temp_file, name_of_file);
+        system(temp_string);
+    }
+    else {
+
+    }
+    free(temp_file);
 
     return 0;
 }

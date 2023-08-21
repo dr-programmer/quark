@@ -83,6 +83,10 @@ MOV %rbx, -16(%rbp)
 MOV $6, %r10
 MOV %r10, -24(%rbp)
 MOV -16(%rbp), %r11
+MOV -24(%rbp), %r11
+MOV -24(%rbp), %r11
+MOV %r11, -16(%rbp)
+MOV -16(%rbp), %r11
 MOV -24(%rbp), %r12
 ADD %r11, %r12
 MOV y, %r11

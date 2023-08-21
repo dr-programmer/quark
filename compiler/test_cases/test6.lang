@@ -9,6 +9,8 @@ y[int] = 6;
 main[void](arg[int]) {
     a[int] = 5;
     b[int] = 6;
+    a; b;
+    a = b;
     a + b;
     a = y - x;
     printINT(b = function(x, y));

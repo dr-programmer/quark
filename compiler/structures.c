@@ -976,8 +976,12 @@ void stmt_codegen(struct stmt *s, const char *function_name) {
                 fprintf(result_file, "MOV $%s, %%rdi\n", label_name(string_label));
                 fprintf(result_file, "PUSHQ %%rax\n");
                 fprintf(result_file, "PUSHQ %%rcx\n");
+                fprintf(result_file, "PUSHQ %%r10\n");
+                fprintf(result_file, "PUSHQ %%r11\n");
                 fprintf(result_file, "XOR %%rax, %%rax\n");
                 fprintf(result_file, "CALL printf\n");
+                fprintf(result_file, "PUSHQ %%r11\n");
+                fprintf(result_file, "PUSHQ %%r10\n");
                 fprintf(result_file, "POPQ %%rcx\n");
                 fprintf(result_file, "POPQ %%rax\n");
             }
@@ -1070,8 +1074,8 @@ void expr_codegen(struct expr *e) {
             expr_codegen(e->left);
             expr_codegen(e->right);
             fprintf(result_file, "CMP %s, %s\n", 
-                        scratch_name(e->left->reg), 
-                        scratch_name(e->right->reg));
+                        scratch_name(e->right->reg), 
+                        scratch_name(e->left->reg));
             switch(e->kind) {
                 case EXPR_EQUAL:
                     fprintf(result_file, "JE %s\n", label_name(true_label));

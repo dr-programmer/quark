@@ -1,5 +1,5 @@
-compiler: parser.o structures.o scanner.o main.o scope.o stack_do symbol_make
-	gcc -o compiler parser.o structures.o scanner.o main.o scope.o symbol/symbol.o -Lstack -lstack
+quark: parser.o structures.o scanner.o main.o scope.o stack_do symbol_make LLVM/codegen.o
+	gcc -o quark parser.o structures.o scanner.o main.o scope.o symbol/symbol.o LLVM/codegen.o -Lstack -lstack
 
 parser.o: parser.c
 	gcc -c parser.c -o parser.o
@@ -34,5 +34,8 @@ symbol_make:
 symbol_wipe:
 	cd symbol; make clean; cd ..
 
+LLVM/codegen.o: LLVM/codegen.h LLVM/codegen.c
+	gcc -c LLVM/codegen.c -o LLVM/codegen.o
+
 clean: symbol_wipe stack_wipe
-	rm -f *.out *.o scanner.c parser.c token.h *.dot *.output compiler *.s
+	rm -f *.out *.o scanner.c parser.c token.h *.dot *.output quark *.s
