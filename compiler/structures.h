@@ -91,7 +91,7 @@ struct expr {
     struct symbol *symbol;
     struct type *type;
 
-    unsigned short reg;
+    int reg;
 };
 
 struct type {

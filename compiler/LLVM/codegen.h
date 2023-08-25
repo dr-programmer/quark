@@ -1,7 +1,7 @@
 #include "../structures.h"
 
 unsigned int register_create();
-const char *register_name(unsigned int r);
+const char *register_name(int r);
 
 const char *symbol_irgen(struct symbol *s);
 
