@@ -6,7 +6,7 @@ function[int](a[int], b[int]) {
 }
 x[int] = 3;
 y[int] = 6;
-main[int](arg[int]) {
+main[int]() {
     a[int] = 5;
     b[int] = 6;
     temp[bool];
@@ -17,6 +17,10 @@ main[int](arg[int]) {
     else {
         a = a - b;
     }
+    i[int];
+    for(i = 0; i < 10; i++) {
+        a = a + i;
+    }
     a < b;
     a; b;
     a = b;
@@ -24,6 +28,7 @@ main[int](arg[int]) {
     a = 3;
     c[float];
     c = 3.3;
+    c++;
     c = a + c;
     y = a;
     a = y - x;

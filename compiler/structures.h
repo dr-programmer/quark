@@ -107,6 +107,8 @@ struct param_list {
     struct param_list *next;
 
     struct symbol *symbol;
+
+    int reg;
 };
 
 struct decl *decl_create(char *name, 
@@ -153,6 +155,9 @@ void print_tabs(int number_of_tabs);
 
 #include "symbol/symbol.h"
 #include "scope.h"
+
+void print_error(const char *error, const char *name);
+void print_error_formated(char *str, ...);
 
 void decl_resolve(struct decl *d);
 void stmt_resolve(struct stmt *s);

@@ -202,6 +202,8 @@ algebra : algebra TOKEN_PLUS term       { $$ = expr_create(EXPR_ADD, $1, $3); }
 starting_expr
         : assignment_algebra    { $$ = $1; }
         | logical_algebra       { $$ = $1; }
+        | name TOKEN_ASSIGN assignment_algebra
+                                { $$ = expr_create(EXPR_ASSIGN, expr_create_name($1), $3); }
         ;
 
 factor  : name                  { $$ = expr_create_name($1); }

@@ -92,13 +92,88 @@ const char *type_irgen(struct type *t) {
 
 extern FILE *result_file;
 
+void type_cast(struct expr *e) {
+    int old_register;
+    struct expr *expr;
+
+    if(e->left->type->kind != e->type->kind) expr = e->left;
+    else if(e->right->type->kind != e->type->kind) expr = e->right;
+    else return;
+
+    old_register = expr->reg;
+    expr->reg = register_create();
+    if(e->type->kind == TYPE_INTEGER) {
+        fprintf(result_file, "%s = zext %s %s to %s\n", register_name(expr->reg), 
+                    type_irgen(expr->type), 
+                    register_name(old_register), 
+                    type_irgen(e->type));
+    }
+    else if(e->type->kind == TYPE_FLOATING_POINT) {
+        fprintf(result_file, "%s = sitofp %s %s to %s\n", register_name(expr->reg), 
+                    type_irgen(expr->type), 
+                    register_name(old_register), 
+                    type_irgen(e->type));
+    }
+}
+
+unsigned int callr_create() {
+
+}
+const char *callr_name(int r) {
+    
+}
+
 void decl_irgen(struct decl *d) {
     if(d == NULL)return;
 
     if(d->code) {
         r_count = 0;
+        fprintf(result_file, "define %s %s (", type_irgen(d->type->subtype), 
+                    symbol_irgen(d->symbol));
+        struct param_list *p = d->type->params;
+        while(p != NULL) {
+            p->reg = register_create();
+            fprintf(result_file, "%s %s", type_irgen(p->type), register_name(p->reg));
+            if(p->next != NULL)fprintf(result_file, ", ");
+            p = p->next;
+        }
+        fprintf(result_file, ") {\n");
         fprintf(result_file, ".%s_body:\n", d->name);
+        p = d->type->params;
+        while(p != NULL) {
+            fprintf(result_file, "%s = alloca %s\n", symbol_irgen(p->symbol), 
+                        type_irgen(p->type));
+            fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(p->type), 
+                        register_name(p->reg), 
+                        symbol_irgen(p->symbol));
+            p = p->next;
+        }
         stmt_irgen(d->code, d->symbol);
+        fprintf(result_file, "}\n");
+    }
+    else {
+        if(d->symbol->kind == SYMBOL_LOCAL) {
+            fprintf(result_file, "%s = alloca %s\n", symbol_irgen(d->symbol), 
+                        type_irgen(d->type));
+            if(d->value) {
+                expr_irgen(d->value);
+                fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(d->type), 
+                            register_name(d->value->reg), 
+                            symbol_irgen(d->symbol));
+            }
+        }
+        else {
+            if(d->value) {
+                expr_irgen(d->value);
+                fprintf(result_file, "%s = global %s %s\n", symbol_irgen(d->symbol), 
+                            type_irgen(d->type), 
+                            register_name(d->value->reg));
+            }
+            else {
+                fprintf(result_file, "%s = global %s 0\n", symbol_irgen(d->symbol), 
+                            type_irgen(d->type));
+            }
+        }
     }
 
     decl_irgen(d->next);
@@ -134,10 +209,40 @@ void stmt_irgen(struct stmt *s, struct symbol *function_symbol) {
             fprintf(result_file, "%s:\n", label_name(done_label));
             break;
         }
+        case STMT_FOR:
+        {
+            int loop_label = label_create();
+            int continue_label = label_create();
+            int done_label = label_create();
+            expr_irgen(s->init_expr);
+            fprintf(result_file, "br label %%%s\n", label_name(loop_label));
+            fprintf(result_file, "%s:\n", label_name(loop_label));
+            if(s->expr) {
+                expr_irgen(s->expr);
+                fprintf(result_file, "br %s %s, label %%%s, label %%%s\n", 
+                            type_irgen(s->expr->type), 
+                            register_name(s->expr->reg), 
+                            label_name(continue_label), 
+                            label_name(done_label));
+                fprintf(result_file, "%s:\n", label_name(continue_label));
+            }
+            stmt_irgen(s->body, function_symbol);
+            expr_irgen(s->next_expr);
+            fprintf(result_file, "br label %%%s\n", label_name(loop_label));
+            fprintf(result_file, "%s:\n", label_name(done_label));
+            break;
+        }
         case STMT_GIVE:
-            expr_irgen(s->expr);
-            fprintf(result_file, "ret %s %s\n", type_irgen(function_symbol->type->subtype), 
-                        register_name(s->expr->reg));
+            if(s->expr) {
+                expr_irgen(s->expr);
+                fprintf(result_file, "ret %s %s\n", 
+                            type_irgen(function_symbol->type->subtype), 
+                            register_name(s->expr->reg));
+            }
+            else {
+                fprintf(result_file, "ret void\n");
+            }
+
             break;
         case STMT_BLOCK:
             stmt_irgen(s->body, function_symbol);
@@ -174,20 +279,14 @@ void expr_irgen(struct expr *e) {
             break;
         case EXPR_NAME:
             e->reg = register_create();
-            if(e->symbol->kind != SYMBOL_GLOBAL) {
-                fprintf(result_file, "%s = load %s, ptr %s\n", register_name(e->reg), 
-                            type_irgen(e->type), 
-                            symbol_irgen(e->symbol));
-            }
-            else {
-                fprintf(result_file, "%s = %s %s\n", register_name(e->reg), 
-                            type_irgen(e->type), 
-                            symbol_irgen(e->symbol));
-            }
+            fprintf(result_file, "%s = load %s, ptr %s\n", register_name(e->reg), 
+                        type_irgen(e->type), 
+                        symbol_irgen(e->symbol));
             break;
         case EXPR_ADD:
             expr_irgen(e->left);
             expr_irgen(e->right);
+            type_cast(e);
             e->reg = register_create();
             fprintf(result_file, "%s = %cadd %s %s, %s\n", register_name(e->reg), 
                         check_for_float(e->type), 
@@ -198,6 +297,7 @@ void expr_irgen(struct expr *e) {
         case EXPR_SUB:
             expr_irgen(e->left);
             expr_irgen(e->right);
+            type_cast(e);
             e->reg = register_create();
             fprintf(result_file, "%s = %csub %s %s, %s\n", register_name(e->reg), 
                         check_for_float(e->type), 
@@ -208,6 +308,7 @@ void expr_irgen(struct expr *e) {
         case EXPR_MUL:
             expr_irgen(e->left);
             expr_irgen(e->right);
+            type_cast(e);
             e->reg = register_create();
             fprintf(result_file, "%s = %cmul %s %s, %s\n", register_name(e->reg), 
                         check_for_float(e->type), 
@@ -219,6 +320,7 @@ void expr_irgen(struct expr *e) {
         {
             expr_irgen(e->left);
             expr_irgen(e->right);
+            type_cast(e);
             char temp = check_for_float(e->type) == 32 ? 's' : 'f';
             e->reg = register_create();
             fprintf(result_file, "%s = %cdiv %s %s, %s\n", register_name(e->reg), 
@@ -232,6 +334,7 @@ void expr_irgen(struct expr *e) {
         {
             expr_irgen(e->left);
             expr_irgen(e->right);
+            type_cast(e);
             char temp = check_for_float(e->type) == 32 ? 's' : 'f';
             e->reg = register_create();
             fprintf(result_file, "%s = %crem %s %s, %s\n", register_name(e->reg), 
@@ -243,16 +346,10 @@ void expr_irgen(struct expr *e) {
         }
         case EXPR_ASSIGN:
             expr_irgen(e->right);
-            if(e->left->symbol->kind != SYMBOL_GLOBAL) {
-                fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(e->right->type), 
-                                        register_name(e->right->reg), 
-                                        symbol_irgen(e->left->symbol));
-            }
-            else {
-                fprintf(result_file, "%s = %s %s\n", symbol_irgen(e->left->symbol), 
-                            type_irgen(e->type), 
-                            register_name(e->right->reg));
-            }
+            type_cast(e);
+            fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(e->type), 
+                                    register_name(e->right->reg), 
+                                    symbol_irgen(e->left->symbol));
             e->reg = e->right->reg;
             break;
         case EXPR_EQUAL ... EXPR_LESS_EQUAL:
@@ -263,7 +360,7 @@ void expr_irgen(struct expr *e) {
                         ? 'f' : check_for_float(e->right->type);
             if(temp == ' ') temp = 'i';
             char operation_temp = temp == 'f' ? 'o' : ' ';
-            struct type *temp_type = e->left->type->kind > e->left->type->kind 
+            struct type *temp_type = e->left->type->kind > e->right->type->kind 
                         ? e->left->type : e->right->type;
             e->reg = register_create();
             switch(e->kind) {
@@ -322,5 +419,47 @@ void expr_irgen(struct expr *e) {
             }
             break;
         }
+        case EXPR_INCREMENT ... EXPR_DECREMENT:
+            if(e->kind == EXPR_INCREMENT) e->kind = EXPR_ADD;
+            else e->kind = EXPR_SUB;
+            if(e->left) {
+                e->right = expr_create_integer_literal(1);
+                e->right->type = type_create(TYPE_INTEGER, NULL, NULL, 0);
+                expr_irgen(e);
+                fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(e->type), 
+                            register_name(e->reg), 
+                            symbol_irgen(e->left->symbol));
+                e->reg = e->left->reg;
+            }
+            else {
+                e->left = expr_create_integer_literal(1);
+                e->left->type = type_create(TYPE_INTEGER, NULL, NULL, 0);
+                expr_irgen(e);
+                fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(e->type), 
+                            register_name(e->reg), 
+                            symbol_irgen(e->right->symbol));
+            }
+            break;
+        case EXPR_ADD_WITH ... EXPR_DIV_WITH:
+            switch(e->kind) {
+                case EXPR_ADD_WITH: e->kind = EXPR_ADD; break;
+                case EXPR_SUB_WITH: e->kind = EXPR_SUB; break;
+                case EXPR_MUL_WITH: e->kind = EXPR_MUL; break;
+                case EXPR_DIV_WITH: e->kind = EXPR_DIV; break;
+            }
+            expr_irgen(e);
+            fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(e->type), 
+                        register_name(e->reg), 
+                        symbol_irgen(e->left->symbol));
+            break;
+        case EXPR_CALL:
+        {
+            int call_register = callr_create();
+            break;
+        }
+        case EXPR_ARG:
+            expr_irgen(e->left);
+            expr_irgen(e->right);
+            break;
     }
 }

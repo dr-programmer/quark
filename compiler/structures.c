@@ -273,13 +273,13 @@ void print_tabs(int number_of_tabs) {
 
 unsigned int error_count;
 
-static void print_error(const char *error, const char *name) {
+void print_error(const char *error, const char *name) {
     error_count++;
     fprintf(stderr, RED "Error" RESET \
         MAG" |%s|"RESET"->"YEL"|%s|"RESET" \n", error, name);
 }
 
-static void print_error_formated(char *str, ...) {
+void print_error_formated(char *str, ...) {
     va_list argument;
     struct decl *d;
     struct stmt *s;
