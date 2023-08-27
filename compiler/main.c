@@ -52,6 +52,7 @@ int main(int argc, char **argv)
                 decl_codegen(parser_result);
             }
             else {
+                fprintf(result_file, "declare i32 @printf (ptr, ...)\n");
                 decl_irgen(parser_result);
             }
         }
@@ -64,14 +65,15 @@ int main(int argc, char **argv)
     fclose(result_file);
     fclose(yyin);
 
+    char *temp_string = (char *)calloc(strlen(temp_file) + strlen(name_of_file) + 20, 
+                            sizeof(char));
     if(debug) {
-        char *temp_string = (char *)calloc(strlen(temp_file) + strlen(name_of_file) + 20, 
-                                sizeof(char));
         sprintf(temp_string, "gcc %s -o %s -no-pie", temp_file, name_of_file);
         system(temp_string);
     }
     else {
-
+        sprintf(temp_string, "clang %s -o %s", temp_file, name_of_file);
+        system(temp_string);
     }
     free(temp_file);
 

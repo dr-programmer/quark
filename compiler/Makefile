@@ -1,5 +1,5 @@
 quark: parser.o structures.o scanner.o main.o scope.o stack_do symbol_make LLVM/codegen.o
-	gcc -o quark parser.o structures.o scanner.o main.o scope.o symbol/symbol.o LLVM/codegen.o -Lstack -lstack
+	gcc -o quark parser.o structures.o scanner.o main.o scope.o symbol/symbol.o LLVM/codegen.o -Lstack -lstack -lm
 
 parser.o: parser.c
 	gcc -c parser.c -o parser.o

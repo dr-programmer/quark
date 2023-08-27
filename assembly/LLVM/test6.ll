@@ -1,4 +1,7 @@
 declare i32 @printf (ptr, ...)
+
+@.str = constant [4 x i8] c"%d\0A\00"
+
 define i32 @printINT (i32 %0) {
 .printINT_body:
 %.8a = alloca i32
@@ -96,89 +99,92 @@ store i1 1, ptr %.17temp
 %0 = load i32, ptr %.8a
 %1 = load i32, ptr %.16b
 %2 = icmp  eq i32 %0, %1
-%3 = zext i1 %2 to i32
-%4 = icmp  ne i32 %3, 0
-%5 = load i32, ptr @x
-%6 = zext i8 3 to i32
-%7 = icmp  eq i32 %5, %6
-%8 = zext i1 %7 to i32
-%9 = icmp  ne i32 %8, 0
-%10 = icmp  eq i1 %4, %9
-br i1 %10, label %.L6, label %.L7
+br i1 %2, label %.L6, label %.L7
 .L6:
-%11 = load i32, ptr %.8a
-%12 = load i32, ptr %.16b
-%13 =  add i32 %11, %12
-store i32 %13, ptr %.8a
-%14 = load i32, ptr @x
-%15 = call i32 (i32) @printINT (i32 %14)
+%3 = load i32, ptr %.8a
+%4 = load i32, ptr %.16b
+%5 =  add i32 %3, %4
+store i32 %5, ptr %.8a
 br label %.L8
 .L7:
-%16 = load i32, ptr %.8a
-%17 = load i32, ptr %.16b
-%18 =  sub i32 %16, %17
-store i32 %18, ptr %.8a
+%6 = load i32, ptr %.8a
+%7 = load i32, ptr %.16b
+%8 =  sub i32 %6, %7
+store i32 %8, ptr %.8a
 br label %.L8
 .L8:
 %.25i = alloca i32
-%19 = zext i1 0 to i32
-store i32 %19, ptr %.25i
+%9 = zext i1 0 to i32
+store i32 %9, ptr %.25i
 br label %.L9
 .L9:
-%20 = load i32, ptr %.25i
-%21 = zext i8 10 to i32
-%22 = icmp slt i32 %20, %21
-br i1 %22, label %.L10, label %.L11
+%10 = load i32, ptr %.25i
+%11 = zext i8 10 to i32
+%12 = icmp slt i32 %10, %11
+br i1 %12, label %.L10, label %.L11
 .L10:
-%23 = load i32, ptr %.8a
-%24 = load i32, ptr %.25i
-%25 =  add i32 %23, %24
-store i32 %25, ptr %.8a
-%26 = load i32, ptr %.25i
-%27 =  add i32 %26, 1
-store i32 %27, ptr %.25i
+%13 = load i32, ptr %.8a
+%14 = load i32, ptr %.25i
+%15 =  add i32 %13, %14
+store i32 %15, ptr %.8a
+%16 = load i32, ptr %.25i
+%17 =  add i32 %16, 1
+store i32 %17, ptr %.25i
 br label %.L9
 .L11:
-%28 = load i32, ptr %.8a
-%29 = load i32, ptr %.16b
-%30 = icmp slt i32 %28, %29
-%31 = load i32, ptr %.8a
-%32 = load i32, ptr %.16b
-%33 = load i32, ptr %.16b
-store i32 %33, ptr %.8a
-%34 = load i32, ptr %.8a
-%35 = load i32, ptr %.16b
-%36 =  add i32 %34, %35
-%37 = zext i8 3 to i32
-store i32 %37, ptr %.8a
+%18 = load i32, ptr %.8a
+%19 = load i32, ptr %.16b
+%20 = icmp slt i32 %18, %19
+%21 = load i32, ptr %.8a
+%22 = load i32, ptr %.16b
+%23 = load i32, ptr %.16b
+store i32 %23, ptr %.8a
+%24 = load i32, ptr %.8a
+%25 = load i32, ptr %.16b
+%26 =  add i32 %24, %25
+%27 = zext i8 3 to i32
+store i32 %27, ptr %.8a
 %.33c = alloca double
 store double 3.300000, ptr %.33c
-%38 = load i32, ptr %.8a
-%39 = load double, ptr %.33c
-%40 = sitofp i32 %38 to double
-%41 = fcmp olt double %40, %39
-%42 = load double, ptr %.33c
-%43 = sitofp i32 1 to double
-%44 = fadd double %42, %43
-store double %44, ptr %.33c
-%45 = load i32, ptr %.8a
-%46 = load double, ptr %.33c
-%47 = sitofp i32 %45 to double
-%48 = fadd double %47, %46
-store double %48, ptr %.33c
+%28 = load i32, ptr %.8a
+%29 = load double, ptr %.33c
+%30 = sitofp i32 %28 to double
+%31 = fcmp olt double %30, %29
+%32 = load double, ptr %.33c
+%33 = sitofp i32 1 to double
+%34 = fadd double %32, %33
+store double %34, ptr %.33c
+%35 = load i32, ptr %.8a
+%36 = load double, ptr %.33c
+%37 = sitofp i32 %35 to double
+%38 = fadd double %37, %36
+store double %38, ptr %.33c
+%39 = load i32, ptr %.8a
+store i32 %39, ptr @y
+%40 = load i32, ptr @y
+%41 = load i32, ptr @x
+%42 =  sub i32 %40, %41
+store i32 %42, ptr %.8a
+%43 = load i32, ptr @x
+%44 = load i32, ptr @y
+%45 = call i32 (i32, i32) @function (i32 %43, i32 %44)
+store i32 %45, ptr %.16b
+%46 = call i32 (i32) @printINT (i32 %45)
+%47 = load i32, ptr %.16b
+%48 = call i32 (i32) @printINT (i32 %47)
 %49 = load i32, ptr %.8a
-store i32 %49, ptr @y
-%50 = load i32, ptr @y
-%51 = load i32, ptr @x
-%52 =  sub i32 %50, %51
-store i32 %52, ptr %.8a
-%53 = load i32, ptr %.8a
-%54 = zext i8 3 to i32
-%55 =  mul i32 %53, %54
-%56 = zext i1 1 to i32
-%57 =  sub i32 %55, %56
-store i32 %57, ptr %.16b
-%58 = zext i8 6 to i32
+%50 = zext i8 3 to i32
+%51 =  mul i32 %49, %50
+%52 = zext i1 1 to i32
+%53 =  sub i32 %51, %52
+store i32 %53, ptr %.16b
+%54 = load i32, ptr %.16b
+%55 = call i32 (i32) @printINT (i32 %54)
+%56 = zext i8 3 to i32
+store i32 %56, ptr %.8a
+%57 = call i32 (i32) @printINT (i32 %56)
+%58 = zext i1 0 to i32
+store i32 %58, ptr %.8a
 %59 = call i32 (i32) @fibonachi (i32 %58)
 %60 = load i32, ptr %.16b
 ret i32 %60
