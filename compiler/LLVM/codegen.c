@@ -4,10 +4,16 @@
 
 #include "codegen.h"
 
+#define ANNUL_CURRENT_CONSTANT current_constant.ivalue = 0; \
+                                current_constant.fvalue = 0; \
+                                current_constant.svalue = 0;  \
+                                current_constant.evalue = 0;
+
 typedef union {
     int ivalue;
     float fvalue;
     char *svalue;
+    struct expr *evalue;
 } Value;
 
 Value current_constant;
@@ -39,6 +45,39 @@ const char *register_name(int r) {
     }
     else if(r == -3) {
         return current_constant.svalue;
+    }
+    else if(r == -4) {
+        struct expr *e = current_constant.evalue;
+        struct type *array_subtype = e->type->subtype;
+        name = (char *)calloc(2, sizeof(char));
+        if(array_subtype->kind == TYPE_CHARACTER) {
+            e->string_literal++;
+            for(int i = 0;; i++) {
+                if(e->string_literal[i] == '"') {
+                    e->string_literal[i] = '\0';
+                    break;
+                }
+            }
+            name = (char *)realloc(name, 8 + strlen(e->string_literal) * sizeof(char));
+            sprintf(name, "c\"%s\\00\"", e->string_literal);
+        }
+        else {
+            strcat(name, "[");
+            int size = 1;
+            while(e != NULL) {
+                const char *temp = type_irgen(array_subtype);
+                name = (char *)realloc(name, 
+                            (strlen(temp) + size + 3 + log10(e->left->integer_value)) 
+                            * sizeof(char));
+                sprintf(name + size, "%s %d", temp, 
+                                        e->left->integer_value);
+                if(e->right != NULL) strcat(name, ", ");
+                size = strlen(name);
+                e = e->right;
+            }
+            strcat(name, "]");
+        }
+        return name;
     }
     else name[0] = '%';
 
@@ -92,6 +131,13 @@ const char *type_irgen(struct type *t) {
             name = (char *)calloc(5, sizeof(char));
             strcpy(name, "void");
             break;
+        case TYPE_ARRAY:
+            const char *temp = type_irgen(t->subtype);
+            name = (char *)calloc(strlen(temp) + log10(t->number_of_subtypes) + 5, 
+                        sizeof(char));
+            sprintf(name, "[%d x %s]", t->number_of_subtypes, 
+                        temp);
+            break;
     }
 
     return name;
@@ -110,16 +156,9 @@ void type_cast(struct expr *e) {
                                             ? e->left : e->right;
             old_register = expr->reg;
             expr->reg = register_create();
-            if(higher_expr->type->kind <= TYPE_INTEGER) 
-                fprintf(result_file, "%s = zext %s %s to %s\n", register_name(expr->reg), 
-                            type_irgen(expr->type), 
-                            register_name(old_register), 
-                            type_irgen(higher_expr->type));
-            else if(higher_expr->type->kind == TYPE_FLOATING_POINT) 
-                fprintf(result_file, "%s = sitofp %s %s to %s\n", register_name(expr->reg), 
-                            type_irgen(expr->type), 
-                            register_name(old_register), 
-                            type_irgen(higher_expr->type));
+            apply_type_cast(higher_expr->type->kind, expr->reg, expr->type, 
+                                    old_register, 
+                                    higher_expr->type);
         }
         return;
     }
@@ -130,21 +169,59 @@ void type_cast(struct expr *e) {
 
     old_register = expr->reg;
     expr->reg = register_create();
-    if(e->type->kind <= TYPE_INTEGER) {
-        fprintf(result_file, "%s = zext %s %s to %s\n", register_name(expr->reg), 
-                    type_irgen(expr->type), 
+    apply_type_cast(e->type->kind, expr->reg, expr->type, old_register, e->type);
+}
+void apply_type_cast(type_t type_kind, 
+                            int result_register, 
+                            struct type *from_type, 
+                            int old_register, 
+                            struct type *to_type)
+{
+    if(type_kind <= TYPE_INTEGER) {
+        fprintf(result_file, "%s = zext %s %s to %s\n", register_name(result_register), 
+                    type_irgen(from_type), 
                     register_name(old_register), 
-                    type_irgen(e->type));
+                    type_irgen(to_type));
     }
-    else if(e->type->kind == TYPE_FLOATING_POINT) {
-        fprintf(result_file, "%s = sitofp %s %s to %s\n", register_name(expr->reg), 
-                    type_irgen(expr->type), 
+    else if(type_kind == TYPE_FLOATING_POINT) {
+        fprintf(result_file, "%s = sitofp %s %s to %s\n", register_name(result_register), 
+                    type_irgen(from_type), 
                     register_name(old_register), 
-                    type_irgen(e->type));
+                    type_irgen(to_type));
     }
 }
 
 int exit_count;
+
+static void init_type_cast(struct decl *d) {
+    if(d->type->kind == TYPE_ARRAY) {
+        /*struct expr *e = d->value;
+        while(e) {
+            if(e->left->type->kind != d->type->subtype->kind) {
+                expr_irgen(e->left);
+                int old_register = e->left->reg;
+                e->left->reg = register_create();
+                apply_type_cast(d->type->subtype->kind, e->left->reg, e->left->type, 
+                                        old_register, 
+                                        d->type->subtype);
+            }
+            e = e->right;
+        }*/
+        d->value->reg = -4;
+        type_delete(d->value->type->subtype);
+        d->value->type->subtype = type_copy(d->type->subtype);
+        ANNUL_CURRENT_CONSTANT;
+        current_constant.evalue = d->value;
+    }
+    else if(d->symbol->kind == SYMBOL_GLOBAL) return;
+    else if(d->value->type->kind != d->type->kind) {
+        int old_register = d->value->reg;
+        d->value->reg = register_create();
+        apply_type_cast(d->type->kind, d->value->reg, d->value->type, 
+                                old_register, 
+                                d->type);
+    }
+}
 
 void decl_irgen(struct decl *d) {
     if(d == NULL)return;
@@ -182,6 +259,7 @@ void decl_irgen(struct decl *d) {
                         type_irgen(d->type));
             if(d->value) {
                 expr_irgen(d->value);
+                init_type_cast(d);
                 fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(d->type), 
                             register_name(d->value->reg), 
                             symbol_irgen(d->symbol));
@@ -190,6 +268,7 @@ void decl_irgen(struct decl *d) {
         else {
             if(d->value) {
                 expr_irgen(d->value);
+                init_type_cast(d);
                 fprintf(result_file, "%s = global %s %s\n", symbol_irgen(d->symbol), 
                             type_irgen(d->type), 
                             register_name(d->value->reg));
@@ -302,10 +381,6 @@ void stmt_irgen(struct stmt *s, struct symbol *function_symbol) {
     stmt_irgen(s->next, function_symbol);
 }
 
-#define ANNUL_CURRENT_CONSTANT current_constant.ivalue = 0; \
-                                current_constant.fvalue = 0; \
-                                current_constant.svalue = 0;
-
 static char check_for_float(struct type *t) {
     if(t->kind == TYPE_FLOATING_POINT) {
         return 'f';
@@ -320,18 +395,7 @@ static void arg_type_cast(struct param_list *p, struct expr *e) {
         struct expr *expr = e->left;
         int old_register = expr->reg;
         expr->reg = register_create();
-        if(p->type->kind <= TYPE_INTEGER) {
-            fprintf(result_file, "%s = zext %s %s to %s\n", register_name(expr->reg), 
-                        type_irgen(expr->type), 
-                        register_name(old_register), 
-                        type_irgen(p->type));
-        }
-        else if(p->type->kind == TYPE_FLOATING_POINT) {
-            fprintf(result_file, "%s = sitofp %s %s to %s\n", register_name(expr->reg), 
-                                    type_irgen(expr->type), 
-                                    register_name(old_register), 
-                                    type_irgen(p->type));
-        }
+        apply_type_cast(p->type->kind, expr->reg, expr->type, old_register, p->type);
     }
 
     return arg_type_cast(p->next, e->right);
@@ -584,6 +648,22 @@ void expr_irgen(struct expr *e) {
             fprintf(result_file, ")\n");
             break;
         }
+        case EXPR_SUBSCRIPT:
+            expr_irgen(e->left);
+            expr_irgen(e->right);
+            e->reg = register_create();
+            fprintf(result_file, "%s = getelementptr %s, ptr %s, i1 0, %s %s \n", 
+                        register_name(e->reg), 
+                        type_irgen(e->left->type), 
+                        symbol_irgen(e->left->symbol), 
+                        type_irgen(e->right->type), 
+                        register_name(e->right->reg));
+            int ptr_register = e->reg;
+            e->reg = register_create();
+            fprintf(result_file, "%s = load %s, ptr %s\n", register_name(e->reg), 
+                        type_irgen(e->left->type->subtype), 
+                        register_name(ptr_register));
+            break;
         case EXPR_ARG:
             expr_irgen(e->left);
             expr_irgen(e->right);

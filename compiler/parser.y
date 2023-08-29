@@ -311,6 +311,7 @@ type    : TOKEN_INT     { $$ = type_create(TYPE_INTEGER, 0, 0, 0); }
 %%
 
 void yyerror(char *s) {
+    error_count++;
     fprintf(stderr, RED "Error" RESET \
         MAG" |%s|"RESET"->"YEL"|%s|"RESET" on line %d \n", s, yytext, line);
 }

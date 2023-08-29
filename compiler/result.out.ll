@@ -87,101 +87,119 @@ unreachable
 @y = global i32 6
 define i32 @main () {
 .main_body:
-%.8a = alloca i32
-store i32 5, ptr %.8a
-%.16b = alloca i32
-store i32 6, ptr %.16b
-%.17temp = alloca i1
-store i1 1, ptr %.17temp
-%0 = load i32, ptr %.8a
-%1 = load i32, ptr %.16b
-%2 = icmp  eq i32 %0, %1
-%3 = zext i1 %2 to i32
-%4 = icmp  ne i32 %3, 0
-%5 = load i32, ptr @x
-%6 = zext i8 3 to i32
-%7 = icmp  eq i32 %5, %6
-%8 = zext i1 %7 to i32
-%9 = icmp  ne i32 %8, 0
-%10 = icmp  eq i1 %4, %9
-br i1 %10, label %.L6, label %.L7
+%.48arr = alloca [6 x i32]
+store [6 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5, i32 6], ptr %.48arr
+%.54str = alloca [6 x i8]
+store [6 x i8] c"Hello\00", ptr %.54str
+%.62check = alloca i32
+%0 = load [6 x i32], ptr %.48arr
+%1 = getelementptr [6 x i32], ptr %.48arr, i1 0, i8 5 
+%2 = load i32, ptr %1
+store i32 %2, ptr %.62check
+%3 = load i32, ptr %.62check
+%4 = call i32 (i32) @printINT (i32 %3)
+%5 = load [6 x i8], ptr %.54str
+%6 = getelementptr [6 x i8], ptr %.54str, i1 0, i1 0 
+%7 = load i8, ptr %6
+%8 = zext i8 %7 to i32
+%9 = call i32 (i32) @printINT (i32 %8)
+%.70a = alloca i32
+%10 = zext i8 5 to i32
+store i32 %10, ptr %.70a
+%.78b = alloca i32
+%11 = zext i8 6 to i32
+store i32 %11, ptr %.78b
+%.79temp = alloca i1
+store i1 1, ptr %.79temp
+%12 = load i32, ptr %.70a
+%13 = load i32, ptr %.78b
+%14 = icmp  eq i32 %12, %13
+%15 = zext i1 %14 to i32
+%16 = icmp  ne i32 %15, 0
+%17 = load i32, ptr @x
+%18 = zext i8 3 to i32
+%19 = icmp  eq i32 %17, %18
+%20 = zext i1 %19 to i32
+%21 = icmp  ne i32 %20, 0
+%22 = icmp  eq i1 %16, %21
+br i1 %22, label %.L6, label %.L7
 .L6:
-%11 = load i32, ptr %.8a
-%12 = load i32, ptr %.16b
-%13 =  add i32 %11, %12
-store i32 %13, ptr %.8a
-%14 = load i32, ptr @x
-%15 = call i32 (i32) @printINT (i32 %14)
+%23 = load i32, ptr %.70a
+%24 = load i32, ptr %.78b
+%25 =  add i32 %23, %24
+store i32 %25, ptr %.70a
+%26 = load i32, ptr @x
+%27 = call i32 (i32) @printINT (i32 %26)
 br label %.L8
 .L7:
-%16 = load i32, ptr %.8a
-%17 = load i32, ptr %.16b
-%18 =  sub i32 %16, %17
-store i32 %18, ptr %.8a
+%28 = load i32, ptr %.70a
+%29 = load i32, ptr %.78b
+%30 =  sub i32 %28, %29
+store i32 %30, ptr %.70a
 br label %.L8
 .L8:
-%.25i = alloca i32
-%19 = zext i1 0 to i32
-store i32 %19, ptr %.25i
+%.87i = alloca i32
+%31 = zext i1 0 to i32
+store i32 %31, ptr %.87i
 br label %.L9
 .L9:
-%20 = load i32, ptr %.25i
-%21 = zext i8 10 to i32
-%22 = icmp slt i32 %20, %21
-br i1 %22, label %.L10, label %.L11
+%32 = load i32, ptr %.87i
+%33 = zext i8 10 to i32
+%34 = icmp slt i32 %32, %33
+br i1 %34, label %.L10, label %.L11
 .L10:
-%23 = load i32, ptr %.8a
-%24 = load i32, ptr %.25i
-%25 =  add i32 %23, %24
-store i32 %25, ptr %.8a
-%26 = load i32, ptr %.25i
-%27 =  add i32 %26, 1
-store i32 %27, ptr %.25i
+%35 = load i32, ptr %.70a
+%36 = load i32, ptr %.87i
+%37 =  add i32 %35, %36
+store i32 %37, ptr %.70a
+%38 = load i32, ptr %.87i
+%39 =  add i32 %38, 1
+store i32 %39, ptr %.87i
 br label %.L9
 .L11:
-%28 = load i32, ptr %.8a
-%29 = load i32, ptr %.16b
-%30 = icmp slt i32 %28, %29
-%31 = load i32, ptr %.8a
-%32 = load i32, ptr %.16b
-%33 = load i32, ptr %.16b
-store i32 %33, ptr %.8a
-%34 = load i32, ptr %.8a
-%35 = load i32, ptr %.16b
-%36 =  add i32 %34, %35
-%37 = zext i8 3 to i32
-store i32 %37, ptr %.8a
-%.33c = alloca double
-store double 3.300000, ptr %.33c
-%38 = load i32, ptr %.8a
-%39 = load double, ptr %.33c
-%40 = sitofp i32 %38 to double
-%41 = fcmp olt double %40, %39
-%42 = load double, ptr %.33c
-%43 = sitofp i32 1 to double
-%44 = fadd double %42, %43
-store double %44, ptr %.33c
-%45 = load i32, ptr %.8a
-%46 = load double, ptr %.33c
-%47 = sitofp i32 %45 to double
-%48 = fadd double %47, %46
-store double %48, ptr %.33c
-%49 = load i32, ptr %.8a
-store i32 %49, ptr @y
-%50 = load i32, ptr @y
-%51 = load i32, ptr @x
-%52 =  sub i32 %50, %51
-store i32 %52, ptr %.8a
-%53 = load i32, ptr %.8a
-%54 = zext i8 3 to i32
-%55 =  mul i32 %53, %54
-%56 = zext i1 1 to i32
-%57 =  sub i32 %55, %56
-store i32 %57, ptr %.16b
-%58 = zext i8 6 to i32
-%59 = call i32 (i32) @fibonachi (i32 %58)
-%60 = load i32, ptr %.16b
-ret i32 %60
+%40 = load i32, ptr %.70a
+%41 = load i32, ptr %.78b
+%42 = icmp slt i32 %40, %41
+%43 = load i32, ptr %.70a
+%44 = load i32, ptr %.78b
+%45 = load i32, ptr %.78b
+store i32 %45, ptr %.70a
+%46 = load i32, ptr %.70a
+%47 = load i32, ptr %.78b
+%48 =  add i32 %46, %47
+%49 = zext i8 3 to i32
+store i32 %49, ptr %.70a
+%.95c = alloca double
+store double 3.300000, ptr %.95c
+%50 = load i32, ptr %.70a
+%51 = load double, ptr %.95c
+%52 = sitofp i32 %50 to double
+%53 = fcmp olt double %52, %51
+%54 = load double, ptr %.95c
+%55 = sitofp i32 1 to double
+%56 = fadd double %54, %55
+store double %56, ptr %.95c
+%57 = load i32, ptr %.70a
+%58 = load double, ptr %.95c
+%59 = sitofp i32 %57 to double
+%60 = fadd double %59, %58
+store double %60, ptr %.95c
+%61 = load i32, ptr %.70a
+store i32 %61, ptr @y
+%62 = load i32, ptr @y
+%63 = load i32, ptr @x
+%64 =  sub i32 %62, %63
+store i32 %64, ptr %.70a
+%65 = load i32, ptr %.70a
+%66 = zext i8 3 to i32
+%67 =  mul i32 %65, %66
+%68 = zext i1 1 to i32
+%69 =  sub i32 %67, %68
+store i32 %69, ptr %.78b
+%70 = zext i8 6 to i32
+%71 = call i32 (i32) @fibonachi (i32 %70)
+%72 = load i32, ptr %.78b
+ret i32 %72
 .retExit0:
 unreachable
 }

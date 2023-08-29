@@ -73,7 +73,7 @@ struct expr *expr_create_floating_point_literal(float f) {
     e->floating_point_value = f;
     return e;
 }
-struct expr *expr_create_string_literal(const char *string) {
+struct expr *expr_create_string_literal(char *string) {
     struct expr *e = expr_create(EXPR_STRING_LITERAL, NULL, NULL);
     e->string_literal = string;
     return e;
@@ -653,7 +653,7 @@ struct type *expr_typecheck(struct expr *e) {
             break;
         case EXPR_SUBSCRIPT:
             if(left->kind == TYPE_ARRAY) {
-                if(right->kind != TYPE_INTEGER) {
+                if(right->kind > TYPE_INTEGER) {
                     print_error_formated(RED"Error "
                         MAG"|array index not an integer|"RESET"->"
                         YEL"|%E;|\n"RESET, e);
