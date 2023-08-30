@@ -5,6 +5,7 @@
 
 unsigned int register_create();
 const char *register_name(int r);
+const char *value_name(struct expr *e);
 
 const char *symbol_irgen(struct symbol *s);
 

@@ -90,6 +90,22 @@ const char *register_name(int r) {
     }
     return name;
 }
+const char *value_name(struct expr *e) {
+    char *name = (char *)calloc(1, sizeof(char));
+    if(e->kind == EXPR_INTEGER_LITERAL) {
+        name = (char *)realloc(name, sizeof(char) * (log10(e->integer_value) + 1));
+        sprintf(name, "%d", e->integer_value);
+        return name;
+    }
+    else if(e->kind == EXPR_FLOATING_POINT_LITERAL) {
+        name = (char *)realloc(name, sizeof(char) + 7);
+        sprintf(name, "%lf", e->floating_point_value);
+        return name;
+    }
+    else {
+        return register_name(e->reg);
+    }
+}
 
 const char *symbol_irgen(struct symbol *s) {
     char *name;
@@ -603,23 +619,33 @@ void expr_irgen(struct expr *e) {
             break;
         case EXPR_AND ... EXPR_OR:
         {
-            e->kind = e->kind == EXPR_AND ? EXPR_NOT_EQUAL : EXPR_EQUAL;
+            expr_t temp_kind = EXPR_NOT_EQUAL;
             struct type *check_expr_type = type_create(TYPE_INTEGER, 0, 0, 0);
             struct type *temp_expr_type = type_copy(e->type);
 
             struct expr *check_expr = expr_create_integer_literal(0);
             check_expr->type = check_expr_type;
 
-            struct expr *temp_expr = expr_create(e->kind, e->left, check_expr);
+            struct expr *temp_expr = expr_create(temp_kind, e->left, check_expr);
             temp_expr->type = temp_expr_type;
             e->left = temp_expr;
 
-            temp_expr = expr_create(e->kind, e->right, check_expr);
+            temp_expr = expr_create(temp_kind, e->right, check_expr);
             temp_expr->type = temp_expr_type;
             e->right = temp_expr;
 
-            e->kind = e->kind == EXPR_NOT_EQUAL ? EXPR_EQUAL : EXPR_NOT_EQUAL;
-            expr_irgen(e);
+            expr_irgen(e->left);
+            expr_irgen(e->right);
+
+            e->reg = register_create();
+            if(e->kind == EXPR_AND) 
+                fprintf(result_file, "%s = and i1 %s, %s\n", register_name(e->reg), 
+                            register_name(e->left->reg), 
+                            register_name(e->right->reg));
+            else 
+                fprintf(result_file, "%s = or i1 %s, %s\n", register_name(e->reg), 
+                            register_name(e->left->reg), 
+                            register_name(e->right->reg));
             break;
         }
         case EXPR_NOT:
