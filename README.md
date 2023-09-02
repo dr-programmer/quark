@@ -12,7 +12,7 @@ The structure of the Quark compiler is as follows:
   9. **Code generator** --> Generates assembly instruction from the high level IR
      - Technically there are two codegenerators - a _production_ and _debug_: the first one generates LLVM assembly and **is highly optimized**, and the second one generates directly X86 assembly but with **no low level optimizations**. Thus the _production_ codegenerator has longer compile-time but faster run-time and the _debug_ codegenerator has faster compile-time but longer run-time.
      - Written in **C** and **LLVM assembly / X86 assembly**
-  - ***Important notice*** - To be exact, the **Optimizer** and the **Code generator** are implemented simultaneously.
+  > ***Important notice*** - To be exact, the **Optimizer** and the **Code generator** are implemented simultaneously.
 
 ## Build dependencies
 The following must be installed in order to build the Quark compiler
@@ -22,4 +22,4 @@ The following must be installed in order to build the Quark compiler
  - `flex` - For linux: `sudo apt install flex`
  - `bison` - For linux: `sudo apt install bison`
 
- - ***Important notice*** - If you are on linux, make sure to run `sudo apt update` and then `sudo apt upgrade` before installing any of the dependencies.
+ > ***Important notice*** - If you are on linux, make sure to run `sudo apt update` and then `sudo apt upgrade` before installing any of the dependencies.
