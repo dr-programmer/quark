@@ -27,7 +27,7 @@ struct decl *parser_result;
 %type <decl> program decl_list decl
 %type <stmt> stmt_list stmt
 %type <expr> expr expr_list next_expr term factor starting_expr
-%type <expr> assignment_algebra algebra logical_algebra comparison_algebra
+%type <expr> assignment_algebra algebra logical_algebra comparison_algebra assignable
 %type <type> type
 %type <params> parameters parameter list_of_parameters
 
@@ -176,21 +176,27 @@ term    : term TOKEN_MUL factor { $$ = expr_create(EXPR_MUL, $1, $3); }
         | factor                { $$ = $1; }
         ;
 
+assignable
+        : name          { $$ = expr_create_name($1); }
+        | name TOKEN_SUBSCRIPT factor
+                        { $$ = expr_create(EXPR_SUBSCRIPT, expr_create_name($1), $3); }
+        ;
+
 assignment_algebra
-        : name TOKEN_ASSIGN algebra
-                                { $$ = expr_create(EXPR_ASSIGN, expr_create_name($1), $3); }
-        | name TOKEN_ADD_WITH algebra
-                                { $$ = expr_create(EXPR_ADD_WITH, expr_create_name($1), $3); }
-        | name TOKEN_SUB_WITH algebra
-                                { $$ = expr_create(EXPR_SUB_WITH, expr_create_name($1), $3); }
-        | name TOKEN_MUL_WITH algebra
-                                { $$ = expr_create(EXPR_MUL_WITH, expr_create_name($1), $3); }
-        | name TOKEN_DIV_WITH algebra
-                                { $$ = expr_create(EXPR_DIV_WITH, expr_create_name($1), $3); }
-        | name TOKEN_INCREMENT  { $$ = expr_create(EXPR_INCREMENT, expr_create_name($1), 0); }
-        | name TOKEN_DECREMENT  { $$ = expr_create(EXPR_DECREMENT, expr_create_name($1), 0); }
-        | TOKEN_INCREMENT name  { $$ = expr_create(EXPR_INCREMENT, 0, expr_create_name($2)); }
-        | TOKEN_DECREMENT name  { $$ = expr_create(EXPR_DECREMENT, 0, expr_create_name($2)); }
+        : assignable TOKEN_ASSIGN algebra
+                                { $$ = expr_create(EXPR_ASSIGN, $1, $3); }
+        | assignable TOKEN_ADD_WITH algebra
+                                { $$ = expr_create(EXPR_ADD_WITH, $1, $3); }
+        | assignable TOKEN_SUB_WITH algebra
+                                { $$ = expr_create(EXPR_SUB_WITH, $1, $3); }
+        | assignable TOKEN_MUL_WITH algebra
+                                { $$ = expr_create(EXPR_MUL_WITH, $1, $3); }
+        | assignable TOKEN_DIV_WITH algebra
+                                { $$ = expr_create(EXPR_DIV_WITH, $1, $3); }
+        | assignable TOKEN_INCREMENT  { $$ = expr_create(EXPR_INCREMENT, $1, 0); }
+        | assignable TOKEN_DECREMENT  { $$ = expr_create(EXPR_DECREMENT, $1, 0); }
+        | TOKEN_INCREMENT assignable  { $$ = expr_create(EXPR_INCREMENT, 0, $2); }
+        | TOKEN_DECREMENT assignable  { $$ = expr_create(EXPR_DECREMENT, 0, $2); }
         ;
 
 algebra : algebra TOKEN_PLUS term       { $$ = expr_create(EXPR_ADD, $1, $3); }
@@ -202,8 +208,8 @@ algebra : algebra TOKEN_PLUS term       { $$ = expr_create(EXPR_ADD, $1, $3); }
 starting_expr
         : assignment_algebra    { $$ = $1; }
         | logical_algebra       { $$ = $1; }
-        | name TOKEN_ASSIGN assignment_algebra
-                                { $$ = expr_create(EXPR_ASSIGN, expr_create_name($1), $3); }
+        | assignable TOKEN_ASSIGN assignment_algebra
+                                { $$ = expr_create(EXPR_ASSIGN, $1, $3); }
         ;
 
 factor  : name                  { $$ = expr_create_name($1); }

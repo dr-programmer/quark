@@ -15,9 +15,23 @@ extern Stack symbol_table;
 FILE *result_file;
 
 unsigned short debug;
+unsigned short show_pcode;
+
+#define BUFFER_SIZE 128
 
 int main(int argc, char **argv)
 {
+    char *open_pipe = "llvm-config --host-target";
+    FILE *pipe = popen(open_pipe, "r");
+    char architecture[BUFFER_SIZE] = {0};
+    if(pipe == NULL) {
+        printf("Cannot open pipe!\n");
+        exit(ERROR_OPENING_FILE);
+    }
+    fgets(architecture, BUFFER_SIZE, pipe);
+    char *new_row_target = strchr(architecture, '\n');
+    *new_row_target = '\0';
+    pclose(pipe);
     yyin = fopen(argv[1], "r");
     if (yyin == NULL) {
         printf("Cannot open file \n");
@@ -31,6 +45,12 @@ int main(int argc, char **argv)
         else if(!strcmp(argv[i], "-o")) {
             name_of_file = argv[i+1];
         }
+        else if(!strcmp(argv[i], "--show-offset")) {
+            show_stack_offset = 1;
+        }
+        else if(!strcmp(argv[i], "--show-pcode")) {
+            show_pcode = 1;
+        }
     }
     printf("Name of result file = "CYN"%s"RESET" \n", name_of_file);
     char *temp_file = (char *)calloc(strlen(name_of_file) + 3, sizeof(char));
@@ -40,7 +60,7 @@ int main(int argc, char **argv)
     result_file = fopen(temp_file, "w");
     if(yyparse() == 0) {
         printf("Parse "GRN"successful"RESET"! \n");
-        decl_print(parser_result, 0);
+        if(show_pcode) decl_print(parser_result, 0);
 
         symbol_table = initStack();
         scope_enter();
@@ -52,6 +72,7 @@ int main(int argc, char **argv)
                 decl_codegen(parser_result);
             }
             else {
+                fprintf(result_file, "target triple = \"%s\"\n", architecture);
                 fprintf(result_file, "declare i32 @printf (ptr, ...)\n");
                 decl_irgen(parser_result);
             }
@@ -73,7 +94,8 @@ int main(int argc, char **argv)
             system(temp_string);
         }
         else {
-            sprintf(temp_string, "clang %s -o %s", temp_file, name_of_file);
+            sprintf(temp_string, "clang %s -O2 -o %s", 
+                        temp_file, name_of_file);
             system(temp_string);
         }
     }

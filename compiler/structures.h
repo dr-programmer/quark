@@ -173,6 +173,8 @@ void type_delete(struct type *t);
 void param_list_delete(struct param_list *p);
 
 extern unsigned int error_count;
+extern unsigned short show_stack_offset;
+extern unsigned short show_pcode;
 
 void decl_typecheck(struct decl *d);
 void stmt_typecheck(struct stmt *t, 

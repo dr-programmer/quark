@@ -509,13 +509,21 @@ void expr_irgen(struct expr *e) {
             break;
         }
         case EXPR_ASSIGN:
+        {
             expr_irgen(e->right);
             type_cast(e);
+            const char *store_to;
+            if(e->left->symbol == NULL) {
+                expr_irgen(e->left);
+                store_to = register_name(e->left->integer_value);
+            }
+            else store_to = symbol_irgen(e->left->symbol);
             fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(e->type), 
                                     register_name(e->right->reg), 
-                                    symbol_irgen(e->left->symbol));
+                                    store_to);
             e->reg = e->right->reg;
             break;
+        }
         case EXPR_EQUAL ... EXPR_LESS_EQUAL:
         {
             expr_irgen(e->left);
@@ -689,6 +697,7 @@ void expr_irgen(struct expr *e) {
             fprintf(result_file, "%s = load %s, ptr %s\n", register_name(e->reg), 
                         type_irgen(e->left->type->subtype), 
                         register_name(ptr_register));
+            e->integer_value = ptr_register;
             break;
         case EXPR_ARG:
             expr_irgen(e->left);

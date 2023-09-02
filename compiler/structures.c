@@ -272,6 +272,7 @@ void print_tabs(int number_of_tabs) {
 #include <stdarg.h>
 
 unsigned int error_count;
+unsigned short show_stack_offset;
 
 void print_error(const char *error, const char *name) {
     error_count++;
@@ -392,8 +393,10 @@ void expr_resolve(struct expr *e) {
             struct type *temp = type_create(TYPE_INTEGER, 0, 0, 0);
             e->symbol = symbol_create(SYMBOL_LOCAL, temp, NULL);
         }
-        printf("Variable named %s has offset of %d bytes \n", e->name, e->symbol->which);
-        printf("Variable named %s: %s \n", e->name, symbol_codegen(e->symbol));
+        if(show_stack_offset) {
+            printf("Variable named %s has offset of %d bytes \n", e->name, e->symbol->which);
+            printf("Variable named %s: %s \n", e->name, symbol_codegen(e->symbol));
+        }
     }
     else {
         expr_resolve(e->left);

@@ -18,7 +18,10 @@ main[int]() {
     check[int] = arr->5;
     ??printINT(check);
     ??printINT(str->0);
-    a[int] = 5 + 3 - 2;
+    a[int] = arr->4 + 3 - 2;
+    arr->4 = 8;
+    printINT(arr->4);
+    printINT(a);
     b[int] = 6;
     temp[bool];
     temp = 1;

@@ -6,7 +6,7 @@ Terminals unused in grammar
     TOKEN_ERROR
 
 
-State 150 conflicts: 1 shift/reduce
+State 156 conflicts: 1 shift/reduce
 
 
 Grammar
@@ -43,81 +43,84 @@ Grammar
    23     | term TOKEN_MODULUS factor
    24     | factor
 
-   25 assignment_algebra: name TOKEN_ASSIGN algebra
-   26                   | name TOKEN_ADD_WITH algebra
-   27                   | name TOKEN_SUB_WITH algebra
-   28                   | name TOKEN_MUL_WITH algebra
-   29                   | name TOKEN_DIV_WITH algebra
-   30                   | name TOKEN_INCREMENT
-   31                   | name TOKEN_DECREMENT
-   32                   | TOKEN_INCREMENT name
-   33                   | TOKEN_DECREMENT name
+   25 assignable: name
+   26           | name TOKEN_SUBSCRIPT factor
 
-   34 algebra: algebra TOKEN_PLUS term
-   35        | algebra TOKEN_MINUS term
-   36        | comparison_algebra
-   37        | term
+   27 assignment_algebra: assignable TOKEN_ASSIGN algebra
+   28                   | assignable TOKEN_ADD_WITH algebra
+   29                   | assignable TOKEN_SUB_WITH algebra
+   30                   | assignable TOKEN_MUL_WITH algebra
+   31                   | assignable TOKEN_DIV_WITH algebra
+   32                   | assignable TOKEN_INCREMENT
+   33                   | assignable TOKEN_DECREMENT
+   34                   | TOKEN_INCREMENT assignable
+   35                   | TOKEN_DECREMENT assignable
 
-   38 starting_expr: assignment_algebra
-   39              | logical_algebra
-   40              | name TOKEN_ASSIGN assignment_algebra
+   36 algebra: algebra TOKEN_PLUS term
+   37        | algebra TOKEN_MINUS term
+   38        | comparison_algebra
+   39        | term
 
-   41 factor: name
-   42       | TOKEN_INTEGER_LITERAL
-   43       | TOKEN_FLOATING_POINT_LITERAL
-   44       | string_literal
-   45       | boolean_literal
-   46       | char_literal
-   47       | TOKEN_MINUS factor
-   48       | TOKEN_NOT factor
-   49       | name TOKEN_LPAREN expr_list TOKEN_RPAREN
-   50       | name TOKEN_SUBSCRIPT factor
-   51       | TOKEN_LPAREN expr TOKEN_RPAREN
+   40 starting_expr: assignment_algebra
+   41              | logical_algebra
+   42              | assignable TOKEN_ASSIGN assignment_algebra
 
-   52 comparison_algebra: algebra TOKEN_EQUAL term
-   53                   | algebra TOKEN_NOT_EQUAL term
-   54                   | algebra TOKEN_LESS term
-   55                   | algebra TOKEN_GREATER term
-   56                   | algebra TOKEN_LESS_EQUAL term
-   57                   | algebra TOKEN_GREATER_EQUAL term
+   43 factor: name
+   44       | TOKEN_INTEGER_LITERAL
+   45       | TOKEN_FLOATING_POINT_LITERAL
+   46       | string_literal
+   47       | boolean_literal
+   48       | char_literal
+   49       | TOKEN_MINUS factor
+   50       | TOKEN_NOT factor
+   51       | name TOKEN_LPAREN expr_list TOKEN_RPAREN
+   52       | name TOKEN_SUBSCRIPT factor
+   53       | TOKEN_LPAREN expr TOKEN_RPAREN
 
-   58 logical_algebra: expr TOKEN_AND algebra
-   59                | expr TOKEN_OR algebra
+   54 comparison_algebra: algebra TOKEN_EQUAL term
+   55                   | algebra TOKEN_NOT_EQUAL term
+   56                   | algebra TOKEN_LESS term
+   57                   | algebra TOKEN_GREATER term
+   58                   | algebra TOKEN_LESS_EQUAL term
+   59                   | algebra TOKEN_GREATER_EQUAL term
 
-   60 expr: starting_expr
-   61     | algebra
+   60 logical_algebra: expr TOKEN_AND algebra
+   61                | expr TOKEN_OR algebra
 
-   62 expr_list: expr next_expr
-   63          | ε
+   62 expr: starting_expr
+   63     | algebra
 
-   64 next_expr: TOKEN_COMMA expr_list
+   64 expr_list: expr next_expr
    65          | ε
 
-   66 name: TOKEN_IDENT
+   66 next_expr: TOKEN_COMMA expr_list
+   67          | ε
 
-   67 string_literal: TOKEN_STRING_LITERAL
+   68 name: TOKEN_IDENT
 
-   68 boolean_literal: TOKEN_TRUE
-   69                | TOKEN_FALSE
+   69 string_literal: TOKEN_STRING_LITERAL
 
-   70 char_literal: TOKEN_CHAR_LITERAL
+   70 boolean_literal: TOKEN_TRUE
+   71                | TOKEN_FALSE
 
-   71 allocation_size: TOKEN_INTEGER_LITERAL
-   72                | TOKEN_UNKNOWN
+   72 char_literal: TOKEN_CHAR_LITERAL
 
-   73 parameter: name TOKEN_LSQBR type TOKEN_RSQBR
+   73 allocation_size: TOKEN_INTEGER_LITERAL
+   74                | TOKEN_UNKNOWN
 
-   74 parameters: parameter list_of_parameters
-   75           | ε
+   75 parameter: name TOKEN_LSQBR type TOKEN_RSQBR
 
-   76 list_of_parameters: TOKEN_COMMA parameters
-   77                   | ε
+   76 parameters: parameter list_of_parameters
+   77           | ε
 
-   78 type: TOKEN_INT
-   79     | TOKEN_CHAR
-   80     | TOKEN_BOOL
-   81     | TOKEN_FLOAT
-   82     | TOKEN_VOID
+   78 list_of_parameters: TOKEN_COMMA parameters
+   79                   | ε
+
+   80 type: TOKEN_INT
+   81     | TOKEN_CHAR
+   82     | TOKEN_BOOL
+   83     | TOKEN_FLOAT
+   84     | TOKEN_VOID
 
 
 Terminals, with rules where they appear
@@ -127,55 +130,55 @@ Terminals, with rules where they appear
     TOKEN_PRINT_IN (258) 18
     TOKEN_STDIN (259) 18
     TOKEN_ALLOCATE (260) 4 5 6
-    TOKEN_SUBSCRIPT (261) 50
+    TOKEN_SUBSCRIPT (261) 26 52
     TOKEN_UP (262) 17
-    TOKEN_AND (263) 58
-    TOKEN_OR (264) 59
-    TOKEN_NOT (265) 48
-    TOKEN_UNKNOWN (266) 72
+    TOKEN_AND (263) 60
+    TOKEN_OR (264) 61
+    TOKEN_NOT (265) 50
+    TOKEN_UNKNOWN (266) 74
     TOKEN_GIVE (267) 16 17 18
     TOKEN_IF (268) 10 11
     TOKEN_ELSE (269) 11
     TOKEN_WHILE (270)
     TOKEN_FOR (271) 12
     TOKEN_DO (272)
-    TOKEN_CHAR (273) 79
-    TOKEN_INT (274) 78
-    TOKEN_FLOAT (275) 81
-    TOKEN_BOOL (276) 80
-    TOKEN_VOID (277) 82
-    TOKEN_TRUE (278) 68
-    TOKEN_FALSE (279) 69
-    TOKEN_CHAR_LITERAL (280) 70
-    TOKEN_INTEGER_LITERAL (281) 42 71
-    TOKEN_FLOATING_POINT_LITERAL (282) 43
-    TOKEN_IDENT (283) 66
-    TOKEN_STRING_LITERAL (284) 67
-    TOKEN_PLUS (285) 34
-    TOKEN_MINUS (286) 35 47
+    TOKEN_CHAR (273) 81
+    TOKEN_INT (274) 80
+    TOKEN_FLOAT (275) 83
+    TOKEN_BOOL (276) 82
+    TOKEN_VOID (277) 84
+    TOKEN_TRUE (278) 70
+    TOKEN_FALSE (279) 71
+    TOKEN_CHAR_LITERAL (280) 72
+    TOKEN_INTEGER_LITERAL (281) 44 73
+    TOKEN_FLOATING_POINT_LITERAL (282) 45
+    TOKEN_IDENT (283) 68
+    TOKEN_STRING_LITERAL (284) 69
+    TOKEN_PLUS (285) 36
+    TOKEN_MINUS (286) 37 49
     TOKEN_MUL (287) 21
     TOKEN_DIV (288) 22
     TOKEN_MODULUS (289) 23
-    TOKEN_ASSIGN (290) 3 5 6 25 40
-    TOKEN_EQUAL (291) 52
-    TOKEN_NOT_EQUAL (292) 53
-    TOKEN_GREATER (293) 55
-    TOKEN_GREATER_EQUAL (294) 57
-    TOKEN_LESS (295) 54
-    TOKEN_LESS_EQUAL (296) 56
-    TOKEN_INCREMENT (297) 30 32
-    TOKEN_DECREMENT (298) 31 33
-    TOKEN_ADD_WITH (299) 26
-    TOKEN_SUB_WITH (300) 27
-    TOKEN_MUL_WITH (301) 28
-    TOKEN_DIV_WITH (302) 29
-    TOKEN_LPAREN (303) 7 10 11 12 49 51
-    TOKEN_RPAREN (304) 7 10 11 12 49 51
+    TOKEN_ASSIGN (290) 3 5 6 27 42
+    TOKEN_EQUAL (291) 54
+    TOKEN_NOT_EQUAL (292) 55
+    TOKEN_GREATER (293) 57
+    TOKEN_GREATER_EQUAL (294) 59
+    TOKEN_LESS (295) 56
+    TOKEN_LESS_EQUAL (296) 58
+    TOKEN_INCREMENT (297) 32 34
+    TOKEN_DECREMENT (298) 33 35
+    TOKEN_ADD_WITH (299) 28
+    TOKEN_SUB_WITH (300) 29
+    TOKEN_MUL_WITH (301) 30
+    TOKEN_DIV_WITH (302) 31
+    TOKEN_LPAREN (303) 7 10 11 12 51 53
+    TOKEN_RPAREN (304) 7 10 11 12 51 53
     TOKEN_LCRBR (305) 6 7 13
     TOKEN_RCRBR (306) 6 7 13
-    TOKEN_LSQBR (307) 2 3 4 5 6 7 73
-    TOKEN_RSQBR (308) 2 3 4 5 6 7 73
-    TOKEN_COMMA (309) 64 76
+    TOKEN_LSQBR (307) 2 3 4 5 6 7 75
+    TOKEN_RSQBR (308) 2 3 4 5 6 7 75
+    TOKEN_COMMA (309) 66 78
     TOKEN_COLON (310)
     TOKEN_SEMI (311) 2 3 4 5 6 12 15 16 17 18
     TOKEN_ERROR (312)
@@ -202,61 +205,64 @@ Nonterminals, with rules where they appear
         on right: 7 13 19
     term <expr> (64)
         on left: 21 22 23 24
-        on right: 21 22 23 34 35 37 52 53 54 55 56 57
-    assignment_algebra <expr> (65)
-        on left: 25 26 27 28 29 30 31 32 33
-        on right: 38 40
-    algebra <expr> (66)
-        on left: 34 35 36 37
-        on right: 25 26 27 28 29 34 35 52 53 54 55 56 57 58 59 61
-    starting_expr <expr> (67)
-        on left: 38 39 40
-        on right: 60
-    factor <expr> (68)
-        on left: 41 42 43 44 45 46 47 48 49 50 51
-        on right: 21 22 23 24 47 48 50
-    comparison_algebra <expr> (69)
-        on left: 52 53 54 55 56 57
-        on right: 36
-    logical_algebra <expr> (70)
-        on left: 58 59
-        on right: 39
-    expr <expr> (71)
-        on left: 60 61
-        on right: 3 10 11 12 15 16 18 51 58 59 62
-    expr_list <expr> (72)
-        on left: 62 63
-        on right: 6 12 49 64
-    next_expr <expr> (73)
-        on left: 64 65
+        on right: 21 22 23 36 37 39 54 55 56 57 58 59
+    assignable <expr> (65)
+        on left: 25 26
+        on right: 27 28 29 30 31 32 33 34 35 42
+    assignment_algebra <expr> (66)
+        on left: 27 28 29 30 31 32 33 34 35
+        on right: 40 42
+    algebra <expr> (67)
+        on left: 36 37 38 39
+        on right: 27 28 29 30 31 36 37 54 55 56 57 58 59 60 61 63
+    starting_expr <expr> (68)
+        on left: 40 41 42
         on right: 62
-    name <name> (74)
-        on left: 66
-        on right: 2 3 4 5 6 7 25 26 27 28 29 30 31 32 33 40 41 49 50 73
-    string_literal <name> (75)
-        on left: 67
-        on right: 5 44
-    boolean_literal <integer> (76)
-        on left: 68 69
-        on right: 45
-    char_literal <integer> (77)
-        on left: 70
-        on right: 46
-    allocation_size <integer> (78)
-        on left: 71 72
+    factor <expr> (69)
+        on left: 43 44 45 46 47 48 49 50 51 52 53
+        on right: 21 22 23 24 26 49 50 52
+    comparison_algebra <expr> (70)
+        on left: 54 55 56 57 58 59
+        on right: 38
+    logical_algebra <expr> (71)
+        on left: 60 61
+        on right: 41
+    expr <expr> (72)
+        on left: 62 63
+        on right: 3 10 11 12 15 16 18 53 60 61 64
+    expr_list <expr> (73)
+        on left: 64 65
+        on right: 6 12 51 66
+    next_expr <expr> (74)
+        on left: 66 67
+        on right: 64
+    name <name> (75)
+        on left: 68
+        on right: 2 3 4 5 6 7 25 26 43 51 52 75
+    string_literal <name> (76)
+        on left: 69
+        on right: 5 46
+    boolean_literal <integer> (77)
+        on left: 70 71
+        on right: 47
+    char_literal <integer> (78)
+        on left: 72
+        on right: 48
+    allocation_size <integer> (79)
+        on left: 73 74
         on right: 4 5 6
-    parameter <params> (79)
-        on left: 73
-        on right: 74
-    parameters <params> (80)
-        on left: 74 75
-        on right: 7 76
-    list_of_parameters <params> (81)
+    parameter <params> (80)
+        on left: 75
+        on right: 76
+    parameters <params> (81)
         on left: 76 77
-        on right: 74
-    type <type> (82)
-        on left: 78 79 80 81 82
-        on right: 2 3 4 5 6 7 73
+        on right: 7 78
+    list_of_parameters <params> (82)
+        on left: 78 79
+        on right: 76
+    type <type> (83)
+        on left: 80 81 82 83 84
+        on right: 2 3 4 5 6 7 75
 
 
 State 0
@@ -275,9 +281,9 @@ State 0
 
 State 1
 
-   66 name: TOKEN_IDENT •
+   68 name: TOKEN_IDENT •
 
-    $default  reduce using rule 66 (name)
+    $default  reduce using rule 68 (name)
 
 
 State 2
@@ -353,37 +359,37 @@ State 8
 
 State 9
 
-   79 type: TOKEN_CHAR •
-
-    $default  reduce using rule 79 (type)
-
-
-State 10
-
-   78 type: TOKEN_INT •
-
-    $default  reduce using rule 78 (type)
-
-
-State 11
-
-   81 type: TOKEN_FLOAT •
+   81 type: TOKEN_CHAR •
 
     $default  reduce using rule 81 (type)
 
 
-State 12
+State 10
 
-   80 type: TOKEN_BOOL •
+   80 type: TOKEN_INT •
 
     $default  reduce using rule 80 (type)
 
 
-State 13
+State 11
 
-   82 type: TOKEN_VOID •
+   83 type: TOKEN_FLOAT •
+
+    $default  reduce using rule 83 (type)
+
+
+State 12
+
+   82 type: TOKEN_BOOL •
 
     $default  reduce using rule 82 (type)
+
+
+State 13
+
+   84 type: TOKEN_VOID •
+
+    $default  reduce using rule 84 (type)
 
 
 State 14
@@ -443,17 +449,18 @@ State 17
     TOKEN_LPAREN                  shift, and go to state 33
 
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 41
-    name                go to state 42
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 42
+    name                go to state 43
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
 State 18
@@ -462,11 +469,11 @@ State 18
 
     TOKEN_IDENT  shift, and go to state 1
 
-    $default  reduce using rule 75 (parameters)
+    $default  reduce using rule 77 (parameters)
 
-    name        go to state 46
-    parameter   go to state 47
-    parameters  go to state 48
+    name        go to state 47
+    parameter   go to state 48
+    parameters  go to state 49
 
 
 State 19
@@ -478,16 +485,16 @@ State 19
 
 State 20
 
-   72 allocation_size: TOKEN_UNKNOWN •
+   74 allocation_size: TOKEN_UNKNOWN •
 
-    $default  reduce using rule 72 (allocation_size)
+    $default  reduce using rule 74 (allocation_size)
 
 
 State 21
 
-   71 allocation_size: TOKEN_INTEGER_LITERAL •
+   73 allocation_size: TOKEN_INTEGER_LITERAL •
 
-    $default  reduce using rule 71 (allocation_size)
+    $default  reduce using rule 73 (allocation_size)
 
 
 State 22
@@ -496,13 +503,13 @@ State 22
     5     | name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size • TOKEN_ASSIGN string_literal TOKEN_SEMI
     6     | name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size • TOKEN_ASSIGN TOKEN_LCRBR expr_list TOKEN_RCRBR TOKEN_SEMI
 
-    TOKEN_ASSIGN  shift, and go to state 49
-    TOKEN_SEMI    shift, and go to state 50
+    TOKEN_ASSIGN  shift, and go to state 50
+    TOKEN_SEMI    shift, and go to state 51
 
 
 State 23
 
-   48 factor: TOKEN_NOT • factor
+   50 factor: TOKEN_NOT • factor
 
     TOKEN_NOT                     shift, and go to state 23
     TOKEN_TRUE                    shift, and go to state 24
@@ -515,58 +522,58 @@ State 23
     TOKEN_MINUS                   shift, and go to state 30
     TOKEN_LPAREN                  shift, and go to state 33
 
-    factor           go to state 51
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
+    factor           go to state 52
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
 
 
 State 24
 
-   68 boolean_literal: TOKEN_TRUE •
+   70 boolean_literal: TOKEN_TRUE •
 
-    $default  reduce using rule 68 (boolean_literal)
+    $default  reduce using rule 70 (boolean_literal)
 
 
 State 25
 
-   69 boolean_literal: TOKEN_FALSE •
+   71 boolean_literal: TOKEN_FALSE •
 
-    $default  reduce using rule 69 (boolean_literal)
+    $default  reduce using rule 71 (boolean_literal)
 
 
 State 26
 
-   70 char_literal: TOKEN_CHAR_LITERAL •
+   72 char_literal: TOKEN_CHAR_LITERAL •
 
-    $default  reduce using rule 70 (char_literal)
+    $default  reduce using rule 72 (char_literal)
 
 
 State 27
 
-   42 factor: TOKEN_INTEGER_LITERAL •
+   44 factor: TOKEN_INTEGER_LITERAL •
 
-    $default  reduce using rule 42 (factor)
+    $default  reduce using rule 44 (factor)
 
 
 State 28
 
-   43 factor: TOKEN_FLOATING_POINT_LITERAL •
+   45 factor: TOKEN_FLOATING_POINT_LITERAL •
 
-    $default  reduce using rule 43 (factor)
+    $default  reduce using rule 45 (factor)
 
 
 State 29
 
-   67 string_literal: TOKEN_STRING_LITERAL •
+   69 string_literal: TOKEN_STRING_LITERAL •
 
-    $default  reduce using rule 67 (string_literal)
+    $default  reduce using rule 69 (string_literal)
 
 
 State 30
 
-   47 factor: TOKEN_MINUS • factor
+   49 factor: TOKEN_MINUS • factor
 
     TOKEN_NOT                     shift, and go to state 23
     TOKEN_TRUE                    shift, and go to state 24
@@ -579,34 +586,36 @@ State 30
     TOKEN_MINUS                   shift, and go to state 30
     TOKEN_LPAREN                  shift, and go to state 33
 
-    factor           go to state 53
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
+    factor           go to state 54
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
 
 
 State 31
 
-   32 assignment_algebra: TOKEN_INCREMENT • name
+   34 assignment_algebra: TOKEN_INCREMENT • assignable
 
     TOKEN_IDENT  shift, and go to state 1
 
-    name  go to state 54
+    assignable  go to state 55
+    name        go to state 56
 
 
 State 32
 
-   33 assignment_algebra: TOKEN_DECREMENT • name
+   35 assignment_algebra: TOKEN_DECREMENT • assignable
 
     TOKEN_IDENT  shift, and go to state 1
 
-    name  go to state 55
+    assignable  go to state 57
+    name        go to state 56
 
 
 State 33
 
-   51 factor: TOKEN_LPAREN • expr TOKEN_RPAREN
+   53 factor: TOKEN_LPAREN • expr TOKEN_RPAREN
 
     TOKEN_NOT                     shift, and go to state 23
     TOKEN_TRUE                    shift, and go to state 24
@@ -622,17 +631,18 @@ State 33
     TOKEN_LPAREN                  shift, and go to state 33
 
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 56
-    name                go to state 42
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 58
+    name                go to state 43
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
 State 34
@@ -640,228 +650,252 @@ State 34
    21 term: term • TOKEN_MUL factor
    22     | term • TOKEN_DIV factor
    23     | term • TOKEN_MODULUS factor
-   37 algebra: term •
+   39 algebra: term •
 
-    TOKEN_MUL      shift, and go to state 57
-    TOKEN_DIV      shift, and go to state 58
-    TOKEN_MODULUS  shift, and go to state 59
+    TOKEN_MUL      shift, and go to state 59
+    TOKEN_DIV      shift, and go to state 60
+    TOKEN_MODULUS  shift, and go to state 61
 
-    $default  reduce using rule 37 (algebra)
+    $default  reduce using rule 39 (algebra)
 
 
 State 35
 
-   38 starting_expr: assignment_algebra •
+   27 assignment_algebra: assignable • TOKEN_ASSIGN algebra
+   28                   | assignable • TOKEN_ADD_WITH algebra
+   29                   | assignable • TOKEN_SUB_WITH algebra
+   30                   | assignable • TOKEN_MUL_WITH algebra
+   31                   | assignable • TOKEN_DIV_WITH algebra
+   32                   | assignable • TOKEN_INCREMENT
+   33                   | assignable • TOKEN_DECREMENT
+   42 starting_expr: assignable • TOKEN_ASSIGN assignment_algebra
 
-    $default  reduce using rule 38 (starting_expr)
+    TOKEN_ASSIGN     shift, and go to state 62
+    TOKEN_INCREMENT  shift, and go to state 63
+    TOKEN_DECREMENT  shift, and go to state 64
+    TOKEN_ADD_WITH   shift, and go to state 65
+    TOKEN_SUB_WITH   shift, and go to state 66
+    TOKEN_MUL_WITH   shift, and go to state 67
+    TOKEN_DIV_WITH   shift, and go to state 68
 
 
 State 36
 
-   34 algebra: algebra • TOKEN_PLUS term
-   35        | algebra • TOKEN_MINUS term
-   52 comparison_algebra: algebra • TOKEN_EQUAL term
-   53                   | algebra • TOKEN_NOT_EQUAL term
-   54                   | algebra • TOKEN_LESS term
-   55                   | algebra • TOKEN_GREATER term
-   56                   | algebra • TOKEN_LESS_EQUAL term
-   57                   | algebra • TOKEN_GREATER_EQUAL term
-   61 expr: algebra •
+   40 starting_expr: assignment_algebra •
 
-    TOKEN_PLUS           shift, and go to state 60
-    TOKEN_MINUS          shift, and go to state 61
-    TOKEN_EQUAL          shift, and go to state 62
-    TOKEN_NOT_EQUAL      shift, and go to state 63
-    TOKEN_GREATER        shift, and go to state 64
-    TOKEN_GREATER_EQUAL  shift, and go to state 65
-    TOKEN_LESS           shift, and go to state 66
-    TOKEN_LESS_EQUAL     shift, and go to state 67
-
-    $default  reduce using rule 61 (expr)
+    $default  reduce using rule 40 (starting_expr)
 
 
 State 37
 
-   60 expr: starting_expr •
+   36 algebra: algebra • TOKEN_PLUS term
+   37        | algebra • TOKEN_MINUS term
+   54 comparison_algebra: algebra • TOKEN_EQUAL term
+   55                   | algebra • TOKEN_NOT_EQUAL term
+   56                   | algebra • TOKEN_LESS term
+   57                   | algebra • TOKEN_GREATER term
+   58                   | algebra • TOKEN_LESS_EQUAL term
+   59                   | algebra • TOKEN_GREATER_EQUAL term
+   63 expr: algebra •
 
-    $default  reduce using rule 60 (expr)
+    TOKEN_PLUS           shift, and go to state 69
+    TOKEN_MINUS          shift, and go to state 70
+    TOKEN_EQUAL          shift, and go to state 71
+    TOKEN_NOT_EQUAL      shift, and go to state 72
+    TOKEN_GREATER        shift, and go to state 73
+    TOKEN_GREATER_EQUAL  shift, and go to state 74
+    TOKEN_LESS           shift, and go to state 75
+    TOKEN_LESS_EQUAL     shift, and go to state 76
+
+    $default  reduce using rule 63 (expr)
 
 
 State 38
+
+   62 expr: starting_expr •
+
+    $default  reduce using rule 62 (expr)
+
+
+State 39
 
    24 term: factor •
 
     $default  reduce using rule 24 (term)
 
 
-State 39
-
-   36 algebra: comparison_algebra •
-
-    $default  reduce using rule 36 (algebra)
-
-
 State 40
 
-   39 starting_expr: logical_algebra •
+   38 algebra: comparison_algebra •
 
-    $default  reduce using rule 39 (starting_expr)
+    $default  reduce using rule 38 (algebra)
 
 
 State 41
 
-    3 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ASSIGN expr • TOKEN_SEMI
-   58 logical_algebra: expr • TOKEN_AND algebra
-   59                | expr • TOKEN_OR algebra
+   41 starting_expr: logical_algebra •
 
-    TOKEN_AND   shift, and go to state 68
-    TOKEN_OR    shift, and go to state 69
-    TOKEN_SEMI  shift, and go to state 70
+    $default  reduce using rule 41 (starting_expr)
 
 
 State 42
 
-   25 assignment_algebra: name • TOKEN_ASSIGN algebra
-   26                   | name • TOKEN_ADD_WITH algebra
-   27                   | name • TOKEN_SUB_WITH algebra
-   28                   | name • TOKEN_MUL_WITH algebra
-   29                   | name • TOKEN_DIV_WITH algebra
-   30                   | name • TOKEN_INCREMENT
-   31                   | name • TOKEN_DECREMENT
-   40 starting_expr: name • TOKEN_ASSIGN assignment_algebra
-   41 factor: name •
-   49       | name • TOKEN_LPAREN expr_list TOKEN_RPAREN
-   50       | name • TOKEN_SUBSCRIPT factor
+    3 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ASSIGN expr • TOKEN_SEMI
+   60 logical_algebra: expr • TOKEN_AND algebra
+   61                | expr • TOKEN_OR algebra
 
-    TOKEN_SUBSCRIPT  shift, and go to state 71
-    TOKEN_ASSIGN     shift, and go to state 72
-    TOKEN_INCREMENT  shift, and go to state 73
-    TOKEN_DECREMENT  shift, and go to state 74
-    TOKEN_ADD_WITH   shift, and go to state 75
-    TOKEN_SUB_WITH   shift, and go to state 76
-    TOKEN_MUL_WITH   shift, and go to state 77
-    TOKEN_DIV_WITH   shift, and go to state 78
-    TOKEN_LPAREN     shift, and go to state 79
-
-    $default  reduce using rule 41 (factor)
+    TOKEN_AND   shift, and go to state 77
+    TOKEN_OR    shift, and go to state 78
+    TOKEN_SEMI  shift, and go to state 79
 
 
 State 43
 
-   44 factor: string_literal •
+   25 assignable: name •
+   26           | name • TOKEN_SUBSCRIPT factor
+   43 factor: name •
+   51       | name • TOKEN_LPAREN expr_list TOKEN_RPAREN
+   52       | name • TOKEN_SUBSCRIPT factor
 
-    $default  reduce using rule 44 (factor)
+    TOKEN_SUBSCRIPT  shift, and go to state 80
+    TOKEN_LPAREN     shift, and go to state 81
+
+    TOKEN_ASSIGN     reduce using rule 25 (assignable)
+    TOKEN_INCREMENT  reduce using rule 25 (assignable)
+    TOKEN_DECREMENT  reduce using rule 25 (assignable)
+    TOKEN_ADD_WITH   reduce using rule 25 (assignable)
+    TOKEN_SUB_WITH   reduce using rule 25 (assignable)
+    TOKEN_MUL_WITH   reduce using rule 25 (assignable)
+    TOKEN_DIV_WITH   reduce using rule 25 (assignable)
+    $default         reduce using rule 43 (factor)
 
 
 State 44
 
-   45 factor: boolean_literal •
-
-    $default  reduce using rule 45 (factor)
-
-
-State 45
-
-   46 factor: char_literal •
+   46 factor: string_literal •
 
     $default  reduce using rule 46 (factor)
 
 
+State 45
+
+   47 factor: boolean_literal •
+
+    $default  reduce using rule 47 (factor)
+
+
 State 46
 
-   73 parameter: name • TOKEN_LSQBR type TOKEN_RSQBR
+   48 factor: char_literal •
 
-    TOKEN_LSQBR  shift, and go to state 80
+    $default  reduce using rule 48 (factor)
 
 
 State 47
 
-   74 parameters: parameter • list_of_parameters
+   75 parameter: name • TOKEN_LSQBR type TOKEN_RSQBR
 
-    TOKEN_COMMA  shift, and go to state 81
-
-    $default  reduce using rule 77 (list_of_parameters)
-
-    list_of_parameters  go to state 82
+    TOKEN_LSQBR  shift, and go to state 82
 
 
 State 48
 
-    7 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_LPAREN parameters • TOKEN_RPAREN TOKEN_LCRBR stmt_list TOKEN_RCRBR
+   76 parameters: parameter • list_of_parameters
 
-    TOKEN_RPAREN  shift, and go to state 83
+    TOKEN_COMMA  shift, and go to state 83
+
+    $default  reduce using rule 79 (list_of_parameters)
+
+    list_of_parameters  go to state 84
 
 
 State 49
+
+    7 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_LPAREN parameters • TOKEN_RPAREN TOKEN_LCRBR stmt_list TOKEN_RCRBR
+
+    TOKEN_RPAREN  shift, and go to state 85
+
+
+State 50
 
     5 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_ASSIGN • string_literal TOKEN_SEMI
     6     | name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_ASSIGN • TOKEN_LCRBR expr_list TOKEN_RCRBR TOKEN_SEMI
 
     TOKEN_STRING_LITERAL  shift, and go to state 29
-    TOKEN_LCRBR           shift, and go to state 84
+    TOKEN_LCRBR           shift, and go to state 86
 
-    string_literal  go to state 85
+    string_literal  go to state 87
 
 
-State 50
+State 51
 
     4 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_SEMI •
 
     $default  reduce using rule 4 (decl)
 
 
-State 51
-
-   48 factor: TOKEN_NOT factor •
-
-    $default  reduce using rule 48 (factor)
-
-
 State 52
 
-   41 factor: name •
-   49       | name • TOKEN_LPAREN expr_list TOKEN_RPAREN
-   50       | name • TOKEN_SUBSCRIPT factor
+   50 factor: TOKEN_NOT factor •
 
-    TOKEN_SUBSCRIPT  shift, and go to state 71
-    TOKEN_LPAREN     shift, and go to state 79
-
-    $default  reduce using rule 41 (factor)
+    $default  reduce using rule 50 (factor)
 
 
 State 53
 
-   47 factor: TOKEN_MINUS factor •
+   43 factor: name •
+   51       | name • TOKEN_LPAREN expr_list TOKEN_RPAREN
+   52       | name • TOKEN_SUBSCRIPT factor
 
-    $default  reduce using rule 47 (factor)
+    TOKEN_SUBSCRIPT  shift, and go to state 88
+    TOKEN_LPAREN     shift, and go to state 81
+
+    $default  reduce using rule 43 (factor)
 
 
 State 54
 
-   32 assignment_algebra: TOKEN_INCREMENT name •
+   49 factor: TOKEN_MINUS factor •
 
-    $default  reduce using rule 32 (assignment_algebra)
+    $default  reduce using rule 49 (factor)
 
 
 State 55
 
-   33 assignment_algebra: TOKEN_DECREMENT name •
+   34 assignment_algebra: TOKEN_INCREMENT assignable •
 
-    $default  reduce using rule 33 (assignment_algebra)
+    $default  reduce using rule 34 (assignment_algebra)
 
 
 State 56
 
-   51 factor: TOKEN_LPAREN expr • TOKEN_RPAREN
-   58 logical_algebra: expr • TOKEN_AND algebra
-   59                | expr • TOKEN_OR algebra
+   25 assignable: name •
+   26           | name • TOKEN_SUBSCRIPT factor
 
-    TOKEN_AND     shift, and go to state 68
-    TOKEN_OR      shift, and go to state 69
-    TOKEN_RPAREN  shift, and go to state 86
+    TOKEN_SUBSCRIPT  shift, and go to state 89
+
+    $default  reduce using rule 25 (assignable)
 
 
 State 57
+
+   35 assignment_algebra: TOKEN_DECREMENT assignable •
+
+    $default  reduce using rule 35 (assignment_algebra)
+
+
+State 58
+
+   53 factor: TOKEN_LPAREN expr • TOKEN_RPAREN
+   60 logical_algebra: expr • TOKEN_AND algebra
+   61                | expr • TOKEN_OR algebra
+
+    TOKEN_AND     shift, and go to state 77
+    TOKEN_OR      shift, and go to state 78
+    TOKEN_RPAREN  shift, and go to state 90
+
+
+State 59
 
    21 term: term TOKEN_MUL • factor
 
@@ -876,14 +910,14 @@ State 57
     TOKEN_MINUS                   shift, and go to state 30
     TOKEN_LPAREN                  shift, and go to state 33
 
-    factor           go to state 87
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
+    factor           go to state 91
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
 
 
-State 58
+State 60
 
    22 term: term TOKEN_DIV • factor
 
@@ -898,14 +932,14 @@ State 58
     TOKEN_MINUS                   shift, and go to state 30
     TOKEN_LPAREN                  shift, and go to state 33
 
-    factor           go to state 88
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
+    factor           go to state 92
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
 
 
-State 59
+State 61
 
    23 term: term TOKEN_MODULUS • factor
 
@@ -920,62 +954,17 @@ State 59
     TOKEN_MINUS                   shift, and go to state 30
     TOKEN_LPAREN                  shift, and go to state 33
 
-    factor           go to state 89
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
-
-
-State 60
-
-   34 algebra: algebra TOKEN_PLUS • term
-
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    term             go to state 90
-    factor           go to state 38
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
-
-
-State 61
-
-   35 algebra: algebra TOKEN_MINUS • term
-
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    term             go to state 91
-    factor           go to state 38
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
+    factor           go to state 93
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
 
 
 State 62
 
-   52 comparison_algebra: algebra TOKEN_EQUAL • term
+   27 assignment_algebra: assignable TOKEN_ASSIGN • algebra
+   42 starting_expr: assignable TOKEN_ASSIGN • assignment_algebra
 
     TOKEN_NOT                     shift, and go to state 23
     TOKEN_TRUE                    shift, and go to state 24
@@ -986,65 +975,39 @@ State 62
     TOKEN_IDENT                   shift, and go to state 1
     TOKEN_STRING_LITERAL          shift, and go to state 29
     TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_INCREMENT               shift, and go to state 31
+    TOKEN_DECREMENT               shift, and go to state 32
     TOKEN_LPAREN                  shift, and go to state 33
 
-    term             go to state 92
-    factor           go to state 38
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
+    term                go to state 34
+    assignable          go to state 94
+    assignment_algebra  go to state 95
+    algebra             go to state 96
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    name                go to state 43
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
 State 63
 
-   53 comparison_algebra: algebra TOKEN_NOT_EQUAL • term
+   32 assignment_algebra: assignable TOKEN_INCREMENT •
 
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    term             go to state 93
-    factor           go to state 38
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
+    $default  reduce using rule 32 (assignment_algebra)
 
 
 State 64
 
-   55 comparison_algebra: algebra TOKEN_GREATER • term
+   33 assignment_algebra: assignable TOKEN_DECREMENT •
 
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    term             go to state 94
-    factor           go to state 38
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
+    $default  reduce using rule 33 (assignment_algebra)
 
 
 State 65
 
-   57 comparison_algebra: algebra TOKEN_GREATER_EQUAL • term
+   28 assignment_algebra: assignable TOKEN_ADD_WITH • algebra
 
     TOKEN_NOT                     shift, and go to state 23
     TOKEN_TRUE                    shift, and go to state 24
@@ -1057,63 +1020,19 @@ State 65
     TOKEN_MINUS                   shift, and go to state 30
     TOKEN_LPAREN                  shift, and go to state 33
 
-    term             go to state 95
-    factor           go to state 38
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
+    term                go to state 34
+    algebra             go to state 97
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    name                go to state 53
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
 State 66
 
-   54 comparison_algebra: algebra TOKEN_LESS • term
-
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    term             go to state 96
-    factor           go to state 38
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
-
-
-State 67
-
-   56 comparison_algebra: algebra TOKEN_LESS_EQUAL • term
-
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    term             go to state 97
-    factor           go to state 38
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
-
-
-State 68
-
-   58 logical_algebra: expr TOKEN_AND • algebra
+   29 assignment_algebra: assignable TOKEN_SUB_WITH • algebra
 
     TOKEN_NOT                     shift, and go to state 23
     TOKEN_TRUE                    shift, and go to state 24
@@ -1128,17 +1047,17 @@ State 68
 
     term                go to state 34
     algebra             go to state 98
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    name                go to state 52
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    name                go to state 53
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 69
+State 67
 
-   59 logical_algebra: expr TOKEN_OR • algebra
+   30 assignment_algebra: assignable TOKEN_MUL_WITH • algebra
 
     TOKEN_NOT                     shift, and go to state 23
     TOKEN_TRUE                    shift, and go to state 24
@@ -1153,223 +1072,341 @@ State 69
 
     term                go to state 34
     algebra             go to state 99
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    name                go to state 52
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    name                go to state 53
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
+
+
+State 68
+
+   31 assignment_algebra: assignable TOKEN_DIV_WITH • algebra
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    term                go to state 34
+    algebra             go to state 100
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    name                go to state 53
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
+
+
+State 69
+
+   36 algebra: algebra TOKEN_PLUS • term
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    term             go to state 101
+    factor           go to state 39
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
 
 
 State 70
+
+   37 algebra: algebra TOKEN_MINUS • term
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    term             go to state 102
+    factor           go to state 39
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
+
+
+State 71
+
+   54 comparison_algebra: algebra TOKEN_EQUAL • term
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    term             go to state 103
+    factor           go to state 39
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
+
+
+State 72
+
+   55 comparison_algebra: algebra TOKEN_NOT_EQUAL • term
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    term             go to state 104
+    factor           go to state 39
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
+
+
+State 73
+
+   57 comparison_algebra: algebra TOKEN_GREATER • term
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    term             go to state 105
+    factor           go to state 39
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
+
+
+State 74
+
+   59 comparison_algebra: algebra TOKEN_GREATER_EQUAL • term
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    term             go to state 106
+    factor           go to state 39
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
+
+
+State 75
+
+   56 comparison_algebra: algebra TOKEN_LESS • term
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    term             go to state 107
+    factor           go to state 39
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
+
+
+State 76
+
+   58 comparison_algebra: algebra TOKEN_LESS_EQUAL • term
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    term             go to state 108
+    factor           go to state 39
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
+
+
+State 77
+
+   60 logical_algebra: expr TOKEN_AND • algebra
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    term                go to state 34
+    algebra             go to state 109
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    name                go to state 53
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
+
+
+State 78
+
+   61 logical_algebra: expr TOKEN_OR • algebra
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    term                go to state 34
+    algebra             go to state 110
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    name                go to state 53
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
+
+
+State 79
 
     3 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ASSIGN expr TOKEN_SEMI •
 
     $default  reduce using rule 3 (decl)
 
 
-State 71
-
-   50 factor: name TOKEN_SUBSCRIPT • factor
-
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    factor           go to state 100
-    name             go to state 52
-    string_literal   go to state 43
-    boolean_literal  go to state 44
-    char_literal     go to state 45
-
-
-State 72
-
-   25 assignment_algebra: name TOKEN_ASSIGN • algebra
-   40 starting_expr: name TOKEN_ASSIGN • assignment_algebra
-
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_INCREMENT               shift, and go to state 31
-    TOKEN_DECREMENT               shift, and go to state 32
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    term                go to state 34
-    assignment_algebra  go to state 101
-    algebra             go to state 102
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    name                go to state 103
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
-
-
-State 73
-
-   30 assignment_algebra: name TOKEN_INCREMENT •
-
-    $default  reduce using rule 30 (assignment_algebra)
-
-
-State 74
-
-   31 assignment_algebra: name TOKEN_DECREMENT •
-
-    $default  reduce using rule 31 (assignment_algebra)
-
-
-State 75
-
-   26 assignment_algebra: name TOKEN_ADD_WITH • algebra
-
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    term                go to state 34
-    algebra             go to state 104
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    name                go to state 52
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
-
-
-State 76
-
-   27 assignment_algebra: name TOKEN_SUB_WITH • algebra
-
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    term                go to state 34
-    algebra             go to state 105
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    name                go to state 52
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
-
-
-State 77
-
-   28 assignment_algebra: name TOKEN_MUL_WITH • algebra
-
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    term                go to state 34
-    algebra             go to state 106
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    name                go to state 52
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
-
-
-State 78
-
-   29 assignment_algebra: name TOKEN_DIV_WITH • algebra
-
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    term                go to state 34
-    algebra             go to state 107
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    name                go to state 52
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
-
-
-State 79
-
-   49 factor: name TOKEN_LPAREN • expr_list TOKEN_RPAREN
-
-    TOKEN_NOT                     shift, and go to state 23
-    TOKEN_TRUE                    shift, and go to state 24
-    TOKEN_FALSE                   shift, and go to state 25
-    TOKEN_CHAR_LITERAL            shift, and go to state 26
-    TOKEN_INTEGER_LITERAL         shift, and go to state 27
-    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
-    TOKEN_IDENT                   shift, and go to state 1
-    TOKEN_STRING_LITERAL          shift, and go to state 29
-    TOKEN_MINUS                   shift, and go to state 30
-    TOKEN_INCREMENT               shift, and go to state 31
-    TOKEN_DECREMENT               shift, and go to state 32
-    TOKEN_LPAREN                  shift, and go to state 33
-
-    $default  reduce using rule 63 (expr_list)
-
-    term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 108
-    expr_list           go to state 109
-    name                go to state 42
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
-
-
 State 80
 
-   73 parameter: name TOKEN_LSQBR • type TOKEN_RSQBR
+   26 assignable: name TOKEN_SUBSCRIPT • factor
+   52 factor: name TOKEN_SUBSCRIPT • factor
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    factor           go to state 111
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
+
+
+State 81
+
+   51 factor: name TOKEN_LPAREN • expr_list TOKEN_RPAREN
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_INCREMENT               shift, and go to state 31
+    TOKEN_DECREMENT               shift, and go to state 32
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    $default  reduce using rule 65 (expr_list)
+
+    term                go to state 34
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 112
+    expr_list           go to state 113
+    name                go to state 43
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
+
+
+State 82
+
+   75 parameter: name TOKEN_LSQBR • type TOKEN_RSQBR
 
     TOKEN_CHAR   shift, and go to state 9
     TOKEN_INT    shift, and go to state 10
@@ -1377,37 +1414,37 @@ State 80
     TOKEN_BOOL   shift, and go to state 12
     TOKEN_VOID   shift, and go to state 13
 
-    type  go to state 110
-
-
-State 81
-
-   76 list_of_parameters: TOKEN_COMMA • parameters
-
-    TOKEN_IDENT  shift, and go to state 1
-
-    $default  reduce using rule 75 (parameters)
-
-    name        go to state 46
-    parameter   go to state 47
-    parameters  go to state 111
-
-
-State 82
-
-   74 parameters: parameter list_of_parameters •
-
-    $default  reduce using rule 74 (parameters)
+    type  go to state 114
 
 
 State 83
 
-    7 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_LPAREN parameters TOKEN_RPAREN • TOKEN_LCRBR stmt_list TOKEN_RCRBR
+   78 list_of_parameters: TOKEN_COMMA • parameters
 
-    TOKEN_LCRBR  shift, and go to state 112
+    TOKEN_IDENT  shift, and go to state 1
+
+    $default  reduce using rule 77 (parameters)
+
+    name        go to state 47
+    parameter   go to state 48
+    parameters  go to state 115
 
 
 State 84
+
+   76 parameters: parameter list_of_parameters •
+
+    $default  reduce using rule 76 (parameters)
+
+
+State 85
+
+    7 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_LPAREN parameters TOKEN_RPAREN • TOKEN_LCRBR stmt_list TOKEN_RCRBR
+
+    TOKEN_LCRBR  shift, and go to state 116
+
+
+State 86
 
     6 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_ASSIGN TOKEN_LCRBR • expr_list TOKEN_RCRBR TOKEN_SEMI
 
@@ -1424,422 +1461,468 @@ State 84
     TOKEN_DECREMENT               shift, and go to state 32
     TOKEN_LPAREN                  shift, and go to state 33
 
-    $default  reduce using rule 63 (expr_list)
+    $default  reduce using rule 65 (expr_list)
 
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 108
-    expr_list           go to state 113
-    name                go to state 42
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
-
-
-State 85
-
-    5 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_ASSIGN string_literal • TOKEN_SEMI
-
-    TOKEN_SEMI  shift, and go to state 114
-
-
-State 86
-
-   51 factor: TOKEN_LPAREN expr TOKEN_RPAREN •
-
-    $default  reduce using rule 51 (factor)
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 112
+    expr_list           go to state 117
+    name                go to state 43
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
 State 87
+
+    5 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_ASSIGN string_literal • TOKEN_SEMI
+
+    TOKEN_SEMI  shift, and go to state 118
+
+
+State 88
+
+   52 factor: name TOKEN_SUBSCRIPT • factor
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    factor           go to state 119
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
+
+
+State 89
+
+   26 assignable: name TOKEN_SUBSCRIPT • factor
+
+    TOKEN_NOT                     shift, and go to state 23
+    TOKEN_TRUE                    shift, and go to state 24
+    TOKEN_FALSE                   shift, and go to state 25
+    TOKEN_CHAR_LITERAL            shift, and go to state 26
+    TOKEN_INTEGER_LITERAL         shift, and go to state 27
+    TOKEN_FLOATING_POINT_LITERAL  shift, and go to state 28
+    TOKEN_IDENT                   shift, and go to state 1
+    TOKEN_STRING_LITERAL          shift, and go to state 29
+    TOKEN_MINUS                   shift, and go to state 30
+    TOKEN_LPAREN                  shift, and go to state 33
+
+    factor           go to state 120
+    name             go to state 53
+    string_literal   go to state 44
+    boolean_literal  go to state 45
+    char_literal     go to state 46
+
+
+State 90
+
+   53 factor: TOKEN_LPAREN expr TOKEN_RPAREN •
+
+    $default  reduce using rule 53 (factor)
+
+
+State 91
 
    21 term: term TOKEN_MUL factor •
 
     $default  reduce using rule 21 (term)
 
 
-State 88
+State 92
 
    22 term: term TOKEN_DIV factor •
 
     $default  reduce using rule 22 (term)
 
 
-State 89
+State 93
 
    23 term: term TOKEN_MODULUS factor •
 
     $default  reduce using rule 23 (term)
 
 
-State 90
-
-   21 term: term • TOKEN_MUL factor
-   22     | term • TOKEN_DIV factor
-   23     | term • TOKEN_MODULUS factor
-   34 algebra: algebra TOKEN_PLUS term •
-
-    TOKEN_MUL      shift, and go to state 57
-    TOKEN_DIV      shift, and go to state 58
-    TOKEN_MODULUS  shift, and go to state 59
-
-    $default  reduce using rule 34 (algebra)
-
-
-State 91
-
-   21 term: term • TOKEN_MUL factor
-   22     | term • TOKEN_DIV factor
-   23     | term • TOKEN_MODULUS factor
-   35 algebra: algebra TOKEN_MINUS term •
-
-    TOKEN_MUL      shift, and go to state 57
-    TOKEN_DIV      shift, and go to state 58
-    TOKEN_MODULUS  shift, and go to state 59
-
-    $default  reduce using rule 35 (algebra)
-
-
-State 92
-
-   21 term: term • TOKEN_MUL factor
-   22     | term • TOKEN_DIV factor
-   23     | term • TOKEN_MODULUS factor
-   52 comparison_algebra: algebra TOKEN_EQUAL term •
-
-    TOKEN_MUL      shift, and go to state 57
-    TOKEN_DIV      shift, and go to state 58
-    TOKEN_MODULUS  shift, and go to state 59
-
-    $default  reduce using rule 52 (comparison_algebra)
-
-
-State 93
-
-   21 term: term • TOKEN_MUL factor
-   22     | term • TOKEN_DIV factor
-   23     | term • TOKEN_MODULUS factor
-   53 comparison_algebra: algebra TOKEN_NOT_EQUAL term •
-
-    TOKEN_MUL      shift, and go to state 57
-    TOKEN_DIV      shift, and go to state 58
-    TOKEN_MODULUS  shift, and go to state 59
-
-    $default  reduce using rule 53 (comparison_algebra)
-
-
 State 94
 
-   21 term: term • TOKEN_MUL factor
-   22     | term • TOKEN_DIV factor
-   23     | term • TOKEN_MODULUS factor
-   55 comparison_algebra: algebra TOKEN_GREATER term •
+   27 assignment_algebra: assignable • TOKEN_ASSIGN algebra
+   28                   | assignable • TOKEN_ADD_WITH algebra
+   29                   | assignable • TOKEN_SUB_WITH algebra
+   30                   | assignable • TOKEN_MUL_WITH algebra
+   31                   | assignable • TOKEN_DIV_WITH algebra
+   32                   | assignable • TOKEN_INCREMENT
+   33                   | assignable • TOKEN_DECREMENT
 
-    TOKEN_MUL      shift, and go to state 57
-    TOKEN_DIV      shift, and go to state 58
-    TOKEN_MODULUS  shift, and go to state 59
-
-    $default  reduce using rule 55 (comparison_algebra)
+    TOKEN_ASSIGN     shift, and go to state 121
+    TOKEN_INCREMENT  shift, and go to state 63
+    TOKEN_DECREMENT  shift, and go to state 64
+    TOKEN_ADD_WITH   shift, and go to state 65
+    TOKEN_SUB_WITH   shift, and go to state 66
+    TOKEN_MUL_WITH   shift, and go to state 67
+    TOKEN_DIV_WITH   shift, and go to state 68
 
 
 State 95
 
-   21 term: term • TOKEN_MUL factor
-   22     | term • TOKEN_DIV factor
-   23     | term • TOKEN_MODULUS factor
-   57 comparison_algebra: algebra TOKEN_GREATER_EQUAL term •
+   42 starting_expr: assignable TOKEN_ASSIGN assignment_algebra •
 
-    TOKEN_MUL      shift, and go to state 57
-    TOKEN_DIV      shift, and go to state 58
-    TOKEN_MODULUS  shift, and go to state 59
-
-    $default  reduce using rule 57 (comparison_algebra)
+    $default  reduce using rule 42 (starting_expr)
 
 
 State 96
 
-   21 term: term • TOKEN_MUL factor
-   22     | term • TOKEN_DIV factor
-   23     | term • TOKEN_MODULUS factor
-   54 comparison_algebra: algebra TOKEN_LESS term •
+   27 assignment_algebra: assignable TOKEN_ASSIGN algebra •
+   36 algebra: algebra • TOKEN_PLUS term
+   37        | algebra • TOKEN_MINUS term
+   54 comparison_algebra: algebra • TOKEN_EQUAL term
+   55                   | algebra • TOKEN_NOT_EQUAL term
+   56                   | algebra • TOKEN_LESS term
+   57                   | algebra • TOKEN_GREATER term
+   58                   | algebra • TOKEN_LESS_EQUAL term
+   59                   | algebra • TOKEN_GREATER_EQUAL term
 
-    TOKEN_MUL      shift, and go to state 57
-    TOKEN_DIV      shift, and go to state 58
-    TOKEN_MODULUS  shift, and go to state 59
-
-    $default  reduce using rule 54 (comparison_algebra)
-
-
-State 97
-
-   21 term: term • TOKEN_MUL factor
-   22     | term • TOKEN_DIV factor
-   23     | term • TOKEN_MODULUS factor
-   56 comparison_algebra: algebra TOKEN_LESS_EQUAL term •
-
-    TOKEN_MUL      shift, and go to state 57
-    TOKEN_DIV      shift, and go to state 58
-    TOKEN_MODULUS  shift, and go to state 59
-
-    $default  reduce using rule 56 (comparison_algebra)
-
-
-State 98
-
-   34 algebra: algebra • TOKEN_PLUS term
-   35        | algebra • TOKEN_MINUS term
-   52 comparison_algebra: algebra • TOKEN_EQUAL term
-   53                   | algebra • TOKEN_NOT_EQUAL term
-   54                   | algebra • TOKEN_LESS term
-   55                   | algebra • TOKEN_GREATER term
-   56                   | algebra • TOKEN_LESS_EQUAL term
-   57                   | algebra • TOKEN_GREATER_EQUAL term
-   58 logical_algebra: expr TOKEN_AND algebra •
-
-    TOKEN_PLUS           shift, and go to state 60
-    TOKEN_MINUS          shift, and go to state 61
-    TOKEN_EQUAL          shift, and go to state 62
-    TOKEN_NOT_EQUAL      shift, and go to state 63
-    TOKEN_GREATER        shift, and go to state 64
-    TOKEN_GREATER_EQUAL  shift, and go to state 65
-    TOKEN_LESS           shift, and go to state 66
-    TOKEN_LESS_EQUAL     shift, and go to state 67
-
-    $default  reduce using rule 58 (logical_algebra)
-
-
-State 99
-
-   34 algebra: algebra • TOKEN_PLUS term
-   35        | algebra • TOKEN_MINUS term
-   52 comparison_algebra: algebra • TOKEN_EQUAL term
-   53                   | algebra • TOKEN_NOT_EQUAL term
-   54                   | algebra • TOKEN_LESS term
-   55                   | algebra • TOKEN_GREATER term
-   56                   | algebra • TOKEN_LESS_EQUAL term
-   57                   | algebra • TOKEN_GREATER_EQUAL term
-   59 logical_algebra: expr TOKEN_OR algebra •
-
-    TOKEN_PLUS           shift, and go to state 60
-    TOKEN_MINUS          shift, and go to state 61
-    TOKEN_EQUAL          shift, and go to state 62
-    TOKEN_NOT_EQUAL      shift, and go to state 63
-    TOKEN_GREATER        shift, and go to state 64
-    TOKEN_GREATER_EQUAL  shift, and go to state 65
-    TOKEN_LESS           shift, and go to state 66
-    TOKEN_LESS_EQUAL     shift, and go to state 67
-
-    $default  reduce using rule 59 (logical_algebra)
-
-
-State 100
-
-   50 factor: name TOKEN_SUBSCRIPT factor •
-
-    $default  reduce using rule 50 (factor)
-
-
-State 101
-
-   40 starting_expr: name TOKEN_ASSIGN assignment_algebra •
-
-    $default  reduce using rule 40 (starting_expr)
-
-
-State 102
-
-   25 assignment_algebra: name TOKEN_ASSIGN algebra •
-   34 algebra: algebra • TOKEN_PLUS term
-   35        | algebra • TOKEN_MINUS term
-   52 comparison_algebra: algebra • TOKEN_EQUAL term
-   53                   | algebra • TOKEN_NOT_EQUAL term
-   54                   | algebra • TOKEN_LESS term
-   55                   | algebra • TOKEN_GREATER term
-   56                   | algebra • TOKEN_LESS_EQUAL term
-   57                   | algebra • TOKEN_GREATER_EQUAL term
-
-    TOKEN_PLUS           shift, and go to state 60
-    TOKEN_MINUS          shift, and go to state 61
-    TOKEN_EQUAL          shift, and go to state 62
-    TOKEN_NOT_EQUAL      shift, and go to state 63
-    TOKEN_GREATER        shift, and go to state 64
-    TOKEN_GREATER_EQUAL  shift, and go to state 65
-    TOKEN_LESS           shift, and go to state 66
-    TOKEN_LESS_EQUAL     shift, and go to state 67
-
-    $default  reduce using rule 25 (assignment_algebra)
-
-
-State 103
-
-   25 assignment_algebra: name • TOKEN_ASSIGN algebra
-   26                   | name • TOKEN_ADD_WITH algebra
-   27                   | name • TOKEN_SUB_WITH algebra
-   28                   | name • TOKEN_MUL_WITH algebra
-   29                   | name • TOKEN_DIV_WITH algebra
-   30                   | name • TOKEN_INCREMENT
-   31                   | name • TOKEN_DECREMENT
-   41 factor: name •
-   49       | name • TOKEN_LPAREN expr_list TOKEN_RPAREN
-   50       | name • TOKEN_SUBSCRIPT factor
-
-    TOKEN_SUBSCRIPT  shift, and go to state 71
-    TOKEN_ASSIGN     shift, and go to state 115
-    TOKEN_INCREMENT  shift, and go to state 73
-    TOKEN_DECREMENT  shift, and go to state 74
-    TOKEN_ADD_WITH   shift, and go to state 75
-    TOKEN_SUB_WITH   shift, and go to state 76
-    TOKEN_MUL_WITH   shift, and go to state 77
-    TOKEN_DIV_WITH   shift, and go to state 78
-    TOKEN_LPAREN     shift, and go to state 79
-
-    $default  reduce using rule 41 (factor)
-
-
-State 104
-
-   26 assignment_algebra: name TOKEN_ADD_WITH algebra •
-   34 algebra: algebra • TOKEN_PLUS term
-   35        | algebra • TOKEN_MINUS term
-   52 comparison_algebra: algebra • TOKEN_EQUAL term
-   53                   | algebra • TOKEN_NOT_EQUAL term
-   54                   | algebra • TOKEN_LESS term
-   55                   | algebra • TOKEN_GREATER term
-   56                   | algebra • TOKEN_LESS_EQUAL term
-   57                   | algebra • TOKEN_GREATER_EQUAL term
-
-    TOKEN_PLUS           shift, and go to state 60
-    TOKEN_MINUS          shift, and go to state 61
-    TOKEN_EQUAL          shift, and go to state 62
-    TOKEN_NOT_EQUAL      shift, and go to state 63
-    TOKEN_GREATER        shift, and go to state 64
-    TOKEN_GREATER_EQUAL  shift, and go to state 65
-    TOKEN_LESS           shift, and go to state 66
-    TOKEN_LESS_EQUAL     shift, and go to state 67
-
-    $default  reduce using rule 26 (assignment_algebra)
-
-
-State 105
-
-   27 assignment_algebra: name TOKEN_SUB_WITH algebra •
-   34 algebra: algebra • TOKEN_PLUS term
-   35        | algebra • TOKEN_MINUS term
-   52 comparison_algebra: algebra • TOKEN_EQUAL term
-   53                   | algebra • TOKEN_NOT_EQUAL term
-   54                   | algebra • TOKEN_LESS term
-   55                   | algebra • TOKEN_GREATER term
-   56                   | algebra • TOKEN_LESS_EQUAL term
-   57                   | algebra • TOKEN_GREATER_EQUAL term
-
-    TOKEN_PLUS           shift, and go to state 60
-    TOKEN_MINUS          shift, and go to state 61
-    TOKEN_EQUAL          shift, and go to state 62
-    TOKEN_NOT_EQUAL      shift, and go to state 63
-    TOKEN_GREATER        shift, and go to state 64
-    TOKEN_GREATER_EQUAL  shift, and go to state 65
-    TOKEN_LESS           shift, and go to state 66
-    TOKEN_LESS_EQUAL     shift, and go to state 67
+    TOKEN_PLUS           shift, and go to state 69
+    TOKEN_MINUS          shift, and go to state 70
+    TOKEN_EQUAL          shift, and go to state 71
+    TOKEN_NOT_EQUAL      shift, and go to state 72
+    TOKEN_GREATER        shift, and go to state 73
+    TOKEN_GREATER_EQUAL  shift, and go to state 74
+    TOKEN_LESS           shift, and go to state 75
+    TOKEN_LESS_EQUAL     shift, and go to state 76
 
     $default  reduce using rule 27 (assignment_algebra)
 
 
-State 106
+State 97
 
-   28 assignment_algebra: name TOKEN_MUL_WITH algebra •
-   34 algebra: algebra • TOKEN_PLUS term
-   35        | algebra • TOKEN_MINUS term
-   52 comparison_algebra: algebra • TOKEN_EQUAL term
-   53                   | algebra • TOKEN_NOT_EQUAL term
-   54                   | algebra • TOKEN_LESS term
-   55                   | algebra • TOKEN_GREATER term
-   56                   | algebra • TOKEN_LESS_EQUAL term
-   57                   | algebra • TOKEN_GREATER_EQUAL term
+   28 assignment_algebra: assignable TOKEN_ADD_WITH algebra •
+   36 algebra: algebra • TOKEN_PLUS term
+   37        | algebra • TOKEN_MINUS term
+   54 comparison_algebra: algebra • TOKEN_EQUAL term
+   55                   | algebra • TOKEN_NOT_EQUAL term
+   56                   | algebra • TOKEN_LESS term
+   57                   | algebra • TOKEN_GREATER term
+   58                   | algebra • TOKEN_LESS_EQUAL term
+   59                   | algebra • TOKEN_GREATER_EQUAL term
 
-    TOKEN_PLUS           shift, and go to state 60
-    TOKEN_MINUS          shift, and go to state 61
-    TOKEN_EQUAL          shift, and go to state 62
-    TOKEN_NOT_EQUAL      shift, and go to state 63
-    TOKEN_GREATER        shift, and go to state 64
-    TOKEN_GREATER_EQUAL  shift, and go to state 65
-    TOKEN_LESS           shift, and go to state 66
-    TOKEN_LESS_EQUAL     shift, and go to state 67
+    TOKEN_PLUS           shift, and go to state 69
+    TOKEN_MINUS          shift, and go to state 70
+    TOKEN_EQUAL          shift, and go to state 71
+    TOKEN_NOT_EQUAL      shift, and go to state 72
+    TOKEN_GREATER        shift, and go to state 73
+    TOKEN_GREATER_EQUAL  shift, and go to state 74
+    TOKEN_LESS           shift, and go to state 75
+    TOKEN_LESS_EQUAL     shift, and go to state 76
 
     $default  reduce using rule 28 (assignment_algebra)
 
 
-State 107
+State 98
 
-   29 assignment_algebra: name TOKEN_DIV_WITH algebra •
-   34 algebra: algebra • TOKEN_PLUS term
-   35        | algebra • TOKEN_MINUS term
-   52 comparison_algebra: algebra • TOKEN_EQUAL term
-   53                   | algebra • TOKEN_NOT_EQUAL term
-   54                   | algebra • TOKEN_LESS term
-   55                   | algebra • TOKEN_GREATER term
-   56                   | algebra • TOKEN_LESS_EQUAL term
-   57                   | algebra • TOKEN_GREATER_EQUAL term
+   29 assignment_algebra: assignable TOKEN_SUB_WITH algebra •
+   36 algebra: algebra • TOKEN_PLUS term
+   37        | algebra • TOKEN_MINUS term
+   54 comparison_algebra: algebra • TOKEN_EQUAL term
+   55                   | algebra • TOKEN_NOT_EQUAL term
+   56                   | algebra • TOKEN_LESS term
+   57                   | algebra • TOKEN_GREATER term
+   58                   | algebra • TOKEN_LESS_EQUAL term
+   59                   | algebra • TOKEN_GREATER_EQUAL term
 
-    TOKEN_PLUS           shift, and go to state 60
-    TOKEN_MINUS          shift, and go to state 61
-    TOKEN_EQUAL          shift, and go to state 62
-    TOKEN_NOT_EQUAL      shift, and go to state 63
-    TOKEN_GREATER        shift, and go to state 64
-    TOKEN_GREATER_EQUAL  shift, and go to state 65
-    TOKEN_LESS           shift, and go to state 66
-    TOKEN_LESS_EQUAL     shift, and go to state 67
+    TOKEN_PLUS           shift, and go to state 69
+    TOKEN_MINUS          shift, and go to state 70
+    TOKEN_EQUAL          shift, and go to state 71
+    TOKEN_NOT_EQUAL      shift, and go to state 72
+    TOKEN_GREATER        shift, and go to state 73
+    TOKEN_GREATER_EQUAL  shift, and go to state 74
+    TOKEN_LESS           shift, and go to state 75
+    TOKEN_LESS_EQUAL     shift, and go to state 76
 
     $default  reduce using rule 29 (assignment_algebra)
 
 
+State 99
+
+   30 assignment_algebra: assignable TOKEN_MUL_WITH algebra •
+   36 algebra: algebra • TOKEN_PLUS term
+   37        | algebra • TOKEN_MINUS term
+   54 comparison_algebra: algebra • TOKEN_EQUAL term
+   55                   | algebra • TOKEN_NOT_EQUAL term
+   56                   | algebra • TOKEN_LESS term
+   57                   | algebra • TOKEN_GREATER term
+   58                   | algebra • TOKEN_LESS_EQUAL term
+   59                   | algebra • TOKEN_GREATER_EQUAL term
+
+    TOKEN_PLUS           shift, and go to state 69
+    TOKEN_MINUS          shift, and go to state 70
+    TOKEN_EQUAL          shift, and go to state 71
+    TOKEN_NOT_EQUAL      shift, and go to state 72
+    TOKEN_GREATER        shift, and go to state 73
+    TOKEN_GREATER_EQUAL  shift, and go to state 74
+    TOKEN_LESS           shift, and go to state 75
+    TOKEN_LESS_EQUAL     shift, and go to state 76
+
+    $default  reduce using rule 30 (assignment_algebra)
+
+
+State 100
+
+   31 assignment_algebra: assignable TOKEN_DIV_WITH algebra •
+   36 algebra: algebra • TOKEN_PLUS term
+   37        | algebra • TOKEN_MINUS term
+   54 comparison_algebra: algebra • TOKEN_EQUAL term
+   55                   | algebra • TOKEN_NOT_EQUAL term
+   56                   | algebra • TOKEN_LESS term
+   57                   | algebra • TOKEN_GREATER term
+   58                   | algebra • TOKEN_LESS_EQUAL term
+   59                   | algebra • TOKEN_GREATER_EQUAL term
+
+    TOKEN_PLUS           shift, and go to state 69
+    TOKEN_MINUS          shift, and go to state 70
+    TOKEN_EQUAL          shift, and go to state 71
+    TOKEN_NOT_EQUAL      shift, and go to state 72
+    TOKEN_GREATER        shift, and go to state 73
+    TOKEN_GREATER_EQUAL  shift, and go to state 74
+    TOKEN_LESS           shift, and go to state 75
+    TOKEN_LESS_EQUAL     shift, and go to state 76
+
+    $default  reduce using rule 31 (assignment_algebra)
+
+
+State 101
+
+   21 term: term • TOKEN_MUL factor
+   22     | term • TOKEN_DIV factor
+   23     | term • TOKEN_MODULUS factor
+   36 algebra: algebra TOKEN_PLUS term •
+
+    TOKEN_MUL      shift, and go to state 59
+    TOKEN_DIV      shift, and go to state 60
+    TOKEN_MODULUS  shift, and go to state 61
+
+    $default  reduce using rule 36 (algebra)
+
+
+State 102
+
+   21 term: term • TOKEN_MUL factor
+   22     | term • TOKEN_DIV factor
+   23     | term • TOKEN_MODULUS factor
+   37 algebra: algebra TOKEN_MINUS term •
+
+    TOKEN_MUL      shift, and go to state 59
+    TOKEN_DIV      shift, and go to state 60
+    TOKEN_MODULUS  shift, and go to state 61
+
+    $default  reduce using rule 37 (algebra)
+
+
+State 103
+
+   21 term: term • TOKEN_MUL factor
+   22     | term • TOKEN_DIV factor
+   23     | term • TOKEN_MODULUS factor
+   54 comparison_algebra: algebra TOKEN_EQUAL term •
+
+    TOKEN_MUL      shift, and go to state 59
+    TOKEN_DIV      shift, and go to state 60
+    TOKEN_MODULUS  shift, and go to state 61
+
+    $default  reduce using rule 54 (comparison_algebra)
+
+
+State 104
+
+   21 term: term • TOKEN_MUL factor
+   22     | term • TOKEN_DIV factor
+   23     | term • TOKEN_MODULUS factor
+   55 comparison_algebra: algebra TOKEN_NOT_EQUAL term •
+
+    TOKEN_MUL      shift, and go to state 59
+    TOKEN_DIV      shift, and go to state 60
+    TOKEN_MODULUS  shift, and go to state 61
+
+    $default  reduce using rule 55 (comparison_algebra)
+
+
+State 105
+
+   21 term: term • TOKEN_MUL factor
+   22     | term • TOKEN_DIV factor
+   23     | term • TOKEN_MODULUS factor
+   57 comparison_algebra: algebra TOKEN_GREATER term •
+
+    TOKEN_MUL      shift, and go to state 59
+    TOKEN_DIV      shift, and go to state 60
+    TOKEN_MODULUS  shift, and go to state 61
+
+    $default  reduce using rule 57 (comparison_algebra)
+
+
+State 106
+
+   21 term: term • TOKEN_MUL factor
+   22     | term • TOKEN_DIV factor
+   23     | term • TOKEN_MODULUS factor
+   59 comparison_algebra: algebra TOKEN_GREATER_EQUAL term •
+
+    TOKEN_MUL      shift, and go to state 59
+    TOKEN_DIV      shift, and go to state 60
+    TOKEN_MODULUS  shift, and go to state 61
+
+    $default  reduce using rule 59 (comparison_algebra)
+
+
+State 107
+
+   21 term: term • TOKEN_MUL factor
+   22     | term • TOKEN_DIV factor
+   23     | term • TOKEN_MODULUS factor
+   56 comparison_algebra: algebra TOKEN_LESS term •
+
+    TOKEN_MUL      shift, and go to state 59
+    TOKEN_DIV      shift, and go to state 60
+    TOKEN_MODULUS  shift, and go to state 61
+
+    $default  reduce using rule 56 (comparison_algebra)
+
+
 State 108
 
-   58 logical_algebra: expr • TOKEN_AND algebra
-   59                | expr • TOKEN_OR algebra
-   62 expr_list: expr • next_expr
+   21 term: term • TOKEN_MUL factor
+   22     | term • TOKEN_DIV factor
+   23     | term • TOKEN_MODULUS factor
+   58 comparison_algebra: algebra TOKEN_LESS_EQUAL term •
 
-    TOKEN_AND    shift, and go to state 68
-    TOKEN_OR     shift, and go to state 69
-    TOKEN_COMMA  shift, and go to state 116
+    TOKEN_MUL      shift, and go to state 59
+    TOKEN_DIV      shift, and go to state 60
+    TOKEN_MODULUS  shift, and go to state 61
 
-    $default  reduce using rule 65 (next_expr)
-
-    next_expr  go to state 117
+    $default  reduce using rule 58 (comparison_algebra)
 
 
 State 109
 
-   49 factor: name TOKEN_LPAREN expr_list • TOKEN_RPAREN
+   36 algebra: algebra • TOKEN_PLUS term
+   37        | algebra • TOKEN_MINUS term
+   54 comparison_algebra: algebra • TOKEN_EQUAL term
+   55                   | algebra • TOKEN_NOT_EQUAL term
+   56                   | algebra • TOKEN_LESS term
+   57                   | algebra • TOKEN_GREATER term
+   58                   | algebra • TOKEN_LESS_EQUAL term
+   59                   | algebra • TOKEN_GREATER_EQUAL term
+   60 logical_algebra: expr TOKEN_AND algebra •
 
-    TOKEN_RPAREN  shift, and go to state 118
+    TOKEN_PLUS           shift, and go to state 69
+    TOKEN_MINUS          shift, and go to state 70
+    TOKEN_EQUAL          shift, and go to state 71
+    TOKEN_NOT_EQUAL      shift, and go to state 72
+    TOKEN_GREATER        shift, and go to state 73
+    TOKEN_GREATER_EQUAL  shift, and go to state 74
+    TOKEN_LESS           shift, and go to state 75
+    TOKEN_LESS_EQUAL     shift, and go to state 76
+
+    $default  reduce using rule 60 (logical_algebra)
 
 
 State 110
 
-   73 parameter: name TOKEN_LSQBR type • TOKEN_RSQBR
+   36 algebra: algebra • TOKEN_PLUS term
+   37        | algebra • TOKEN_MINUS term
+   54 comparison_algebra: algebra • TOKEN_EQUAL term
+   55                   | algebra • TOKEN_NOT_EQUAL term
+   56                   | algebra • TOKEN_LESS term
+   57                   | algebra • TOKEN_GREATER term
+   58                   | algebra • TOKEN_LESS_EQUAL term
+   59                   | algebra • TOKEN_GREATER_EQUAL term
+   61 logical_algebra: expr TOKEN_OR algebra •
 
-    TOKEN_RSQBR  shift, and go to state 119
+    TOKEN_PLUS           shift, and go to state 69
+    TOKEN_MINUS          shift, and go to state 70
+    TOKEN_EQUAL          shift, and go to state 71
+    TOKEN_NOT_EQUAL      shift, and go to state 72
+    TOKEN_GREATER        shift, and go to state 73
+    TOKEN_GREATER_EQUAL  shift, and go to state 74
+    TOKEN_LESS           shift, and go to state 75
+    TOKEN_LESS_EQUAL     shift, and go to state 76
+
+    $default  reduce using rule 61 (logical_algebra)
 
 
 State 111
 
-   76 list_of_parameters: TOKEN_COMMA parameters •
+   26 assignable: name TOKEN_SUBSCRIPT factor •
+   52 factor: name TOKEN_SUBSCRIPT factor •
 
-    $default  reduce using rule 76 (list_of_parameters)
+    TOKEN_ASSIGN     reduce using rule 26 (assignable)
+    TOKEN_INCREMENT  reduce using rule 26 (assignable)
+    TOKEN_DECREMENT  reduce using rule 26 (assignable)
+    TOKEN_ADD_WITH   reduce using rule 26 (assignable)
+    TOKEN_SUB_WITH   reduce using rule 26 (assignable)
+    TOKEN_MUL_WITH   reduce using rule 26 (assignable)
+    TOKEN_DIV_WITH   reduce using rule 26 (assignable)
+    $default         reduce using rule 52 (factor)
 
 
 State 112
 
+   60 logical_algebra: expr • TOKEN_AND algebra
+   61                | expr • TOKEN_OR algebra
+   64 expr_list: expr • next_expr
+
+    TOKEN_AND    shift, and go to state 77
+    TOKEN_OR     shift, and go to state 78
+    TOKEN_COMMA  shift, and go to state 122
+
+    $default  reduce using rule 67 (next_expr)
+
+    next_expr  go to state 123
+
+
+State 113
+
+   51 factor: name TOKEN_LPAREN expr_list • TOKEN_RPAREN
+
+    TOKEN_RPAREN  shift, and go to state 124
+
+
+State 114
+
+   75 parameter: name TOKEN_LSQBR type • TOKEN_RSQBR
+
+    TOKEN_RSQBR  shift, and go to state 125
+
+
+State 115
+
+   78 list_of_parameters: TOKEN_COMMA parameters •
+
+    $default  reduce using rule 78 (list_of_parameters)
+
+
+State 116
+
     7 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_LPAREN parameters TOKEN_RPAREN TOKEN_LCRBR • stmt_list TOKEN_RCRBR
 
     TOKEN_NOT                     shift, and go to state 23
-    TOKEN_GIVE                    shift, and go to state 120
-    TOKEN_IF                      shift, and go to state 121
-    TOKEN_FOR                     shift, and go to state 122
+    TOKEN_GIVE                    shift, and go to state 126
+    TOKEN_IF                      shift, and go to state 127
+    TOKEN_FOR                     shift, and go to state 128
     TOKEN_TRUE                    shift, and go to state 24
     TOKEN_FALSE                   shift, and go to state 25
     TOKEN_CHAR_LITERAL            shift, and go to state 26
@@ -1851,44 +1934,59 @@ State 112
     TOKEN_INCREMENT               shift, and go to state 31
     TOKEN_DECREMENT               shift, and go to state 32
     TOKEN_LPAREN                  shift, and go to state 33
-    TOKEN_LCRBR                   shift, and go to state 123
+    TOKEN_LCRBR                   shift, and go to state 129
 
     $default  reduce using rule 20 (stmt_list)
 
-    decl                go to state 124
-    stmt                go to state 125
-    stmt_list           go to state 126
+    decl                go to state 130
+    stmt                go to state 131
+    stmt_list           go to state 132
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 127
-    name                go to state 128
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 133
+    name                go to state 134
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 113
+State 117
 
     6 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_ASSIGN TOKEN_LCRBR expr_list • TOKEN_RCRBR TOKEN_SEMI
 
-    TOKEN_RCRBR  shift, and go to state 129
+    TOKEN_RCRBR  shift, and go to state 135
 
 
-State 114
+State 118
 
     5 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_ASSIGN string_literal TOKEN_SEMI •
 
     $default  reduce using rule 5 (decl)
 
 
-State 115
+State 119
 
-   25 assignment_algebra: name TOKEN_ASSIGN • algebra
+   52 factor: name TOKEN_SUBSCRIPT factor •
+
+    $default  reduce using rule 52 (factor)
+
+
+State 120
+
+   26 assignable: name TOKEN_SUBSCRIPT factor •
+
+    $default  reduce using rule 26 (assignable)
+
+
+State 121
+
+   27 assignment_algebra: assignable TOKEN_ASSIGN • algebra
 
     TOKEN_NOT                     shift, and go to state 23
     TOKEN_TRUE                    shift, and go to state 24
@@ -1902,18 +2000,18 @@ State 115
     TOKEN_LPAREN                  shift, and go to state 33
 
     term                go to state 34
-    algebra             go to state 102
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    name                go to state 52
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    algebra             go to state 96
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    name                go to state 53
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 116
+State 122
 
-   64 next_expr: TOKEN_COMMA • expr_list
+   66 next_expr: TOKEN_COMMA • expr_list
 
     TOKEN_NOT                     shift, and go to state 23
     TOKEN_TRUE                    shift, and go to state 24
@@ -1928,51 +2026,52 @@ State 116
     TOKEN_DECREMENT               shift, and go to state 32
     TOKEN_LPAREN                  shift, and go to state 33
 
-    $default  reduce using rule 63 (expr_list)
+    $default  reduce using rule 65 (expr_list)
 
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 108
-    expr_list           go to state 130
-    name                go to state 42
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 112
+    expr_list           go to state 136
+    name                go to state 43
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 117
+State 123
 
-   62 expr_list: expr next_expr •
+   64 expr_list: expr next_expr •
 
-    $default  reduce using rule 62 (expr_list)
-
-
-State 118
-
-   49 factor: name TOKEN_LPAREN expr_list TOKEN_RPAREN •
-
-    $default  reduce using rule 49 (factor)
+    $default  reduce using rule 64 (expr_list)
 
 
-State 119
+State 124
 
-   73 parameter: name TOKEN_LSQBR type TOKEN_RSQBR •
+   51 factor: name TOKEN_LPAREN expr_list TOKEN_RPAREN •
 
-    $default  reduce using rule 73 (parameter)
+    $default  reduce using rule 51 (factor)
 
 
-State 120
+State 125
+
+   75 parameter: name TOKEN_LSQBR type TOKEN_RSQBR •
+
+    $default  reduce using rule 75 (parameter)
+
+
+State 126
 
    16 stmt: TOKEN_GIVE • expr TOKEN_SEMI
    17     | TOKEN_GIVE • TOKEN_UP TOKEN_SEMI
    18     | TOKEN_GIVE • expr TOKEN_PRINT_IN TOKEN_STDIN TOKEN_SEMI
 
-    TOKEN_UP                      shift, and go to state 131
+    TOKEN_UP                      shift, and go to state 137
     TOKEN_NOT                     shift, and go to state 23
     TOKEN_TRUE                    shift, and go to state 24
     TOKEN_FALSE                   shift, and go to state 25
@@ -1987,42 +2086,43 @@ State 120
     TOKEN_LPAREN                  shift, and go to state 33
 
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 132
-    name                go to state 42
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 138
+    name                go to state 43
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 121
+State 127
 
    10 stmt: TOKEN_IF • TOKEN_LPAREN expr TOKEN_RPAREN stmt
    11     | TOKEN_IF • TOKEN_LPAREN expr TOKEN_RPAREN stmt TOKEN_ELSE stmt
 
-    TOKEN_LPAREN  shift, and go to state 133
+    TOKEN_LPAREN  shift, and go to state 139
 
 
-State 122
+State 128
 
    12 stmt: TOKEN_FOR • TOKEN_LPAREN expr_list TOKEN_SEMI expr TOKEN_SEMI expr_list TOKEN_RPAREN stmt
 
-    TOKEN_LPAREN  shift, and go to state 134
+    TOKEN_LPAREN  shift, and go to state 140
 
 
-State 123
+State 129
 
    13 stmt: TOKEN_LCRBR • stmt_list TOKEN_RCRBR
 
     TOKEN_NOT                     shift, and go to state 23
-    TOKEN_GIVE                    shift, and go to state 120
-    TOKEN_IF                      shift, and go to state 121
-    TOKEN_FOR                     shift, and go to state 122
+    TOKEN_GIVE                    shift, and go to state 126
+    TOKEN_IF                      shift, and go to state 127
+    TOKEN_FOR                     shift, and go to state 128
     TOKEN_TRUE                    shift, and go to state 24
     TOKEN_FALSE                   shift, and go to state 25
     TOKEN_CHAR_LITERAL            shift, and go to state 26
@@ -2034,42 +2134,43 @@ State 123
     TOKEN_INCREMENT               shift, and go to state 31
     TOKEN_DECREMENT               shift, and go to state 32
     TOKEN_LPAREN                  shift, and go to state 33
-    TOKEN_LCRBR                   shift, and go to state 123
+    TOKEN_LCRBR                   shift, and go to state 129
 
     $default  reduce using rule 20 (stmt_list)
 
-    decl                go to state 124
-    stmt                go to state 125
-    stmt_list           go to state 135
+    decl                go to state 130
+    stmt                go to state 131
+    stmt_list           go to state 141
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 127
-    name                go to state 128
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 133
+    name                go to state 134
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 124
+State 130
 
    14 stmt: decl •
 
     $default  reduce using rule 14 (stmt)
 
 
-State 125
+State 131
 
    19 stmt_list: stmt • stmt_list
 
     TOKEN_NOT                     shift, and go to state 23
-    TOKEN_GIVE                    shift, and go to state 120
-    TOKEN_IF                      shift, and go to state 121
-    TOKEN_FOR                     shift, and go to state 122
+    TOKEN_GIVE                    shift, and go to state 126
+    TOKEN_IF                      shift, and go to state 127
+    TOKEN_FOR                     shift, and go to state 128
     TOKEN_TRUE                    shift, and go to state 24
     TOKEN_FALSE                   shift, and go to state 25
     TOKEN_CHAR_LITERAL            shift, and go to state 26
@@ -2081,46 +2182,47 @@ State 125
     TOKEN_INCREMENT               shift, and go to state 31
     TOKEN_DECREMENT               shift, and go to state 32
     TOKEN_LPAREN                  shift, and go to state 33
-    TOKEN_LCRBR                   shift, and go to state 123
+    TOKEN_LCRBR                   shift, and go to state 129
 
     $default  reduce using rule 20 (stmt_list)
 
-    decl                go to state 124
-    stmt                go to state 125
-    stmt_list           go to state 136
+    decl                go to state 130
+    stmt                go to state 131
+    stmt_list           go to state 142
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 127
-    name                go to state 128
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 133
+    name                go to state 134
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 126
+State 132
 
     7 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_LPAREN parameters TOKEN_RPAREN TOKEN_LCRBR stmt_list • TOKEN_RCRBR
 
-    TOKEN_RCRBR  shift, and go to state 137
+    TOKEN_RCRBR  shift, and go to state 143
 
 
-State 127
+State 133
 
    15 stmt: expr • TOKEN_SEMI
-   58 logical_algebra: expr • TOKEN_AND algebra
-   59                | expr • TOKEN_OR algebra
+   60 logical_algebra: expr • TOKEN_AND algebra
+   61                | expr • TOKEN_OR algebra
 
-    TOKEN_AND   shift, and go to state 68
-    TOKEN_OR    shift, and go to state 69
-    TOKEN_SEMI  shift, and go to state 138
+    TOKEN_AND   shift, and go to state 77
+    TOKEN_OR    shift, and go to state 78
+    TOKEN_SEMI  shift, and go to state 144
 
 
-State 128
+State 134
 
     2 decl: name • TOKEN_LSQBR type TOKEN_RSQBR TOKEN_SEMI
     3     | name • TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ASSIGN expr TOKEN_SEMI
@@ -2128,67 +2230,61 @@ State 128
     5     | name • TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_ASSIGN string_literal TOKEN_SEMI
     6     | name • TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_ASSIGN TOKEN_LCRBR expr_list TOKEN_RCRBR TOKEN_SEMI
     7     | name • TOKEN_LSQBR type TOKEN_RSQBR TOKEN_LPAREN parameters TOKEN_RPAREN TOKEN_LCRBR stmt_list TOKEN_RCRBR
-   25 assignment_algebra: name • TOKEN_ASSIGN algebra
-   26                   | name • TOKEN_ADD_WITH algebra
-   27                   | name • TOKEN_SUB_WITH algebra
-   28                   | name • TOKEN_MUL_WITH algebra
-   29                   | name • TOKEN_DIV_WITH algebra
-   30                   | name • TOKEN_INCREMENT
-   31                   | name • TOKEN_DECREMENT
-   40 starting_expr: name • TOKEN_ASSIGN assignment_algebra
-   41 factor: name •
-   49       | name • TOKEN_LPAREN expr_list TOKEN_RPAREN
-   50       | name • TOKEN_SUBSCRIPT factor
+   25 assignable: name •
+   26           | name • TOKEN_SUBSCRIPT factor
+   43 factor: name •
+   51       | name • TOKEN_LPAREN expr_list TOKEN_RPAREN
+   52       | name • TOKEN_SUBSCRIPT factor
 
-    TOKEN_SUBSCRIPT  shift, and go to state 71
-    TOKEN_ASSIGN     shift, and go to state 72
-    TOKEN_INCREMENT  shift, and go to state 73
-    TOKEN_DECREMENT  shift, and go to state 74
-    TOKEN_ADD_WITH   shift, and go to state 75
-    TOKEN_SUB_WITH   shift, and go to state 76
-    TOKEN_MUL_WITH   shift, and go to state 77
-    TOKEN_DIV_WITH   shift, and go to state 78
-    TOKEN_LPAREN     shift, and go to state 79
+    TOKEN_SUBSCRIPT  shift, and go to state 80
+    TOKEN_LPAREN     shift, and go to state 81
     TOKEN_LSQBR      shift, and go to state 8
 
-    $default  reduce using rule 41 (factor)
+    TOKEN_ASSIGN     reduce using rule 25 (assignable)
+    TOKEN_INCREMENT  reduce using rule 25 (assignable)
+    TOKEN_DECREMENT  reduce using rule 25 (assignable)
+    TOKEN_ADD_WITH   reduce using rule 25 (assignable)
+    TOKEN_SUB_WITH   reduce using rule 25 (assignable)
+    TOKEN_MUL_WITH   reduce using rule 25 (assignable)
+    TOKEN_DIV_WITH   reduce using rule 25 (assignable)
+    $default         reduce using rule 43 (factor)
 
 
-State 129
+State 135
 
     6 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_ASSIGN TOKEN_LCRBR expr_list TOKEN_RCRBR • TOKEN_SEMI
 
-    TOKEN_SEMI  shift, and go to state 139
+    TOKEN_SEMI  shift, and go to state 145
 
 
-State 130
+State 136
 
-   64 next_expr: TOKEN_COMMA expr_list •
+   66 next_expr: TOKEN_COMMA expr_list •
 
-    $default  reduce using rule 64 (next_expr)
+    $default  reduce using rule 66 (next_expr)
 
 
-State 131
+State 137
 
    17 stmt: TOKEN_GIVE TOKEN_UP • TOKEN_SEMI
 
-    TOKEN_SEMI  shift, and go to state 140
+    TOKEN_SEMI  shift, and go to state 146
 
 
-State 132
+State 138
 
    16 stmt: TOKEN_GIVE expr • TOKEN_SEMI
    18     | TOKEN_GIVE expr • TOKEN_PRINT_IN TOKEN_STDIN TOKEN_SEMI
-   58 logical_algebra: expr • TOKEN_AND algebra
-   59                | expr • TOKEN_OR algebra
+   60 logical_algebra: expr • TOKEN_AND algebra
+   61                | expr • TOKEN_OR algebra
 
-    TOKEN_PRINT_IN  shift, and go to state 141
-    TOKEN_AND       shift, and go to state 68
-    TOKEN_OR        shift, and go to state 69
-    TOKEN_SEMI      shift, and go to state 142
+    TOKEN_PRINT_IN  shift, and go to state 147
+    TOKEN_AND       shift, and go to state 77
+    TOKEN_OR        shift, and go to state 78
+    TOKEN_SEMI      shift, and go to state 148
 
 
-State 133
+State 139
 
    10 stmt: TOKEN_IF TOKEN_LPAREN • expr TOKEN_RPAREN stmt
    11     | TOKEN_IF TOKEN_LPAREN • expr TOKEN_RPAREN stmt TOKEN_ELSE stmt
@@ -2207,20 +2303,21 @@ State 133
     TOKEN_LPAREN                  shift, and go to state 33
 
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 143
-    name                go to state 42
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 149
+    name                go to state 43
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 134
+State 140
 
    12 stmt: TOKEN_FOR TOKEN_LPAREN • expr_list TOKEN_SEMI expr TOKEN_SEMI expr_list TOKEN_RPAREN stmt
 
@@ -2237,121 +2334,122 @@ State 134
     TOKEN_DECREMENT               shift, and go to state 32
     TOKEN_LPAREN                  shift, and go to state 33
 
-    $default  reduce using rule 63 (expr_list)
+    $default  reduce using rule 65 (expr_list)
 
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 108
-    expr_list           go to state 144
-    name                go to state 42
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 112
+    expr_list           go to state 150
+    name                go to state 43
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 135
+State 141
 
    13 stmt: TOKEN_LCRBR stmt_list • TOKEN_RCRBR
 
-    TOKEN_RCRBR  shift, and go to state 145
+    TOKEN_RCRBR  shift, and go to state 151
 
 
-State 136
+State 142
 
    19 stmt_list: stmt stmt_list •
 
     $default  reduce using rule 19 (stmt_list)
 
 
-State 137
+State 143
 
     7 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_LPAREN parameters TOKEN_RPAREN TOKEN_LCRBR stmt_list TOKEN_RCRBR •
 
     $default  reduce using rule 7 (decl)
 
 
-State 138
+State 144
 
    15 stmt: expr TOKEN_SEMI •
 
     $default  reduce using rule 15 (stmt)
 
 
-State 139
+State 145
 
     6 decl: name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_ASSIGN TOKEN_LCRBR expr_list TOKEN_RCRBR TOKEN_SEMI •
 
     $default  reduce using rule 6 (decl)
 
 
-State 140
+State 146
 
    17 stmt: TOKEN_GIVE TOKEN_UP TOKEN_SEMI •
 
     $default  reduce using rule 17 (stmt)
 
 
-State 141
+State 147
 
    18 stmt: TOKEN_GIVE expr TOKEN_PRINT_IN • TOKEN_STDIN TOKEN_SEMI
 
-    TOKEN_STDIN  shift, and go to state 146
+    TOKEN_STDIN  shift, and go to state 152
 
 
-State 142
+State 148
 
    16 stmt: TOKEN_GIVE expr TOKEN_SEMI •
 
     $default  reduce using rule 16 (stmt)
 
 
-State 143
+State 149
 
    10 stmt: TOKEN_IF TOKEN_LPAREN expr • TOKEN_RPAREN stmt
    11     | TOKEN_IF TOKEN_LPAREN expr • TOKEN_RPAREN stmt TOKEN_ELSE stmt
-   58 logical_algebra: expr • TOKEN_AND algebra
-   59                | expr • TOKEN_OR algebra
+   60 logical_algebra: expr • TOKEN_AND algebra
+   61                | expr • TOKEN_OR algebra
 
-    TOKEN_AND     shift, and go to state 68
-    TOKEN_OR      shift, and go to state 69
-    TOKEN_RPAREN  shift, and go to state 147
+    TOKEN_AND     shift, and go to state 77
+    TOKEN_OR      shift, and go to state 78
+    TOKEN_RPAREN  shift, and go to state 153
 
 
-State 144
+State 150
 
    12 stmt: TOKEN_FOR TOKEN_LPAREN expr_list • TOKEN_SEMI expr TOKEN_SEMI expr_list TOKEN_RPAREN stmt
 
-    TOKEN_SEMI  shift, and go to state 148
+    TOKEN_SEMI  shift, and go to state 154
 
 
-State 145
+State 151
 
    13 stmt: TOKEN_LCRBR stmt_list TOKEN_RCRBR •
 
     $default  reduce using rule 13 (stmt)
 
 
-State 146
+State 152
 
    18 stmt: TOKEN_GIVE expr TOKEN_PRINT_IN TOKEN_STDIN • TOKEN_SEMI
 
-    TOKEN_SEMI  shift, and go to state 149
+    TOKEN_SEMI  shift, and go to state 155
 
 
-State 147
+State 153
 
    10 stmt: TOKEN_IF TOKEN_LPAREN expr TOKEN_RPAREN • stmt
    11     | TOKEN_IF TOKEN_LPAREN expr TOKEN_RPAREN • stmt TOKEN_ELSE stmt
 
     TOKEN_NOT                     shift, and go to state 23
-    TOKEN_GIVE                    shift, and go to state 120
-    TOKEN_IF                      shift, and go to state 121
-    TOKEN_FOR                     shift, and go to state 122
+    TOKEN_GIVE                    shift, and go to state 126
+    TOKEN_IF                      shift, and go to state 127
+    TOKEN_FOR                     shift, and go to state 128
     TOKEN_TRUE                    shift, and go to state 24
     TOKEN_FALSE                   shift, and go to state 25
     TOKEN_CHAR_LITERAL            shift, and go to state 26
@@ -2363,25 +2461,26 @@ State 147
     TOKEN_INCREMENT               shift, and go to state 31
     TOKEN_DECREMENT               shift, and go to state 32
     TOKEN_LPAREN                  shift, and go to state 33
-    TOKEN_LCRBR                   shift, and go to state 123
+    TOKEN_LCRBR                   shift, and go to state 129
 
-    decl                go to state 124
-    stmt                go to state 150
+    decl                go to state 130
+    stmt                go to state 156
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 127
-    name                go to state 128
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 133
+    name                go to state 134
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 148
+State 154
 
    12 stmt: TOKEN_FOR TOKEN_LPAREN expr_list TOKEN_SEMI • expr TOKEN_SEMI expr_list TOKEN_RPAREN stmt
 
@@ -2399,56 +2498,57 @@ State 148
     TOKEN_LPAREN                  shift, and go to state 33
 
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 151
-    name                go to state 42
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 157
+    name                go to state 43
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 149
+State 155
 
    18 stmt: TOKEN_GIVE expr TOKEN_PRINT_IN TOKEN_STDIN TOKEN_SEMI •
 
     $default  reduce using rule 18 (stmt)
 
 
-State 150
+State 156
 
    10 stmt: TOKEN_IF TOKEN_LPAREN expr TOKEN_RPAREN stmt •
    11     | TOKEN_IF TOKEN_LPAREN expr TOKEN_RPAREN stmt • TOKEN_ELSE stmt
 
-    TOKEN_ELSE  shift, and go to state 152
+    TOKEN_ELSE  shift, and go to state 158
 
     TOKEN_ELSE  [reduce using rule 10 (stmt)]
     $default    reduce using rule 10 (stmt)
 
 
-State 151
+State 157
 
    12 stmt: TOKEN_FOR TOKEN_LPAREN expr_list TOKEN_SEMI expr • TOKEN_SEMI expr_list TOKEN_RPAREN stmt
-   58 logical_algebra: expr • TOKEN_AND algebra
-   59                | expr • TOKEN_OR algebra
+   60 logical_algebra: expr • TOKEN_AND algebra
+   61                | expr • TOKEN_OR algebra
 
-    TOKEN_AND   shift, and go to state 68
-    TOKEN_OR    shift, and go to state 69
-    TOKEN_SEMI  shift, and go to state 153
+    TOKEN_AND   shift, and go to state 77
+    TOKEN_OR    shift, and go to state 78
+    TOKEN_SEMI  shift, and go to state 159
 
 
-State 152
+State 158
 
    11 stmt: TOKEN_IF TOKEN_LPAREN expr TOKEN_RPAREN stmt TOKEN_ELSE • stmt
 
     TOKEN_NOT                     shift, and go to state 23
-    TOKEN_GIVE                    shift, and go to state 120
-    TOKEN_IF                      shift, and go to state 121
-    TOKEN_FOR                     shift, and go to state 122
+    TOKEN_GIVE                    shift, and go to state 126
+    TOKEN_IF                      shift, and go to state 127
+    TOKEN_FOR                     shift, and go to state 128
     TOKEN_TRUE                    shift, and go to state 24
     TOKEN_FALSE                   shift, and go to state 25
     TOKEN_CHAR_LITERAL            shift, and go to state 26
@@ -2460,25 +2560,26 @@ State 152
     TOKEN_INCREMENT               shift, and go to state 31
     TOKEN_DECREMENT               shift, and go to state 32
     TOKEN_LPAREN                  shift, and go to state 33
-    TOKEN_LCRBR                   shift, and go to state 123
+    TOKEN_LCRBR                   shift, and go to state 129
 
-    decl                go to state 124
-    stmt                go to state 154
+    decl                go to state 130
+    stmt                go to state 160
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 127
-    name                go to state 128
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 133
+    name                go to state 134
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 153
+State 159
 
    12 stmt: TOKEN_FOR TOKEN_LPAREN expr_list TOKEN_SEMI expr TOKEN_SEMI • expr_list TOKEN_RPAREN stmt
 
@@ -2495,45 +2596,46 @@ State 153
     TOKEN_DECREMENT               shift, and go to state 32
     TOKEN_LPAREN                  shift, and go to state 33
 
-    $default  reduce using rule 63 (expr_list)
+    $default  reduce using rule 65 (expr_list)
 
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 108
-    expr_list           go to state 155
-    name                go to state 42
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 112
+    expr_list           go to state 161
+    name                go to state 43
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 154
+State 160
 
    11 stmt: TOKEN_IF TOKEN_LPAREN expr TOKEN_RPAREN stmt TOKEN_ELSE stmt •
 
     $default  reduce using rule 11 (stmt)
 
 
-State 155
+State 161
 
    12 stmt: TOKEN_FOR TOKEN_LPAREN expr_list TOKEN_SEMI expr TOKEN_SEMI expr_list • TOKEN_RPAREN stmt
 
-    TOKEN_RPAREN  shift, and go to state 156
+    TOKEN_RPAREN  shift, and go to state 162
 
 
-State 156
+State 162
 
    12 stmt: TOKEN_FOR TOKEN_LPAREN expr_list TOKEN_SEMI expr TOKEN_SEMI expr_list TOKEN_RPAREN • stmt
 
     TOKEN_NOT                     shift, and go to state 23
-    TOKEN_GIVE                    shift, and go to state 120
-    TOKEN_IF                      shift, and go to state 121
-    TOKEN_FOR                     shift, and go to state 122
+    TOKEN_GIVE                    shift, and go to state 126
+    TOKEN_IF                      shift, and go to state 127
+    TOKEN_FOR                     shift, and go to state 128
     TOKEN_TRUE                    shift, and go to state 24
     TOKEN_FALSE                   shift, and go to state 25
     TOKEN_CHAR_LITERAL            shift, and go to state 26
@@ -2545,25 +2647,26 @@ State 156
     TOKEN_INCREMENT               shift, and go to state 31
     TOKEN_DECREMENT               shift, and go to state 32
     TOKEN_LPAREN                  shift, and go to state 33
-    TOKEN_LCRBR                   shift, and go to state 123
+    TOKEN_LCRBR                   shift, and go to state 129
 
-    decl                go to state 124
-    stmt                go to state 157
+    decl                go to state 130
+    stmt                go to state 163
     term                go to state 34
-    assignment_algebra  go to state 35
-    algebra             go to state 36
-    starting_expr       go to state 37
-    factor              go to state 38
-    comparison_algebra  go to state 39
-    logical_algebra     go to state 40
-    expr                go to state 127
-    name                go to state 128
-    string_literal      go to state 43
-    boolean_literal     go to state 44
-    char_literal        go to state 45
+    assignable          go to state 35
+    assignment_algebra  go to state 36
+    algebra             go to state 37
+    starting_expr       go to state 38
+    factor              go to state 39
+    comparison_algebra  go to state 40
+    logical_algebra     go to state 41
+    expr                go to state 133
+    name                go to state 134
+    string_literal      go to state 44
+    boolean_literal     go to state 45
+    char_literal        go to state 46
 
 
-State 157
+State 163
 
    12 stmt: TOKEN_FOR TOKEN_LPAREN expr_list TOKEN_SEMI expr TOKEN_SEMI expr_list TOKEN_RPAREN stmt •
 
