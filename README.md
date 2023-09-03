@@ -48,6 +48,7 @@ quark [--flags] [filename] [--flags]
 > ***Important notice*** - As of right now, the Quark compiler supports the following languages: Quark, C, C++
 ### Flags
   - `-o [filename]` - Tells the compiler how the result file should be called _(If not specified, then the result file is named `a.out`)_.
-  - `--debug` - Tells the compiler to use the debug codegenerator _(If not specified, then the production codegenerator is in use)_. Read more about [The Codegenerator](https://github.com/dr-programmer/quark/tree/develop#the-structure-of-the-quark-compiler-is-as-follows).
+  - `--debug` - Tells the compiler to use the debug codegenerator _(If not specified, then the production codegenerator is in use)_. Read more about [The Code Generator](#the-structure-of-the-quark-compiler-is-as-follows).
   - `--show-offset` - Tells the compiler to print the stack offset of all called variables.
-  - `--show-pcode` - Tells the compiler to structure and print the parsed code back from the AST memory structure.
+  - `--show-pcode` - Tells the compiler to structure and print the parsed code back from the AST memory structure. Read more about [The Abstract Syntax Tree](#the-structure-of-the-quark-compiler-is-as-follows).
+  - `--help` - Tells the compiler to print the usage manual for the Quark compiler
