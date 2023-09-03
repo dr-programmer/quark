@@ -23,30 +23,36 @@ unsigned int r_count = 0;
 unsigned int register_create() {
     return r_count++;
 }
-const char *register_name(int r) {
+const char *register_name(struct complex_reg sreg) {
     unsigned int size = 1;
     char *name = (char *)calloc(2, sizeof(char));
 
-    unsigned int i = 1, temp = r;
+    unsigned int i = 1, temp = sreg.reg;
     while(temp > 9) {
         temp /= 10;
         i *= 10;
     }
 
-    if(r == -1) {
-        name = (char *)realloc(name, sizeof(char) * i);
-        sprintf(name, "%d", current_constant.ivalue);
+    if(sreg.reg == -1) {
+        int temp = sreg.value != 0 
+                    ? log10(sreg.value) 
+                    : 0;
+        name = (char *)realloc(name, sizeof(char) * temp + 1);
+        sprintf(name, "%d", (int)sreg.value);
         return name;
     }
-    else if(r == -2) {
-        name = (char *)realloc(name, sizeof(char) * i + 7);
-        sprintf(name, "%f", current_constant.fvalue);
+    else if(sreg.reg == -2) {
+        int temp = sreg.value != 0 
+                    ? log10(sreg.value) 
+                    : 0;
+        name = (char *)realloc(name, sizeof(char) * temp + 16);
+        sprintf(name, "%lf", sreg.value);
         return name;
     }
-    else if(r == -3) {
+    else if(sreg.reg == -3) {
         return current_constant.svalue;
     }
-    else if(r == -4) {
+    else if(sreg.reg == -4) {
         struct expr *e = current_constant.evalue;
         struct type *array_subtype = e->type->subtype;
         name = (char *)calloc(2, sizeof(char));
@@ -84,8 +90,8 @@ const char *register_name(int r) {
     while(i) {
         size++;
         name = (char *)realloc(name, size * sizeof(char));
-        name[size-1] = '0' + (r / i);
-        r %= i;
+        name[size-1] = '0' + (sreg.reg / i);
+        sreg.reg %= i;
         i /= 10;
     }
     return name;
@@ -103,7 +109,7 @@ const char *value_name(struct expr *e) {
         return name;
     }
     else {
-        return register_name(e->reg);
+        return register_name(e->sreg);
     }
 }
 
@@ -162,17 +168,18 @@ const char *type_irgen(struct type *t) {
 extern FILE *result_file;
 
 void type_cast(struct expr *e) {
-    int old_register;
+    struct complex_reg old_register;
     struct expr *expr;
 
     if(e->type->kind == TYPE_BOOLEAN) {
+        if(e->kind == EXPR_ASSIGN) return;
         if(e->left->type->kind != e->right->type->kind) {
             expr = e->left->type->kind < e->right->type->kind ? e->left : e->right;
             struct expr *higher_expr = e->left->type->kind > e->right->type->kind 
                                             ? e->left : e->right;
-            old_register = expr->reg;
-            expr->reg = register_create();
-            apply_type_cast(higher_expr->type->kind, expr->reg, expr->type, 
+            old_register = expr->sreg;
+            expr->sreg.reg = register_create();
+            apply_type_cast(higher_expr->type->kind, expr->sreg, expr->type, 
                                     old_register, 
                                     higher_expr->type);
         }
@@ -183,14 +190,14 @@ void type_cast(struct expr *e) {
     else if(e->right->type->kind != e->type->kind) expr = e->right;
     else return;
 
-    old_register = expr->reg;
-    expr->reg = register_create();
-    apply_type_cast(e->type->kind, expr->reg, expr->type, old_register, e->type);
+    old_register = expr->sreg;
+    expr->sreg.reg = register_create();
+    apply_type_cast(e->type->kind, expr->sreg, expr->type, old_register, e->type);
 }
 void apply_type_cast(type_t type_kind, 
-                            int result_register, 
+                            struct complex_reg result_register, 
                             struct type *from_type, 
-                            int old_register, 
+                            struct complex_reg old_register, 
                             struct type *to_type)
 {
     if(type_kind <= TYPE_INTEGER) {
@@ -223,7 +230,7 @@ static void init_type_cast(struct decl *d) {
             }
             e = e->right;
         }*/
-        d->value->reg = -4;
+        d->value->sreg.reg = -4;
         type_delete(d->value->type->subtype);
         d->value->type->subtype = type_copy(d->type->subtype);
         ANNUL_CURRENT_CONSTANT;
@@ -231,9 +238,9 @@ static void init_type_cast(struct decl *d) {
     }
     else if(d->symbol->kind == SYMBOL_GLOBAL) return;
     else if(d->value->type->kind != d->type->kind) {
-        int old_register = d->value->reg;
-        d->value->reg = register_create();
-        apply_type_cast(d->type->kind, d->value->reg, d->value->type, 
+        struct complex_reg old_register = d->value->sreg;
+        d->value->sreg.reg = register_create();
+        apply_type_cast(d->type->kind, d->value->sreg, d->value->type, 
                                 old_register, 
                                 d->type);
     }
@@ -249,8 +256,8 @@ void decl_irgen(struct decl *d) {
                     symbol_irgen(d->symbol));
         struct param_list *p = d->type->params;
         while(p != NULL) {
-            p->reg = register_create();
-            fprintf(result_file, "%s %s", type_irgen(p->type), register_name(p->reg));
+            p->sreg.reg = register_create();
+            fprintf(result_file, "%s %s", type_irgen(p->type), register_name(p->sreg));
             if(p->next != NULL)fprintf(result_file, ", ");
             p = p->next;
         }
@@ -261,7 +268,7 @@ void decl_irgen(struct decl *d) {
             fprintf(result_file, "%s = alloca %s\n", symbol_irgen(p->symbol), 
                         type_irgen(p->type));
             fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(p->type), 
-                        register_name(p->reg), 
+                        register_name(p->sreg), 
                         symbol_irgen(p->symbol));
             p = p->next;
         }
@@ -277,7 +284,7 @@ void decl_irgen(struct decl *d) {
                 expr_irgen(d->value);
                 init_type_cast(d);
                 fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(d->type), 
-                            register_name(d->value->reg), 
+                            register_name(d->value->sreg), 
                             symbol_irgen(d->symbol));
             }
         }
@@ -287,7 +294,7 @@ void decl_irgen(struct decl *d) {
                 init_type_cast(d);
                 fprintf(result_file, "%s = global %s %s\n", symbol_irgen(d->symbol), 
                             type_irgen(d->type), 
-                            register_name(d->value->reg));
+                            register_name(d->value->sreg));
             }
             else {
                 fprintf(result_file, "%s = global %s 0\n", symbol_irgen(d->symbol), 
@@ -299,8 +306,8 @@ void decl_irgen(struct decl *d) {
     decl_irgen(d->next);
 }
 
-static int give_type(struct type *t) {
-    int temp_register = register_create();
+static struct complex_reg give_type(struct type *t) {
+    struct complex_reg temp_register = {register_create(), 0};
     fprintf(result_file, "%s = alloca [5 x i8]\n", register_name(temp_register));
     if(t->kind == TYPE_FLOATING_POINT) {
         fprintf(result_file, "store [5 x i8] c\"%%lf\\0A\\00\", ptr %s\n", 
@@ -312,6 +319,15 @@ static int give_type(struct type *t) {
     }
     return temp_register;
 }
+
+#define SIMPLE_BOOLEAN_CHECK \
+            if(s->expr->kind >= EXPR_NAME && s->expr->type->kind != TYPE_BOOLEAN) { \
+                struct expr *head = expr_create(EXPR_NOT_EQUAL, s->expr, NULL); \
+                head->right = expr_create_integer_literal(0); \
+                head->right->type = type_create(TYPE_BOOLEAN, NULL, NULL, 0); \
+                head->type = type_copy(head->right->type); \
+                s->expr = head; \
+            }
 
 void stmt_irgen(struct stmt *s, struct symbol *function_symbol) {
     if(s == NULL)return;
@@ -326,13 +342,14 @@ void stmt_irgen(struct stmt *s, struct symbol *function_symbol) {
             break;
         case STMT_IF_ELSE:
         {
+            SIMPLE_BOOLEAN_CHECK;
             expr_irgen(s->expr);
             int if_label = label_create();
             int else_label = label_create();
             int done_label = label_create();
             fprintf(result_file, "br %s %s, label %%%s, label %%%s\n", 
                         type_irgen(s->expr->type), 
-                        register_name(s->expr->reg), 
+                        register_name(s->expr->sreg), 
                         label_name(if_label), 
                         label_name(else_label));
             fprintf(result_file, "%s:\n", label_name(if_label));
@@ -353,10 +370,11 @@ void stmt_irgen(struct stmt *s, struct symbol *function_symbol) {
             fprintf(result_file, "br label %%%s\n", label_name(loop_label));
             fprintf(result_file, "%s:\n", label_name(loop_label));
             if(s->expr) {
+                SIMPLE_BOOLEAN_CHECK;
                 expr_irgen(s->expr);
                 fprintf(result_file, "br %s %s, label %%%s, label %%%s\n", 
                             type_irgen(s->expr->type), 
-                            register_name(s->expr->reg), 
+                            register_name(s->expr->sreg), 
                             label_name(continue_label), 
                             label_name(done_label));
                 fprintf(result_file, "%s:\n", label_name(continue_label));
@@ -371,18 +389,19 @@ void stmt_irgen(struct stmt *s, struct symbol *function_symbol) {
             if(s->expr) {
                 expr_irgen(s->expr);
                 if(s->print) {
-                    int text_register = give_type(function_symbol->type->subtype);
-                    int call_register = register_create();
+                    struct complex_reg text_register = 
+                                give_type(function_symbol->type->subtype);
+                    struct complex_reg call_register = {register_create(), 0};
                     fprintf(result_file, 
                                 "%s = call i32 (ptr, ...) @printf (ptr %s, %s %s)\n", 
                                             register_name(call_register), 
                                             register_name(text_register), 
                                             type_irgen(s->expr->type), 
-                                            register_name(s->expr->reg));
+                                            register_name(s->expr->sreg));
                 }
                 fprintf(result_file, "ret %s %s\n", 
                             type_irgen(function_symbol->type->subtype), 
-                            register_name(s->expr->reg));
+                            register_name(s->expr->sreg));
             }
             else {
                 fprintf(result_file, "ret void\n");
@@ -409,9 +428,9 @@ static void arg_type_cast(struct param_list *p, struct expr *e) {
 
     if(p->type->kind != e->left->type->kind) {
         struct expr *expr = e->left;
-        int old_register = expr->reg;
-        expr->reg = register_create();
-        apply_type_cast(p->type->kind, expr->reg, expr->type, old_register, p->type);
+        struct complex_reg old_register = expr->sreg;
+        expr->sreg.reg = register_create();
+        apply_type_cast(p->type->kind, expr->sreg, expr->type, old_register, p->type);
     }
 
     return arg_type_cast(p->next, e->right);
@@ -421,7 +440,7 @@ static void arg_irgen(struct param_list *p, struct expr *e) {
     if(e == NULL)return;
 
     fprintf(result_file, "%s %s", type_irgen(p->type), 
-                register_name(e->left->reg));
+                register_name(e->left->sreg));
     if(e->right) fprintf(result_file, ", ");
 
     arg_irgen(p->next, e->right);
@@ -432,18 +451,16 @@ void expr_irgen(struct expr *e) {
 
     switch(e->kind) {
         case EXPR_INTEGER_LITERAL:
-            ANNUL_CURRENT_CONSTANT;
-            current_constant.ivalue = e->integer_value;
-            e->reg = -1;
+            e->sreg.reg = -1;
+            e->sreg.value = e->integer_value;
             break;
         case EXPR_FLOATING_POINT_LITERAL:
-            ANNUL_CURRENT_CONSTANT;
-            current_constant.fvalue = e->floating_point_value;
-            e->reg = -2;
+            e->sreg.reg = -2;
+            e->sreg.value = e->floating_point_value;
             break;
         case EXPR_NAME:
-            e->reg = register_create();
-            fprintf(result_file, "%s = load %s, ptr %s\n", register_name(e->reg), 
+            e->sreg.reg = register_create();
+            fprintf(result_file, "%s = load %s, ptr %s\n", register_name(e->sreg), 
                         type_irgen(e->type), 
                         symbol_irgen(e->symbol));
             break;
@@ -451,34 +468,34 @@ void expr_irgen(struct expr *e) {
             expr_irgen(e->left);
             expr_irgen(e->right);
             type_cast(e);
-            e->reg = register_create();
-            fprintf(result_file, "%s = %cadd %s %s, %s\n", register_name(e->reg), 
+            e->sreg.reg = register_create();
+            fprintf(result_file, "%s = %cadd %s %s, %s\n", register_name(e->sreg), 
                         check_for_float(e->type), 
                         type_irgen(e->type), 
-                        register_name(e->left->reg), 
-                        register_name(e->right->reg));
+                        register_name(e->left->sreg), 
+                        register_name(e->right->sreg));
             break;
         case EXPR_SUB:
             expr_irgen(e->left);
             expr_irgen(e->right);
             type_cast(e);
-            e->reg = register_create();
-            fprintf(result_file, "%s = %csub %s %s, %s\n", register_name(e->reg), 
+            e->sreg.reg = register_create();
+            fprintf(result_file, "%s = %csub %s %s, %s\n", register_name(e->sreg), 
                         check_for_float(e->type), 
                         type_irgen(e->type), 
-                        register_name(e->left->reg), 
-                        register_name(e->right->reg));
+                        register_name(e->left->sreg), 
+                        register_name(e->right->sreg));
             break;
         case EXPR_MUL:
             expr_irgen(e->left);
             expr_irgen(e->right);
             type_cast(e);
-            e->reg = register_create();
-            fprintf(result_file, "%s = %cmul %s %s, %s\n", register_name(e->reg), 
+            e->sreg.reg = register_create();
+            fprintf(result_file, "%s = %cmul %s %s, %s\n", register_name(e->sreg), 
                         check_for_float(e->type), 
                         type_irgen(e->type), 
-                        register_name(e->left->reg), 
-                        register_name(e->right->reg));
+                        register_name(e->left->sreg), 
+                        register_name(e->right->sreg));
             break;
         case EXPR_DIV:
         {
@@ -486,12 +503,12 @@ void expr_irgen(struct expr *e) {
             expr_irgen(e->right);
             type_cast(e);
             char temp = check_for_float(e->type) == 32 ? 's' : 'f';
-            e->reg = register_create();
-            fprintf(result_file, "%s = %cdiv %s %s, %s\n", register_name(e->reg), 
+            e->sreg.reg = register_create();
+            fprintf(result_file, "%s = %cdiv %s %s, %s\n", register_name(e->sreg), 
                         temp, 
                         type_irgen(e->type), 
-                        register_name(e->left->reg), 
-                        register_name(e->right->reg));
+                        register_name(e->left->sreg), 
+                        register_name(e->right->sreg));
             break;
         }
         case EXPR_MODULUS:
@@ -500,12 +517,12 @@ void expr_irgen(struct expr *e) {
             expr_irgen(e->right);
             type_cast(e);
             char temp = check_for_float(e->type) == 32 ? 's' : 'f';
-            e->reg = register_create();
-            fprintf(result_file, "%s = %crem %s %s, %s\n", register_name(e->reg), 
+            e->sreg.reg = register_create();
+            fprintf(result_file, "%s = %crem %s %s, %s\n", register_name(e->sreg), 
                         temp, 
                         type_irgen(e->type), 
-                        register_name(e->left->reg), 
-                        register_name(e->right->reg));
+                        register_name(e->left->sreg), 
+                        register_name(e->right->sreg));
             break;
         }
         case EXPR_ASSIGN:
@@ -515,13 +532,14 @@ void expr_irgen(struct expr *e) {
             const char *store_to;
             if(e->left->symbol == NULL) {
                 expr_irgen(e->left);
-                store_to = register_name(e->left->integer_value);
+                struct complex_reg temp = {e->left->integer_value, 0};
+                store_to = register_name(temp);
             }
             else store_to = symbol_irgen(e->left->symbol);
             fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(e->type), 
-                                    register_name(e->right->reg), 
+                                    register_name(e->right->sreg), 
                                     store_to);
-            e->reg = e->right->reg;
+            e->sreg = e->right->sreg;
             break;
         }
         case EXPR_EQUAL ... EXPR_LESS_EQUAL:
@@ -535,59 +553,59 @@ void expr_irgen(struct expr *e) {
             char operation_temp = temp == 'f' ? 'o' : ' ';
             struct type *temp_type = e->left->type->kind > e->right->type->kind 
                         ? e->left->type : e->right->type;
-            e->reg = register_create();
+            e->sreg.reg = register_create();
             switch(e->kind) {
                 case EXPR_EQUAL:
-                    fprintf(result_file, "%s = %ccmp %ceq %s %s, %s\n", register_name(e->reg), 
+                    fprintf(result_file, "%s = %ccmp %ceq %s %s, %s\n", register_name(e->sreg), 
                         temp, 
                         operation_temp, 
                         type_irgen(temp_type), 
-                        register_name(e->left->reg), 
-                        register_name(e->right->reg));
+                        register_name(e->left->sreg), 
+                        register_name(e->right->sreg));
                     break;
                 case EXPR_NOT_EQUAL:
-                    fprintf(result_file, "%s = %ccmp %cne %s %s, %s\n", register_name(e->reg), 
+                    fprintf(result_file, "%s = %ccmp %cne %s %s, %s\n", register_name(e->sreg), 
                         temp, 
                         operation_temp, 
                         type_irgen(temp_type), 
-                        register_name(e->left->reg), 
-                        register_name(e->right->reg));
+                        register_name(e->left->sreg), 
+                        register_name(e->right->sreg));
                     break;
                 case EXPR_GREATER:
                     if(operation_temp == ' ') operation_temp = 's';
-                    fprintf(result_file, "%s = %ccmp %cgt %s %s, %s\n", register_name(e->reg), 
+                    fprintf(result_file, "%s = %ccmp %cgt %s %s, %s\n", register_name(e->sreg), 
                         temp, 
                         operation_temp, 
                         type_irgen(temp_type), 
-                        register_name(e->left->reg), 
-                        register_name(e->right->reg));
+                        register_name(e->left->sreg), 
+                        register_name(e->right->sreg));
                     break;
                 case EXPR_GREATER_EQUAL:
                     if(operation_temp == ' ') operation_temp = 's';
-                    fprintf(result_file, "%s = %ccmp %cge %s %s, %s\n", register_name(e->reg), 
+                    fprintf(result_file, "%s = %ccmp %cge %s %s, %s\n", register_name(e->sreg), 
                         temp, 
                         operation_temp, 
                         type_irgen(temp_type), 
-                        register_name(e->left->reg), 
-                        register_name(e->right->reg));
+                        register_name(e->left->sreg), 
+                        register_name(e->right->sreg));
                     break;
                 case EXPR_LESS:
                     if(operation_temp == ' ') operation_temp = 's';
-                    fprintf(result_file, "%s = %ccmp %clt %s %s, %s\n", register_name(e->reg), 
+                    fprintf(result_file, "%s = %ccmp %clt %s %s, %s\n", register_name(e->sreg), 
                         temp, 
                         operation_temp, 
                         type_irgen(temp_type), 
-                        register_name(e->left->reg), 
-                        register_name(e->right->reg));
+                        register_name(e->left->sreg), 
+                        register_name(e->right->sreg));
                     break;
                 case EXPR_LESS_EQUAL:
                     if(operation_temp == ' ') operation_temp = 's';
-                    fprintf(result_file, "%s = %ccmp %cle %s %s, %s\n", register_name(e->reg), 
+                    fprintf(result_file, "%s = %ccmp %cle %s %s, %s\n", register_name(e->sreg), 
                         temp, 
                         operation_temp, 
                         type_irgen(temp_type), 
-                        register_name(e->left->reg), 
-                        register_name(e->right->reg));
+                        register_name(e->left->sreg), 
+                        register_name(e->right->sreg));
                     break;
             }
             break;
@@ -600,16 +618,16 @@ void expr_irgen(struct expr *e) {
                 e->right->type = type_create(TYPE_INTEGER, NULL, NULL, 0);
                 expr_irgen(e);
                 fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(e->type), 
-                            register_name(e->reg), 
+                            register_name(e->sreg), 
                             symbol_irgen(e->left->symbol));
-                e->reg = e->left->reg;
+                e->sreg = e->left->sreg;
             }
             else {
                 e->left = expr_create_integer_literal(1);
                 e->left->type = type_create(TYPE_INTEGER, NULL, NULL, 0);
                 expr_irgen(e);
                 fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(e->type), 
-                            register_name(e->reg), 
+                            register_name(e->sreg), 
                             symbol_irgen(e->right->symbol));
             }
             break;
@@ -622,7 +640,7 @@ void expr_irgen(struct expr *e) {
             }
             expr_irgen(e);
             fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(e->type), 
-                        register_name(e->reg), 
+                        register_name(e->sreg), 
                         symbol_irgen(e->left->symbol));
             break;
         case EXPR_AND ... EXPR_OR:
@@ -645,15 +663,15 @@ void expr_irgen(struct expr *e) {
             expr_irgen(e->left);
             expr_irgen(e->right);
 
-            e->reg = register_create();
+            e->sreg.reg = register_create();
             if(e->kind == EXPR_AND) 
-                fprintf(result_file, "%s = and i1 %s, %s\n", register_name(e->reg), 
-                            register_name(e->left->reg), 
-                            register_name(e->right->reg));
+                fprintf(result_file, "%s = and i1 %s, %s\n", register_name(e->sreg), 
+                            register_name(e->left->sreg), 
+                            register_name(e->right->sreg));
             else 
-                fprintf(result_file, "%s = or i1 %s, %s\n", register_name(e->reg), 
-                            register_name(e->left->reg), 
-                            register_name(e->right->reg));
+                fprintf(result_file, "%s = or i1 %s, %s\n", register_name(e->sreg), 
+                            register_name(e->left->sreg), 
+                            register_name(e->right->sreg));
             break;
         }
         case EXPR_NOT:
@@ -668,8 +686,8 @@ void expr_irgen(struct expr *e) {
         {
             expr_irgen(e->right);
             arg_type_cast(e->left->type->params, e->right);
-            e->reg = register_create();
-            fprintf(result_file, "%s = call %s (", register_name(e->reg), 
+            e->sreg.reg = register_create();
+            fprintf(result_file, "%s = call %s (", register_name(e->sreg), 
                         type_irgen(e->left->type->subtype));
             struct param_list *p = e->left->type->params;
             while(p) {
@@ -685,19 +703,19 @@ void expr_irgen(struct expr *e) {
         case EXPR_SUBSCRIPT:
             expr_irgen(e->left);
             expr_irgen(e->right);
-            e->reg = register_create();
+            e->sreg.reg = register_create();
             fprintf(result_file, "%s = getelementptr %s, ptr %s, i1 0, %s %s \n", 
-                        register_name(e->reg), 
+                        register_name(e->sreg), 
                         type_irgen(e->left->type), 
                         symbol_irgen(e->left->symbol), 
                         type_irgen(e->right->type), 
-                        register_name(e->right->reg));
-            int ptr_register = e->reg;
-            e->reg = register_create();
-            fprintf(result_file, "%s = load %s, ptr %s\n", register_name(e->reg), 
+                        register_name(e->right->sreg));
+            struct complex_reg ptr_register = e->sreg;
+            e->sreg.reg = register_create();
+            fprintf(result_file, "%s = load %s, ptr %s\n", register_name(e->sreg), 
                         type_irgen(e->left->type->subtype), 
                         register_name(ptr_register));
-            e->integer_value = ptr_register;
+            e->integer_value = ptr_register.reg;
             break;
         case EXPR_ARG:
             expr_irgen(e->left);

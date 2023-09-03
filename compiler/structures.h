@@ -55,6 +55,11 @@ typedef enum {
     TYPE_FUNCTION
 } type_t;
 
+struct complex_reg {
+    int reg;
+    double value;
+};
+
 struct decl {
     char *name;
     struct type *type;
@@ -92,6 +97,7 @@ struct expr {
     struct type *type;
 
     int reg;
+    struct complex_reg sreg;
 };
 
 struct type {
@@ -109,6 +115,7 @@ struct param_list {
     struct symbol *symbol;
 
     int reg;
+    struct complex_reg sreg;
 };
 
 struct decl *decl_create(char *name, 

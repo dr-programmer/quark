@@ -148,6 +148,9 @@ stmt    : TOKEN_IF TOKEN_LPAREN expr TOKEN_RPAREN stmt
         | TOKEN_FOR TOKEN_LPAREN expr_list TOKEN_SEMI expr TOKEN_SEMI 
                 expr_list TOKEN_RPAREN stmt
                 { $$ = stmt_create(STMT_FOR, 0, $3, $5, $7, $9, 0, 0); }
+        | TOKEN_FOR TOKEN_LPAREN expr_list TOKEN_SEMI TOKEN_SEMI 
+                expr_list TOKEN_RPAREN stmt
+                { $$ = stmt_create(STMT_FOR, 0, $3, 0, $6, $8, 0, 0); }
         | TOKEN_LCRBR stmt_list TOKEN_RCRBR
                 { $$ = stmt_create(STMT_BLOCK, 0, 0, 0, 0, $2, 0, 0); }
         | decl  { $$ = stmt_create(STMT_DECL, $1, 0, 0, 0, 0, 0, 0); }

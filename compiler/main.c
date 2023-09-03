@@ -32,12 +32,7 @@ int main(int argc, char **argv)
     char *new_row_target = strchr(architecture, '\n');
     *new_row_target = '\0';
     pclose(pipe);
-    yyin = fopen(argv[1], "r");
-    if (yyin == NULL) {
-        printf("Cannot open file \n");
-        exit(ERROR_OPENING_FILE);
-    }
-    char *name_of_file = "a.s";
+    char *name_of_file = "a.out";
     for(unsigned int i = 0; i < argc; i++) {
         if(!strcmp(argv[i], "--debug")) {
             debug = 1;
@@ -51,13 +46,26 @@ int main(int argc, char **argv)
         else if(!strcmp(argv[i], "--show-pcode")) {
             show_pcode = 1;
         }
+        else if(!strcmp(argv[i], "--help")) {
+            char help_text[300];
+            FILE *help_file = fopen("quark_help.txt", "r");
+            while(fgets(help_text, 300, help_file)) {
+                printf("%s", help_text);
+            }
+            fclose(help_file);
+            exit(0);
+        }
+    }
+    yyin = fopen(argv[1], "r");
+    if (yyin == NULL) {
+        printf("Cannot open file \n");
+        exit(ERROR_OPENING_FILE);
     }
     printf("Name of result file = "CYN"%s"RESET" \n", name_of_file);
     char *temp_file = (char *)calloc(strlen(name_of_file) + 3, sizeof(char));
     strcpy(temp_file, name_of_file);
     if(debug) strcat(temp_file, ".s");
     else strcat(temp_file, ".ll");
-    result_file = fopen(temp_file, "w");
     if(yyparse() == 0) {
         printf("Parse "GRN"successful"RESET"! \n");
         if(show_pcode) decl_print(parser_result, 0);
@@ -68,6 +76,7 @@ int main(int argc, char **argv)
         scope_exit();
         decl_typecheck(parser_result);
         if(!error_count) {
+            result_file = fopen(temp_file, "w");
             if(debug) {
                 decl_codegen(parser_result);
             }
@@ -76,6 +85,7 @@ int main(int argc, char **argv)
                 fprintf(result_file, "declare i32 @printf (ptr, ...)\n");
                 decl_irgen(parser_result);
             }
+            fclose(result_file);
         }
         printf("Program compiled with %d error/s \n", error_count);
     }
@@ -83,7 +93,6 @@ int main(int argc, char **argv)
         printf("Parse "RED"failed"RESET". \n");
     }
 
-    fclose(result_file);
     fclose(yyin);
 
     if(!error_count) {

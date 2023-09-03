@@ -1,0 +1,12 @@
+Usage of the Quark compiler
+Basic usage
+quark [--flags] [filename] [--flags]
+Important notice - As of right now, the Quark compiler supports the following languages: Quark, C, C++
+
+Flags
+-o [filename] - Tells the compiler how the result file should be called (If not specified, then the result file is named a.out).
+--debug - Tells the compiler to use the debug codegenerator (If not specified, then the production codegenerator is in use).
+--show-offset - Tells the compiler to print the stack offset of all called variables.
+--show-pcode - Tells the compiler to structure and print the parsed code back from the AST memory structure.
+
+Learn more at https://github.com/dr-programmer/quark 
