@@ -18,7 +18,7 @@
 The following must be installed in order to build the Quark compiler
  - `gcc` and `make` - For Linux: `sudo apt install build-essential`
  - `clang` - For Linux: `sudo apt install clang`
- - `llvm-config` - For Linux: `sudo apt install llvm-config`
+ - `llvm` - For Linux: `sudo apt install llvm`
  - `flex` - For Linux: `sudo apt install flex`
  - `bison` - For Linux: `sudo apt install bison`
  - `git` - For Linux: `sudo apt install git`
