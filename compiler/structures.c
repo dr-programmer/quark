@@ -196,6 +196,7 @@ void expr_print(struct expr *e) {
                                 printf(", "); expr_print(e->right);
                             }
                             break;
+        case EXPR_RENAME: printf("%s[%s->&]", e->name, e->string_literal); break;
         case EXPR_ADD: printf("("); expr_print(e->left); printf(" + "); 
                                 expr_print(e->right); printf(")"); break;
         case EXPR_SUB: printf("("); expr_print(e->left); printf(" - "); 
@@ -386,9 +387,18 @@ void stmt_resolve(struct stmt *s) {
 void expr_resolve(struct expr *e) {
     if(e == NULL)return;
 
-    if(e->kind == EXPR_NAME) {
-        e->symbol = scope_lookup(e->name);
+    if(e->kind == EXPR_NAME || e->kind == EXPR_RENAME) {
+        if(e->kind == EXPR_RENAME) {
+            struct symbol *parent = scope_lookup(e->string_literal);
+            if(parent == NULL) goto ERROR;
+            e->symbol = symbol_create(parent->kind, parent->type, (char *)e->name);
+            e->symbol->which = parent->which;
+            e->symbol->parent = parent;
+            scope_bind(e->symbol);
+        }
+        else e->symbol = scope_lookup(e->name);
         if(e->symbol == NULL) {
+            ERROR:
             print_error("no declaration found", e->name);
             struct type *temp = type_create(TYPE_INTEGER, 0, 0, 0);
             e->symbol = symbol_create(SYMBOL_LOCAL, temp, NULL);
@@ -699,6 +709,9 @@ struct type *expr_typecheck(struct expr *e) {
             else result = left->kind > right->kind 
                 ? type_create(TYPE_ARRAY, type_copy(left->subtype), NULL, 0) 
                 : type_create(TYPE_ARRAY, type_copy(right->subtype), NULL, 0);
+            break;
+        case EXPR_RENAME:
+            result = type_copy(e->symbol->type);
             break;
     }
 

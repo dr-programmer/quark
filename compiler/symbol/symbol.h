@@ -14,6 +14,8 @@ struct symbol {
     struct type *type;
     char *name;
     int which;
+
+    struct symbol *parent;
 };
 
 struct symbol *symbol_create(symbol_t kind, 

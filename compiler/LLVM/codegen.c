@@ -115,15 +115,16 @@ const char *value_name(struct expr *e) {
 
 const char *symbol_irgen(struct symbol *s) {
     char *name;
-    int size = 3 + strlen(s->name) + (log10(s->which) + 1);
+    struct symbol *symbol = s->parent == NULL ? s : s->parent;
+    int size = 3 + strlen(symbol->name) + (log10(symbol->which) + 1);
 
-    if(s->kind == SYMBOL_GLOBAL) {
-        name = (char *)calloc(strlen(s->name) + 2, sizeof(char));
-        sprintf(name, "@%s", s->name);
+    if(symbol->kind == SYMBOL_GLOBAL) {
+        name = (char *)calloc(strlen(symbol->name) + 2, sizeof(char));
+        sprintf(name, "@%s", symbol->name);
     }
     else {
         name = (char *)calloc(size, sizeof(char));
-        sprintf(name, "%%.%d%s", s->which, s->name);
+        sprintf(name, "%%.%d%s", symbol->which, symbol->name);
     }
 
     return name;

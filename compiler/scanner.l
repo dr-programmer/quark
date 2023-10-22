@@ -28,6 +28,7 @@ LETTERS [a-zA-Z]
 \%          {return TOKEN_MODULUS;}
 !=          {return TOKEN_NOT_EQUAL;}
 !           {return TOKEN_NOT;}
+\&          {return TOKEN_INSTANCE;}
 \&\&        {return TOKEN_AND;}
 \|\|        {return TOKEN_OR;}
 \<\?        {BEGIN(multiline_comment);}

@@ -18,6 +18,8 @@ main[int]() {
     check[int] = arr->5;
     ??printINT(check);
     ??printINT(str->0);
+    new[check->&];
+    ??printINT(new);
     a[int] = arr->4 + 3 - 2;
     arr->4 = 8;
     printINT(arr->4);

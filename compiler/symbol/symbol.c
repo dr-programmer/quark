@@ -8,5 +8,6 @@ struct symbol *symbol_create(symbol_t kind,
     s->kind = kind;
     s->type = type;
     s->name = name;
+    s->parent = NULL;
     return s;
 }

@@ -18,6 +18,7 @@ typedef enum {
     EXPR_CALL,
     EXPR_SUBSCRIPT,
     EXPR_ARG,
+    EXPR_RENAME,
 
     EXPR_ADD,
     EXPR_SUB,

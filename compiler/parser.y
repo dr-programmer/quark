@@ -40,6 +40,7 @@ struct decl *parser_result;
 %token TOKEN_ALLOCATE
 %token TOKEN_SUBSCRIPT
 %token TOKEN_UP
+%token TOKEN_INSTANCE
 
 %token TOKEN_AND
 %token TOKEN_OR
@@ -229,6 +230,12 @@ factor  : name                  { $$ = expr_create_name($1); }
                                 { $$ = expr_create(EXPR_CALL, expr_create_name($1), $3); }
         | name TOKEN_SUBSCRIPT factor
                                 { $$ = expr_create(EXPR_SUBSCRIPT, expr_create_name($1), $3); }
+        | name TOKEN_LSQBR name TOKEN_SUBSCRIPT TOKEN_INSTANCE TOKEN_RSQBR
+                                { 
+                                        $$ = expr_create(EXPR_RENAME, NULL, NULL); 
+                                        $$->name = $1; 
+                                        $$->string_literal = $3; 
+                                }
         | TOKEN_LPAREN expr TOKEN_RPAREN
                                 { $$ = $2; }
         ;
