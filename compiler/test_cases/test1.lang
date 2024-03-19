@@ -1,0 +1,9 @@
+hello[char];
+str[int]^10;
+dstr[float]^?;
+function[void](a[char], b[int]){
+    i[int]^10 = {0, 1, 2};
+    string[char]^? = "Hello, World!";
+
+    if(a = b)give 1;
+}

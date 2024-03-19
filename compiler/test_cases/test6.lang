@@ -1,0 +1,60 @@
+printINT[int](a[int]) {
+    give a => stdin;
+}
+function[int](a[int], b[int]) {
+    printINT(a+b);
+    if(a + b > 10) give a + b;
+    else give function(a+1, b+1);
+}
+fibonachi[int](a[int]) {
+    if(a <= 1) give a => stdin;
+    else give fibonachi(a-1) + fibonachi(a-2) => stdin;
+}
+x[int] = 3;
+y[int] = 6;
+main[int]() {
+    arr[int]^6 = {1, 2, 3, 4, 5, 6};
+    str[char]^6 = "Hello";
+    check[int] = arr->5;
+    ??printINT(check);
+    ??printINT(str->0);
+    new[check->&];
+    ??printINT(new);
+    a[int] = arr->4 + 3 - 2;
+    arr->4 = 8;
+    printINT(arr->4);
+    printINT(a);
+    b[int] = 6;
+    temp[bool];
+    temp = 1;
+    if(5 == 5 && temp == 1) {
+        a = a + b;
+        printINT(x);
+    }
+    else {
+        a = a - b;
+    }
+    i[int];
+    for(i = 0; i < 10; i++) {
+        a = a + i;
+    }
+    a < b;
+    a; b;
+    a = b;
+    a + b;
+    a = 3;
+    c[float];
+    c = 3.3;
+    a < c;
+    c++;
+    c = a + c;
+    y = a;
+    a = y - x;
+    ??printINT(b = function(x, y));
+    ??printINT(b);
+    b = a * 3 - 1;
+    ??printINT(b);
+    ??printINT(a = 3);
+    ??fibonachi(6);
+    give b;
+}
