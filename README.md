@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://github.com/dr-programmer/quark/blob/main/Letter-Q-LogoTransparent-Upscaled.png" width="380" />
+</p>
+
 # The Quark programming language
 ## About
 ### What is Quark?
