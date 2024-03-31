@@ -1,0 +1,46 @@
+fibonachi[int](a[int]) {
+    if(a <= 1) give a;
+    else give fibonachi(a-1) + fibonachi(a-2);
+}
+
+printINT[int](a[int]) {
+    give a => stdin; ?? The token => sends the stream to a file_pointer
+}
+
+main[int]() {
+    var[int] = 0; ?? Creating a variable named var
+    var = fibonachi(6);
+    printINT(var);
+    arr[int]^6 = {1, 2, 3, 4, 5, 6};
+    printINT(arr->0);
+    i[int];
+    for(i = 0; i < 6; i++) {
+        printINT(arr->i);
+    }
+    give 0; ?? Returning a value
+}
+
+<? This is a multiline 
+comment in Quark ?>
+
+<?
+printINT[int](a[int]) {
+    give a => stdin;
+}
+
+main[int]() {
+    sum[int] = 0;
+    i[int] = 0;
+    for(i = 0; i < 10; i++) {
+        sum += i;
+    }
+    printINT(sum);
+    mul[sum->&]; ?? Renaming sum to mul to save memory and avoid confusion (Both mul and sum point to the same location)
+    mul = 1;
+    for(i = 1; i < 10; i++) {
+        mul *= i;
+    }
+    printINT(mul);
+    give 0;
+}
+?>
