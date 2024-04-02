@@ -114,9 +114,6 @@ printINT[int](a[int]) {
 }
 
 main[int]() {
-    var[int] = 0;
-    var = fibonachi(6);
-    printINT(var);
     arr[int]^6 = {1, 2, 3, 4, 5, 6}; ?? Creating an array of type int with 6 elements
     printINT(arr->0); ?? Array subscription
     i[int];
