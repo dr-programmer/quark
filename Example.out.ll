@@ -51,30 +51,41 @@ store i32 %0, ptr %.8var
 store i32 %2, ptr %.8var
 %3 = load i32, ptr %.8var
 %4 = call i32 (i32) @printINT (i32 %3)
-%.56arr = alloca [6 x i32]
-store [6 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5, i32 6], ptr %.56arr
-%5 = load [6 x i32], ptr %.56arr
-%6 = getelementptr [6 x i32], ptr %.56arr, i1 0, i1 0 
-%7 = load i32, ptr %6
-%8 = call i32 (i32) @printINT (i32 %7)
-%.64i = alloca i32
-%9 = zext i1 0 to i32
-store i32 %9, ptr %.64i
+%.16ptr = alloca ptr
+store ptr %.8var, ptr %.16ptr
+%5 = load ptr, ptr %.16ptr
+%6 = load i32, ptr %5
+%7 = call i32 (i32) @printINT (i32 %6)
+%8 = zext i8 6 to i32
+%9 = load ptr, ptr %.16ptr
+%10 = load i32, ptr %9
+store i32 %8, ptr %9
+%11 = load i32, ptr %.8var
+%12 = call i32 (i32) @printINT (i32 %11)
+%.64arr = alloca [6 x i32]
+store [6 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5, i32 6], ptr %.64arr
+%13 = load [6 x i32], ptr %.64arr
+%14 = getelementptr [6 x i32], ptr %.64arr, i1 0, i1 0 
+%15 = load i32, ptr %14
+%16 = call i32 (i32) @printINT (i32 %15)
+%.72i = alloca i32
+%17 = zext i1 0 to i32
+store i32 %17, ptr %.72i
 br label %.L3
 .L3:
-%10 = load i32, ptr %.64i
-%11 = zext i8 6 to i32
-%12 = icmp slt i32 %10, %11
-br i1 %12, label %.L4, label %.L5
+%18 = load i32, ptr %.72i
+%19 = zext i8 6 to i32
+%20 = icmp slt i32 %18, %19
+br i1 %20, label %.L4, label %.L5
 .L4:
-%13 = load [6 x i32], ptr %.56arr
-%14 = load i32, ptr %.64i
-%15 = getelementptr [6 x i32], ptr %.56arr, i1 0, i32 %14 
-%16 = load i32, ptr %15
-%17 = call i32 (i32) @printINT (i32 %16)
-%18 = load i32, ptr %.64i
-%19 =  add i32 %18, 1
-store i32 %19, ptr %.64i
+%21 = load [6 x i32], ptr %.64arr
+%22 = load i32, ptr %.72i
+%23 = getelementptr [6 x i32], ptr %.64arr, i1 0, i32 %22 
+%24 = load i32, ptr %23
+%25 = call i32 (i32) @printINT (i32 %24)
+%26 = load i32, ptr %.72i
+%27 =  add i32 %26, 1
+store i32 %27, ptr %.72i
 br label %.L3
 .L5:
 ret i32 0

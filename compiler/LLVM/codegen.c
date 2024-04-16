@@ -146,6 +146,10 @@ const char *type_irgen(struct type *t) {
             name = (char *)calloc(4, sizeof(char));
             strcpy(name, "i32");
             break;
+        case TYPE_POINTER:
+            name = (char *)calloc(4, sizeof(char));
+            strcpy(name, "ptr");
+            break;
         case TYPE_FLOATING_POINT:
             name = (char *)calloc(7, sizeof(char));
             strcpy(name, "double");
@@ -284,8 +288,12 @@ void decl_irgen(struct decl *d) {
             if(d->value) {
                 expr_irgen(d->value);
                 init_type_cast(d);
+                const char *store_from;
+                if(d->value->type->kind == TYPE_POINTER) 
+                    store_from = symbol_irgen(d->value->symbol);
+                else store_from = register_name(d->value->sreg);
                 fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(d->type), 
-                            register_name(d->value->sreg), 
+                            store_from, 
                             symbol_irgen(d->symbol));
             }
         }
@@ -531,14 +539,18 @@ void expr_irgen(struct expr *e) {
             expr_irgen(e->right);
             type_cast(e);
             const char *store_to;
-            if(e->left->symbol == NULL) {
+            if(e->left->kind == EXPR_SUBSCRIPT || e->left->kind == EXPR_DEREFERENCE) {
                 expr_irgen(e->left);
                 struct complex_reg temp = {e->left->integer_value, 0};
                 store_to = register_name(temp);
             }
             else store_to = symbol_irgen(e->left->symbol);
+            const char *store_from;
+            if(e->right->type->kind == TYPE_POINTER) 
+                store_from = symbol_irgen(e->right->symbol);
+            else store_from = register_name(e->right->sreg);
             fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(e->type), 
-                                    register_name(e->right->sreg), 
+                                    store_from, 
                                     store_to);
             e->sreg = e->right->sreg;
             break;
@@ -721,6 +733,15 @@ void expr_irgen(struct expr *e) {
         case EXPR_ARG:
             expr_irgen(e->left);
             expr_irgen(e->right);
+            break;
+        case EXPR_DEREFERENCE:
+            expr_irgen(e->left);
+            e->sreg.reg = register_create();
+            e->integer_value = e->left->sreg.reg;
+            struct complex_reg parent_ptr_register = {e->integer_value, 0};
+            fprintf(result_file, "%s = load %s, ptr %s\n", register_name(e->sreg), 
+                        type_irgen(e->left->type->subtype), 
+                        register_name(parent_ptr_register));
             break;
     }
 }

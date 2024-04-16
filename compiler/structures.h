@@ -19,6 +19,8 @@ typedef enum {
     EXPR_SUBSCRIPT,
     EXPR_ARG,
     EXPR_RENAME,
+    EXPR_DEREFERENCE,
+    EXPR_ADDRESS,
 
     EXPR_ADD,
     EXPR_SUB,
@@ -53,7 +55,8 @@ typedef enum {
     TYPE_VOID,
     TYPE_STRING,
     TYPE_ARRAY,
-    TYPE_FUNCTION
+    TYPE_FUNCTION,
+    TYPE_POINTER
 } type_t;
 
 struct complex_reg {

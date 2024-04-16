@@ -12,9 +12,12 @@ main[int]() {
     var = fibonachi(6);
     printINT(var);
 
-    ??ptr->[[[int]]] = 0;
-    ??ptr->->->[int] = 0;
-    ??ptr[->->->int] = 0;
+    ptr[int]^&;
+    ptr = var->&;
+    printINT(^ptr);
+
+    ^ptr = 6;
+    printINT(var);
 
     arr[int]^6 = {1, 2, 3, 4, 5, 6};
     printINT(arr->0);
