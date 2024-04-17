@@ -197,6 +197,8 @@ void expr_print(struct expr *e) {
                             }
                             break;
         case EXPR_RENAME: printf("%s[%s->&]", e->name, e->string_literal); break;
+        case EXPR_DEREFERENCE: printf("^"); expr_print(e->left); break;
+        case EXPR_ADDRESS: expr_print(e->left); printf("->&"); break;
         case EXPR_ADD: printf("("); expr_print(e->left); printf(" + "); 
                                 expr_print(e->right); printf(")"); break;
         case EXPR_SUB: printf("("); expr_print(e->left); printf(" - "); 
@@ -250,6 +252,10 @@ void type_print(struct type *t) {
             printf("(");
             param_list_print(t->params);
             printf(")");
+            break;
+        case TYPE_POINTER:
+            type_print(t->subtype);
+            printf("^&");
             break;
     }
 }
@@ -339,6 +345,7 @@ static void apply_offset(struct symbol *symbol, struct type *type, int number) {
                 apply_offset(symbol, symbol->type->subtype, symbol->type->number_of_subtypes);
             }
             break;
+        case TYPE_POINTER: symbol->which = offset += 8 * number; break;
     }
 }
 
@@ -394,7 +401,9 @@ void expr_resolve(struct expr *e) {
             e->symbol = symbol_create(parent->kind, parent->type, (char *)e->name);
             e->symbol->which = parent->which;
             e->symbol->parent = parent;
-            scope_bind(e->symbol);
+            if(scope_lookup_current(e->name)) 
+                print_error("variable already exists", e->name);
+            else scope_bind(e->symbol);
         }
         else e->symbol = scope_lookup(e->name);
         if(e->symbol == NULL) {
@@ -411,6 +420,7 @@ void expr_resolve(struct expr *e) {
     else {
         expr_resolve(e->left);
         expr_resolve(e->right);
+        if(e->kind == EXPR_ADDRESS) e->symbol = e->left->symbol;
     }
 }
 void param_list_resolve(struct param_list *p) {
@@ -435,6 +445,9 @@ unsigned short type_equals(struct type *a, struct type *b) {
         else if(a->kind == TYPE_FUNCTION) {
             return type_equals(a->subtype, b->subtype) 
                 && param_list_equals(a->params, b->params);
+        }
+        else if(a->kind == TYPE_POINTER) {
+            return type_equals(a->subtype, b->subtype);
         }
         else return 1;
     }
@@ -713,6 +726,12 @@ struct type *expr_typecheck(struct expr *e) {
         case EXPR_RENAME:
             result = type_copy(e->symbol->type);
             break;
+        case EXPR_DEREFERENCE:
+            result = type_copy(left->subtype);
+            break;
+        case EXPR_ADDRESS:
+            result = type_create(TYPE_POINTER, type_copy(left), 0, 0);
+            break;
     }
 
     type_delete(left);
@@ -747,6 +766,9 @@ unsigned short assignment_typecheck(struct type *left, struct type *right) {
         return 1;
     }
     else if(left->kind == TYPE_ARRAY && right->kind == TYPE_ARRAY) {
+        return assignment_typecheck(left->subtype, right->subtype);
+    }
+    else if(left->kind == TYPE_POINTER && right->kind == TYPE_POINTER) {
         return assignment_typecheck(left->subtype, right->subtype);
     }
     return 0;

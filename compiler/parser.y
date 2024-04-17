@@ -107,33 +107,44 @@ struct decl *parser_result;
 program : decl_list {parser_result = $1;}
         ;
 
-decl    : name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_SEMI
-            { $$ = decl_create($1, $3, 0, 0, 0); }
-        | name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ASSIGN expr TOKEN_SEMI
-            { $$ = decl_create($1, $3, $6, 0, 0); }
-        | name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size TOKEN_SEMI
+decl    : name type TOKEN_SEMI
+            { $$ = decl_create($1, $2, 0, 0, 0); }
+        | name type TOKEN_ASSIGN expr TOKEN_SEMI
+            { $$ = decl_create($1, $2, $4, 0, 0); }
+        | name type TOKEN_ALLOCATE allocation_size TOKEN_SEMI
             {
-                struct type *temp = type_create(TYPE_ARRAY, $3, 0, $6);
+                struct type *temp = type_create(TYPE_ARRAY, $2, 0, $4);
                 $$ = decl_create($1, temp, 0, 0, 0); 
             }
-        | name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE 
+        | name type TOKEN_ALLOCATE 
             allocation_size TOKEN_ASSIGN string_literal TOKEN_SEMI
             {
-                struct type *temp = type_create(TYPE_ARRAY, $3, 0, $6);
-                struct expr *e = expr_create_string_literal($8);
+                struct type *temp = type_create(TYPE_ARRAY, $2, 0, $4);
+                struct expr *e = expr_create_string_literal($6);
                 $$ = decl_create($1, temp, e, 0, 0); 
             }
-        | name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_ALLOCATE allocation_size 
+        | name type TOKEN_ALLOCATE allocation_size 
             TOKEN_ASSIGN TOKEN_LCRBR expr_list TOKEN_RCRBR TOKEN_SEMI
             {
-                struct type *temp = type_create(TYPE_ARRAY, $3, 0, $6);
-                $$ = decl_create($1, temp, $9, 0, 0); 
+                struct type *temp = type_create(TYPE_ARRAY, $2, 0, $4);
+                $$ = decl_create($1, temp, $7, 0, 0); 
             }
-        | name TOKEN_LSQBR type TOKEN_RSQBR TOKEN_LPAREN parameters TOKEN_RPAREN 
+        | name type TOKEN_LPAREN parameters TOKEN_RPAREN 
             TOKEN_LCRBR stmt_list TOKEN_RCRBR
             {
-                struct type *temp = type_create(TYPE_FUNCTION, $3, $6, 0);
-                $$ = decl_create($1, temp, 0, $9, 0); 
+                struct type *temp = type_create(TYPE_FUNCTION, $2, $4, 0);
+                $$ = decl_create($1, temp, 0, $7, 0); 
+            }
+        | name type TOKEN_ALLOCATE TOKEN_INSTANCE TOKEN_SEMI
+            {
+                struct type *temp = type_create(TYPE_POINTER, $2, 0, 0);
+                $$ = decl_create($1, temp, 0, 0, 0);
+            }
+        | name type TOKEN_ALLOCATE TOKEN_INSTANCE 
+            TOKEN_ASSIGN expr TOKEN_SEMI
+            {
+                struct type *temp = type_create(TYPE_POINTER, $2, 0, 0);
+                $$ = decl_create($1, temp, $6, 0, 0);
             }
         ;
 
@@ -184,6 +195,8 @@ assignable
         : name          { $$ = expr_create_name($1); }
         | name TOKEN_SUBSCRIPT factor
                         { $$ = expr_create(EXPR_SUBSCRIPT, expr_create_name($1), $3); }
+        | TOKEN_ALLOCATE name
+                        { $$ = expr_create(EXPR_DEREFERENCE, expr_create_name($2), 0); }
         ;
 
 assignment_algebra
@@ -236,6 +249,10 @@ factor  : name                  { $$ = expr_create_name($1); }
                                         $$->name = $1; 
                                         $$->string_literal = $3; 
                                 }
+        | name TOKEN_SUBSCRIPT TOKEN_INSTANCE
+                { $$ = expr_create(EXPR_ADDRESS, expr_create_name($1), 0); }
+        | TOKEN_ALLOCATE name
+                        { $$ = expr_create(EXPR_DEREFERENCE, expr_create_name($2), 0); }
         | TOKEN_LPAREN expr TOKEN_RPAREN
                                 { $$ = $2; }
         ;
@@ -302,8 +319,8 @@ allocation_size
         ;
 
 parameter
-        : name TOKEN_LSQBR type TOKEN_RSQBR 
-            { $$ = param_list_create($1, $3, 0); }
+        : name type 
+            { $$ = param_list_create($1, $2, 0); }
         ;
 
 parameters
@@ -317,11 +334,16 @@ list_of_parameters
         |                           { $$ = 0; }
         ;
 
-type    : TOKEN_INT     { $$ = type_create(TYPE_INTEGER, 0, 0, 0); }
-        | TOKEN_CHAR    { $$ = type_create(TYPE_CHARACTER, 0, 0, 0); }
-        | TOKEN_BOOL    { $$ = type_create(TYPE_BOOLEAN, 0, 0, 0); }
-        | TOKEN_FLOAT   { $$ = type_create(TYPE_FLOATING_POINT, 0, 0, 0); }
-        | TOKEN_VOID    { $$ = type_create(TYPE_VOID, 0, 0, 0); }
+type    : TOKEN_LSQBR TOKEN_INT TOKEN_RSQBR
+                { $$ = type_create(TYPE_INTEGER, 0, 0, 0); }
+        | TOKEN_LSQBR TOKEN_CHAR TOKEN_RSQBR
+                { $$ = type_create(TYPE_CHARACTER, 0, 0, 0); }
+        | TOKEN_LSQBR TOKEN_BOOL TOKEN_RSQBR
+                { $$ = type_create(TYPE_BOOLEAN, 0, 0, 0); }
+        | TOKEN_LSQBR TOKEN_FLOAT TOKEN_RSQBR
+                { $$ = type_create(TYPE_FLOATING_POINT, 0, 0, 0); }
+        | TOKEN_LSQBR TOKEN_VOID TOKEN_RSQBR
+                { $$ = type_create(TYPE_VOID, 0, 0, 0); }
         ;
 
 %%
