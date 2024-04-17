@@ -289,7 +289,7 @@ void decl_irgen(struct decl *d) {
                 expr_irgen(d->value);
                 init_type_cast(d);
                 const char *store_from;
-                if(d->value->type->kind == TYPE_POINTER) 
+                if(d->value->kind == EXPR_ADDRESS) 
                     store_from = symbol_irgen(d->value->symbol);
                 else store_from = register_name(d->value->sreg);
                 fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(d->type), 
@@ -546,7 +546,7 @@ void expr_irgen(struct expr *e) {
             }
             else store_to = symbol_irgen(e->left->symbol);
             const char *store_from;
-            if(e->right->type->kind == TYPE_POINTER) 
+            if(e->right->kind == EXPR_ADDRESS) 
                 store_from = symbol_irgen(e->right->symbol);
             else store_from = register_name(e->right->sreg);
             fprintf(result_file, "store %s %s, ptr %s\n", type_irgen(e->type), 

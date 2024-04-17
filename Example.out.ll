@@ -56,36 +56,42 @@ store ptr %.8var, ptr %.16ptr
 %5 = load ptr, ptr %.16ptr
 %6 = load i32, ptr %5
 %7 = call i32 (i32) @printINT (i32 %6)
-%8 = zext i8 6 to i32
-%9 = load ptr, ptr %.16ptr
+%.24ptr1 = alloca ptr
+%8 = load ptr, ptr %.16ptr
+store ptr %8, ptr %.24ptr1
+%9 = load ptr, ptr %.24ptr1
 %10 = load i32, ptr %9
-store i32 %8, ptr %9
-%11 = load i32, ptr %.8var
-%12 = call i32 (i32) @printINT (i32 %11)
-%.64arr = alloca [6 x i32]
-store [6 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5, i32 6], ptr %.64arr
-%13 = load [6 x i32], ptr %.64arr
-%14 = getelementptr [6 x i32], ptr %.64arr, i1 0, i1 0 
-%15 = load i32, ptr %14
+%11 = call i32 (i32) @printINT (i32 %10)
+%12 = zext i8 6 to i32
+%13 = load ptr, ptr %.16ptr
+%14 = load i32, ptr %13
+store i32 %12, ptr %13
+%15 = load i32, ptr %.8var
 %16 = call i32 (i32) @printINT (i32 %15)
-%.72i = alloca i32
-%17 = zext i1 0 to i32
-store i32 %17, ptr %.72i
+%.72arr = alloca [6 x i32]
+store [6 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5, i32 6], ptr %.72arr
+%17 = load [6 x i32], ptr %.72arr
+%18 = getelementptr [6 x i32], ptr %.72arr, i1 0, i1 0 
+%19 = load i32, ptr %18
+%20 = call i32 (i32) @printINT (i32 %19)
+%.80i = alloca i32
+%21 = zext i1 0 to i32
+store i32 %21, ptr %.80i
 br label %.L3
 .L3:
-%18 = load i32, ptr %.72i
-%19 = zext i8 6 to i32
-%20 = icmp slt i32 %18, %19
-br i1 %20, label %.L4, label %.L5
+%22 = load i32, ptr %.80i
+%23 = zext i8 6 to i32
+%24 = icmp slt i32 %22, %23
+br i1 %24, label %.L4, label %.L5
 .L4:
-%21 = load [6 x i32], ptr %.64arr
-%22 = load i32, ptr %.72i
-%23 = getelementptr [6 x i32], ptr %.64arr, i1 0, i32 %22 
-%24 = load i32, ptr %23
-%25 = call i32 (i32) @printINT (i32 %24)
-%26 = load i32, ptr %.72i
-%27 =  add i32 %26, 1
-store i32 %27, ptr %.72i
+%25 = load [6 x i32], ptr %.72arr
+%26 = load i32, ptr %.80i
+%27 = getelementptr [6 x i32], ptr %.72arr, i1 0, i32 %26 
+%28 = load i32, ptr %27
+%29 = call i32 (i32) @printINT (i32 %28)
+%30 = load i32, ptr %.80i
+%31 =  add i32 %30, 1
+store i32 %31, ptr %.80i
 br label %.L3
 .L5:
 ret i32 0

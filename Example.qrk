@@ -16,6 +16,9 @@ main[int]() {
     ptr = var->&;
     printINT(^ptr);
 
+    ptr1[int]^& = ptr;
+    printINT(^ptr1);
+
     ^ptr = 6;
     printINT(var);
 
