@@ -727,7 +727,14 @@ struct type *expr_typecheck(struct expr *e) {
             result = type_copy(e->symbol->type);
             break;
         case EXPR_DEREFERENCE:
-            result = type_copy(left->subtype);
+            if(left->kind != TYPE_POINTER) {
+                print_error_formated(RED"Error "
+                    MAG"|cannot derefernce "
+                    BLU"%T"MAG"|"RESET"->"
+                    YEL"|%E;|\n"RESET, left, e);
+                result = type_copy(left);
+            }
+            else result = type_copy(left->subtype);
             break;
         case EXPR_ADDRESS:
             result = type_create(TYPE_POINTER, type_copy(left), 0, 0);
