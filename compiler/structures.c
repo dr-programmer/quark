@@ -160,7 +160,8 @@ void stmt_print(struct stmt *s, int number_of_tabs) {
         case STMT_GIVE:
             print_tabs(number_of_tabs);
             printf("give ");
-            expr_print(s->expr);
+            if(s->expr == NULL) printf("up");
+            else expr_print(s->expr);
             if(number_of_tabs == -1)printf(";");
             else printf(";\n");
             break;
@@ -559,7 +560,17 @@ void stmt_typecheck(struct stmt *s, struct type *current_function_type) {
             stmt_typecheck(s->body, current_function_type);
             break;
         case STMT_GIVE:
-            if(s->expr == NULL)break;
+            if(s->expr == NULL) {
+                if(current_function_type->kind != TYPE_VOID) {
+                    print_error_formated(RED"Error "
+                        MAG"|cannot give type "BLU"[void] "
+                        MAG"to function of type "BLU"%T"
+                        MAG"|"RESET"->"
+                        YEL"|%S|\n"RESET, 
+                        current_function_type, s);
+                }
+                break;
+            }
             t = expr_typecheck(s->expr);
             if(!assignment_typecheck(current_function_type, t)) {
                 print_error_formated(RED"Error "

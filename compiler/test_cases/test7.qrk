@@ -1,0 +1,19 @@
+printINT[int](var[int]) {
+    give var => stdin;
+}
+
+function[void]() {
+    arr[int]^6 = {1, 2, 3, 4, 5, 6};
+    ??arr->1 = 123;
+    printINT(arr->2);
+    give up;
+}
+
+main[void]() {
+    arr[int]^6 = {1, 2, 3, 4, 5, 6};
+    arr->1 = 6;
+    printINT(arr->5);
+    function();
+    printINT(-6);
+    give up;
+}

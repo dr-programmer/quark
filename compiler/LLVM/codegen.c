@@ -35,7 +35,7 @@ const char *register_name(struct complex_reg sreg) {
 
     if(sreg.reg == -1) {
         int temp = sreg.value != 0 
-                    ? log10(sreg.value) 
+                    ? log10(abs(sreg.value)) 
                     : 0;
         name = (char *)realloc(name, sizeof(char) * temp + 1);
         sprintf(name, "%d", (int)sreg.value);
@@ -43,7 +43,7 @@ const char *register_name(struct complex_reg sreg) {
     }
     else if(sreg.reg == -2) {
         int temp = sreg.value != 0 
-                    ? log10(sreg.value) 
+                    ? log10(abs(sreg.value)) 
                     : 0;
         name = (char *)realloc(name, sizeof(char) * temp + 16);
         sprintf(name, "%lf", sreg.value);
@@ -72,8 +72,11 @@ const char *register_name(struct complex_reg sreg) {
             int size = 1;
             while(e != NULL) {
                 const char *temp = type_irgen(array_subtype);
+                int logNumber = e->left->integer_value != 0 
+                    ? log10(abs(e->left->integer_value)) 
+                    : 0;
                 name = (char *)realloc(name, 
-                            (strlen(temp) + size + 3 + log10(e->left->integer_value)) 
+                            (strlen(temp) + size + 3 + logNumber) 
                             * sizeof(char));
                 sprintf(name + size, "%s %d", temp, 
                                         e->left->integer_value);
@@ -206,7 +209,7 @@ void apply_type_cast(type_t type_kind,
                             struct type *to_type)
 {
     if(type_kind <= TYPE_INTEGER) {
-        fprintf(result_file, "%s = zext %s %s to %s\n", register_name(result_register), 
+        fprintf(result_file, "%s = sext %s %s to %s\n", register_name(result_register), 
                     type_irgen(from_type), 
                     register_name(old_register), 
                     type_irgen(to_type));
@@ -699,9 +702,11 @@ void expr_irgen(struct expr *e) {
         {
             expr_irgen(e->right);
             arg_type_cast(e->left->type->params, e->right);
-            e->sreg.reg = register_create();
-            fprintf(result_file, "%s = call %s (", register_name(e->sreg), 
-                        type_irgen(e->left->type->subtype));
+            if(e->left->type->subtype->kind != TYPE_VOID) {
+                e->sreg.reg = register_create();
+                fprintf(result_file, "%s = ", register_name(e->sreg));
+            }
+            fprintf(result_file, "call %s (", type_irgen(e->left->type->subtype));
             struct param_list *p = e->left->type->params;
             while(p) {
                 fprintf(result_file, "%s", type_irgen(p->type));
