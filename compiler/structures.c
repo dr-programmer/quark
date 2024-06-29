@@ -601,7 +601,7 @@ struct type *expr_typecheck(struct expr *e) {
         case EXPR_INTEGER_LITERAL:
             if(e->integer_value >= 0 && e->integer_value < 2)
                         result = type_create(TYPE_BOOLEAN, 0, 0, 0);
-            else if(abs(e->integer_value) < 129)
+            else if(e->integer_value >= -128 && e->integer_value <= 127)
                         result = type_create(TYPE_CHARACTER, 0, 0, 0);
             else result = type_create(TYPE_INTEGER, 0, 0, 0);
             break;

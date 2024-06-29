@@ -208,8 +208,10 @@ void apply_type_cast(type_t type_kind,
                             struct complex_reg old_register, 
                             struct type *to_type)
 {
+    char ext_type = from_type->kind == TYPE_BOOLEAN ? 'z' : 's';
     if(type_kind <= TYPE_INTEGER) {
-        fprintf(result_file, "%s = sext %s %s to %s\n", register_name(result_register), 
+        fprintf(result_file, "%s = %cext %s %s to %s\n", register_name(result_register), 
+                    ext_type, 
                     type_irgen(from_type), 
                     register_name(old_register), 
                     type_irgen(to_type));
@@ -721,12 +723,22 @@ void expr_irgen(struct expr *e) {
         case EXPR_SUBSCRIPT:
             expr_irgen(e->left);
             expr_irgen(e->right);
+            struct type *i32indexType = type_create(TYPE_INTEGER, 0, 0, 0);
+            if(e->right->type->kind < TYPE_INTEGER) {
+                struct complex_reg old_register = e->right->sreg;
+                e->right->sreg.reg = register_create();
+                apply_type_cast(e->right->type->kind, 
+                                    e->right->sreg, 
+                                    e->right->type, 
+                                    old_register, 
+                                    i32indexType);
+            }
             e->sreg.reg = register_create();
-            fprintf(result_file, "%s = getelementptr %s, ptr %s, i1 0, %s %s \n", 
+            fprintf(result_file, "%s = getelementptr %s, ptr %s, i64 0, %s %s \n", 
                         register_name(e->sreg), 
                         type_irgen(e->left->type), 
                         symbol_irgen(e->left->symbol), 
-                        type_irgen(e->right->type), 
+                        type_irgen(i32indexType), 
                         register_name(e->right->sreg));
             struct complex_reg ptr_register = e->sreg;
             e->sreg.reg = register_create();

@@ -17,9 +17,10 @@ define void @function () {
 %.48arr = alloca [6 x i32]
 store [6 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5, i32 6], ptr %.48arr
 %0 = load [6 x i32], ptr %.48arr
-%1 = getelementptr [6 x i32], ptr %.48arr, i1 0, i8 2 
-%2 = load i32, ptr %1
-%3 = call i32 (i32) @printINT (i32 %2)
+%1 = sext i8 2 to i32
+%2 = getelementptr [6 x i32], ptr %.48arr, i64 0, i32 %1 
+%3 = load i32, ptr %2
+%4 = call i32 (i32) @printINT (i32 %3)
 ret void
 .retExit0:
 unreachable
@@ -28,19 +29,29 @@ define void @main () {
 .main_body:
 %.48arr = alloca [6 x i32]
 store [6 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5, i32 6], ptr %.48arr
-%0 = sext i8 6 to i32
+%.56index = alloca i32
+%0 = sext i8 4 to i32
+store i32 %0, ptr %.56index
 %1 = load [6 x i32], ptr %.48arr
-%2 = getelementptr [6 x i32], ptr %.48arr, i1 0, i1 1 
-%3 = load i32, ptr %2
-store i32 %0, ptr %2
-%4 = load [6 x i32], ptr %.48arr
-%5 = getelementptr [6 x i32], ptr %.48arr, i1 0, i8 5 
-%6 = load i32, ptr %5
-%7 = call i32 (i32) @printINT (i32 %6)
+%2 = load i32, ptr %.56index
+%3 = getelementptr [6 x i32], ptr %.48arr, i64 0, i32 %2 
+%4 = load i32, ptr %3
+store i32 128, ptr %3
+%5 = load i32, ptr %.56index
+%6 = zext i1 1 to i32
+%7 =  sub i32 %5, %6
+%8 = call i32 (i32) @printINT (i32 %7)
+%9 = load [6 x i32], ptr %.48arr
+%10 = load i32, ptr %.56index
+%11 = zext i1 1 to i32
+%12 =  sub i32 %10, %11
+%13 = getelementptr [6 x i32], ptr %.48arr, i64 0, i32 %12 
+%14 = load i32, ptr %13
+%15 = call i32 (i32) @printINT (i32 %14)
 call void () @function ()
-%8 =  mul i8 -1, 6
-%9 = sext i8 %8 to i32
-%10 = call i32 (i32) @printINT (i32 %9)
+%16 =  mul i8 -1, 6
+%17 = sext i8 %16 to i32
+%18 = call i32 (i32) @printINT (i32 %17)
 ret void
 .retExit0:
 unreachable
