@@ -160,7 +160,8 @@ void stmt_print(struct stmt *s, int number_of_tabs) {
         case STMT_GIVE:
             print_tabs(number_of_tabs);
             printf("give ");
-            expr_print(s->expr);
+            if(s->expr == NULL) printf("up");
+            else expr_print(s->expr);
             if(number_of_tabs == -1)printf(";");
             else printf(";\n");
             break;
@@ -559,7 +560,17 @@ void stmt_typecheck(struct stmt *s, struct type *current_function_type) {
             stmt_typecheck(s->body, current_function_type);
             break;
         case STMT_GIVE:
-            if(s->expr == NULL)break;
+            if(s->expr == NULL) {
+                if(current_function_type->kind != TYPE_VOID) {
+                    print_error_formated(RED"Error "
+                        MAG"|cannot give type "BLU"[void] "
+                        MAG"to function of type "BLU"%T"
+                        MAG"|"RESET"->"
+                        YEL"|%S|\n"RESET, 
+                        current_function_type, s);
+                }
+                break;
+            }
             t = expr_typecheck(s->expr);
             if(!assignment_typecheck(current_function_type, t)) {
                 print_error_formated(RED"Error "
@@ -590,7 +601,7 @@ struct type *expr_typecheck(struct expr *e) {
         case EXPR_INTEGER_LITERAL:
             if(e->integer_value >= 0 && e->integer_value < 2)
                         result = type_create(TYPE_BOOLEAN, 0, 0, 0);
-            else if(abs(e->integer_value) < 129)
+            else if(e->integer_value >= -128 && e->integer_value <= 127)
                         result = type_create(TYPE_CHARACTER, 0, 0, 0);
             else result = type_create(TYPE_INTEGER, 0, 0, 0);
             break;
@@ -727,7 +738,14 @@ struct type *expr_typecheck(struct expr *e) {
             result = type_copy(e->symbol->type);
             break;
         case EXPR_DEREFERENCE:
-            result = type_copy(left->subtype);
+            if(left->kind != TYPE_POINTER) {
+                print_error_formated(RED"Error "
+                    MAG"|cannot derefernce "
+                    BLU"%T"MAG"|"RESET"->"
+                    YEL"|%E;|\n"RESET, left, e);
+                result = type_copy(left);
+            }
+            else result = type_copy(left->subtype);
             break;
         case EXPR_ADDRESS:
             result = type_create(TYPE_POINTER, type_copy(left), 0, 0);
